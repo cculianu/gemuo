@@ -23,6 +23,18 @@ module UO
         def initialize(x, y, z = nil, direction = nil)
             @x, @y, @z, @direction = x, y, z, direction
         end
+        def x
+            @x
+        end
+        def y
+            @y
+        end
+        def z
+            @z
+        end
+        def direction
+            @direction
+        end
     end
 
     class Entity
