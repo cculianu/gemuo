@@ -164,11 +164,12 @@ module UO
         def signal_fire(sig, *args)
             @signals.clone.each do
                 |handler|
+                method = nil
                 begin
-                    handler.send(sig, self, *args)
-                rescue NoMethodError
-                    raise $! unless $!.message =~ /^undefined method .on_/
+                    method = handler.method(sig)
+                rescue NameError
                 end
+                method.call(self, *args) if method
             end
         end
 
