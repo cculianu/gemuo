@@ -187,6 +187,9 @@ module UO
             when 0x2e # item equip
                 # XXX
 
+            when 0x3a # skill update
+                # XXX
+
             when 0x4e # personal light level
             when 0x4f # global light level
             when 0x54 # sound
@@ -241,6 +244,10 @@ module UO
                 @reader = UO::Packet::Reader.new(UO::Decompress.new(@io))
                 self << UO::Packet::GameLogin.new(auth_id, @username, @password)
 
+            when 0xa1 # StatChngStr
+            when 0xa2 # StatChngInt
+            when 0xa3 # StatChngDex
+
             when 0xa8 # server list
                 puts "server list:\n"
                 packet.byte
@@ -285,6 +292,9 @@ module UO
                 end
 
                 return true
+
+            when 0xc0 # UnkHuedEffect
+            when 0xc1 # SpeakTable
 
             else
                 return false
