@@ -25,17 +25,6 @@ require 'uo/packet'
 require 'uo/entity'
 
 module UO
-    class SignalOnce
-        def initialize(handler)
-            @handler = handler
-        end
-
-        def call(client, sig, *args)
-            client.signal_disconnect(sig, self)
-            @handler.call(client, sig, *args)
-        end
-    end
-
     class Client
         def initialize(host, port, seed, username, password)
             @handlers = []
@@ -87,11 +76,6 @@ module UO
             sh = @signals[sig] = [] unless sh
             sh << handler
         end
-        def signal_connect_once(sig, &handler)
-            sh = @signals[sig]
-            sh = @signals[sig] = [] unless sh
-            sh << SignalOnce.new(handler)
-        end
         def signal_disconnect(sig, handler)
             sh = @signals[sig]
             return unless sh
@@ -101,10 +85,12 @@ module UO
         def signal_fire(sig, *args)
             sh = @signals[sig]
             return unless sh
-            sh.each do
+            sh.clone.each do
                 |handler|
-                handler.call(self, sig, *args)
+                again = handler.call(self, sig, *args)
+                sh.delete(handler) unless again
             end
+            @signals.delete(sig) if sh.empty?
         end
 
         def connect(host, port, seed = nil)
