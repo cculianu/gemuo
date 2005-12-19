@@ -112,7 +112,7 @@ module UO
     class Client
         def initialize(host, port, seed, username, password)
             @handlers = []
-            @signals = {}
+            @signals = []
 
             @username = username
             @password = password
@@ -155,26 +155,20 @@ module UO
             end
         end
 
-        def signal_connect(sig, &handler)
-            sh = @signals[sig]
-            sh = @signals[sig] = [] unless sh
-            sh << handler
+        def signal_connect(handler)
+            @signals << handler
         end
-        def signal_disconnect(sig, handler)
-            sh = @signals[sig]
-            return unless sh
-            sh.delete(handler)
-            @signals.delete(sig) if sh.empty?
+        def signal_disconnect(handler)
+            @signals.delete(handler)
         end
         def signal_fire(sig, *args)
-            sh = @signals[sig]
-            return unless sh
-            sh.clone.each do
+            @signals.clone.each do
                 |handler|
-                again = handler.call(self, sig, *args)
-                sh.delete(handler) unless again
+                begin
+                    handler.send(sig, self, *args)
+                rescue NameError
+                end
             end
-            @signals.delete(sig) if sh.empty?
         end
 
         def connect(host, port, seed = nil)
@@ -188,7 +182,7 @@ module UO
             @io << [seed||42].pack('N')
             @io.flush
             @reader = UO::Packet::Reader.new(@io)
-            signal_fire(:connect)
+            signal_fire(:on_connect)
         end
 
         def run
@@ -230,7 +224,7 @@ module UO
                 mobile = @entities[serial] = Mobile.new(serial) unless mobile
                 mobile.name = name
 
-                signal_fire(:mobile_status, mobile)
+                signal_fire(:on_mobile_status, mobile)
 
             when 0x1a # world item
                 serial = packet.uint
@@ -248,7 +242,7 @@ module UO
                 item.hue = hue
                 item.position = Position.new(x, y, z, direction)
 
-                signal_fire(:world_item, item)
+                signal_fire(:on_world_item, item)
 
             when 0x1b # start
                 serial = packet.uint
@@ -280,7 +274,7 @@ module UO
                     @walk = nil
                 end
 
-                signal_fire(:delete_entity, entity) if entity
+                signal_fire(:on_delete_entity, entity) if entity
 
             when 0x20 # mobile update
                 serial = packet.uint
@@ -306,13 +300,13 @@ module UO
                 z = packet.byte
                 @walk.walk_reject(seq, x, y, z, direction) if @walk
 
-                signal_fire(:walk_reject) if @player
+                signal_fire(:on_walk_reject) if @player
 
             when 0x22 # walk ack
                 seq, notoriety = packet.byte, packet.byte
                 @walk.walk_ack(seq, notoriety) if @walk
 
-                signal_fire(:walk_ack) if @player
+                signal_fire(:on_walk_ack) if @player
 
             when 0x25 # cont add
                 # XXX
@@ -328,7 +322,7 @@ module UO
             when 0x54 # sound
 
             when 0x55 # redraw all
-                signal_fire(:ingame)
+                signal_fire(:on_ingame)
 
             when 0x5b # time
             when 0x6e # char action
@@ -355,7 +349,7 @@ module UO
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
 
-                signal_fire(:mobile_moving, mobile, oldpos)
+                signal_fire(:on_mobile_moving, mobile, oldpos)
 
             when 0x78 # mobile incoming
                 serial = packet.uint
@@ -373,7 +367,7 @@ module UO
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
 
-                signal_fire(:mobile_incoming, mobile)
+                signal_fire(:on_mobile_incoming, mobile)
 
             when 0x8c # relay
                 ip = packet.data(4).unpack('C4').join('.')
