@@ -56,11 +56,11 @@ module UO::Engines
             @client.walk(direction)
         end
 
-        def on_walk_reject(client, *args)
+        def on_walk_reject
             @client.signal_disconnect(self)
         end
 
-        def on_walk_ack(client, *args)
+        def on_walk_ack
             next_walk
         end
     end

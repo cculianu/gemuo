@@ -169,7 +169,7 @@ module UO
                     method = handler.method(sig)
                 rescue NameError
                 end
-                method.call(self, *args) if method
+                method.call(*args) if method
             end
         end
 
