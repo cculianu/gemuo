@@ -21,7 +21,7 @@
 module UO
     class Position
         def initialize(x, y, z = nil, direction = nil)
-            @x, @y, @z, @direction = x, y, z, direction
+            @x, @y, @z, @direction = x, y, z, direction & 0x7
         end
         def x
             @x
