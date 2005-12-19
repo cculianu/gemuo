@@ -166,7 +166,8 @@ module UO
                 |handler|
                 begin
                     handler.send(sig, self, *args)
-                rescue NameError
+                rescue NoMethodError
+                    raise $! unless $!.message =~ /^undefined method .on_/
                 end
             end
         end
