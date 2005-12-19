@@ -25,6 +25,17 @@ require 'uo/packet'
 require 'uo/entity'
 
 module UO
+    class SignalOnce
+        def initialize(handler)
+            @handler = handler
+        end
+
+        def call(client, sig, *args)
+            client.signal_disconnect(sig, self)
+            @handler.call(client, sig, *args)
+        end
+    end
+
     class Client
         def initialize(host, port, seed, username, password)
             @handlers = []
@@ -76,11 +87,16 @@ module UO
             sh = @signals[sig] = [] unless sh
             sh << handler
         end
-        def signal_disconnect(sig, &handler)
+        def signal_connect_once(sig, &handler)
+            sh = @signals[sig]
+            sh = @signals[sig] = [] unless sh
+            sh << SignalOnce.new(handler)
+        end
+        def signal_disconnect(sig, handler)
             sh = @signals[sig]
             return unless sh
             sh.delete(handler)
-            signals.delete(sig) if sh.empty?
+            @signals.delete(sig) if sh.empty?
         end
         def signal_fire(sig, *args)
             sh = @signals[sig]
@@ -144,7 +160,7 @@ module UO
                 mobile = @entities[serial] = Mobile.new(serial) unless mobile
                 mobile.name = name
 
-                signal_fire(:movile_status, mobile)
+                signal_fire(:mobile_status, mobile)
 
             when 0x1a # world item
                 serial = packet.uint
@@ -250,7 +266,7 @@ module UO
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
 
-                signal_fire(:movile_moving, mobile, oldpos)
+                signal_fire(:mobile_moving, mobile, oldpos)
 
             when 0x78 # mobile incoming
                 serial = packet.uint
@@ -268,7 +284,7 @@ module UO
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
 
-                signal_fire(:movile_incoming, mobile)
+                signal_fire(:mobile_incoming, mobile)
 
             when 0x8c # relay
                 ip = packet.data(4).unpack('C4').join('.')
