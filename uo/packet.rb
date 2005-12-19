@@ -130,6 +130,15 @@ module UO::Packet
         end
     end
 
+    class Walk < Writer
+        def initialize(direction, seq)
+            super(0x02)
+            byte(direction)
+            byte(seq)
+            uint(0)
+        end
+    end
+
     class PlayCharacter < Writer
         def initialize(slot)
             super(0x5d)

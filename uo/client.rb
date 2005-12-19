@@ -25,6 +25,90 @@ require 'uo/packet'
 require 'uo/entity'
 
 module UO
+    NORTH = 0x0
+    NORTH_EAST = 0x1
+    EAST = 0x2
+    SOUTH_EAST = 0x3
+    SOUTH = 0x4
+    SOUTH_WEST = 0x5
+    WEST = 0x6
+    NORTH_WEST = 0x7
+    RUNNING = 0x80
+
+    class Walk
+        def initialize(mobile)
+            @mobile = mobile
+            @next_seq = 0
+        end
+        def walk(direction)
+            return unless @mobile.position
+            return if @seq != nil
+            @direction = direction & 0x7
+            @seq = @next_seq
+            @next_seq += 1
+            @next_seq = 1 if @next_seq >= 0x100
+            return UO::Packet::Walk.new(@direction, @seq)
+        end
+        def walk_reject(seq, x, y, z, direction)
+            return unless @mobile.position
+
+            # XXX resync when seq mismatch?
+            @seq = nil
+            @direction = nil
+            @next_seq = 0
+            @mobile.position = Position.new(x, y, z, direction)
+        end
+        def walk_ack(seq, notoriety)
+            return unless @mobile.position
+
+            if @seq != seq
+                # XXX resync when seq mismatch?
+            end
+
+            oldpos = @mobile.position
+            if oldpos.direction == @direction
+                x, y = oldpos.x, oldpos.y
+                case @direction
+                when NORTH
+                    y -= 1
+
+                when NORTH_EAST
+                    x += 1
+                    y -= 1
+
+                when EAST
+                    x += 1
+
+                when SOUTH_EAST
+                    x += 1
+                    y += 1
+
+                when SOUTH
+                    y += 1
+
+                when SOUTH_WEST
+                    x -= 1
+                    y += 1
+
+                when WEST
+                    x -= 1
+
+                when NORTH_WEST
+                    x -= 1
+                    y -= 1
+                end
+
+                @mobile.position = Position.new(x, y, oldpos.z, @direction)
+            else
+                @mobile.position = Position.new(oldpos.x, oldpos.y, oldpos.z,
+                                                @direction)
+            end
+
+            @seq = nil
+            @direction = nil
+        end
+    end
+
     class Client
         def initialize(host, port, seed, username, password)
             @handlers = []
@@ -180,6 +264,7 @@ module UO
 
                 @entities = {}
                 @player = @entities[serial] = Mobile.new(serial)
+                @walk = Walk.new(@player)
                 @player.body = body
                 @player.position = Position.new(x, y, z, direction)
 
@@ -190,7 +275,10 @@ module UO
                 serial = packet.uint
 
                 entity = @entities.delete(serial)
-                @player = nil if @player && @player.serial == serial
+                if @player && @player.serial == serial
+                    @player = nil 
+                    @walk = nil
+                end
 
                 signal_fire(:delete_entity, entity) if entity
 
@@ -210,6 +298,21 @@ module UO
                 mobile.body = body
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
+
+            when 0x21 # walk reject
+                seq = packet.byte
+                x, y = packet.ushort, packet.ushort
+                direction = packet.byte
+                z = packet.byte
+                @walk.walk_reject(seq, x, y, z, direction) if @walk
+
+                signal_fire(:walk_reject) if @player
+
+            when 0x22 # walk ack
+                seq, notoriety = packet.byte, packet.byte
+                @walk.walk_ack(seq, notoriety) if @walk
+
+                signal_fire(:walk_ack) if @player
 
             when 0x25 # cont add
                 # XXX
@@ -339,6 +442,13 @@ module UO
             end
 
             return true
+        end
+
+        def walk(direction)
+            return unless @walk
+            packet = @walk.walk(direction)
+            self << packet if packet
+            return packet != nil
         end
     end
 end
