@@ -28,6 +28,7 @@ module UO
     class Client
         def initialize(host, port, seed, username, password)
             @handlers = []
+            @signals = {}
 
             @username = username
             @password = password
@@ -70,6 +71,26 @@ module UO
             end
         end
 
+        def signal_connect(sig, &handler)
+            sh = @signals[sig]
+            sh = @signals[sig] = [] unless sh
+            sh << handler
+        end
+        def signal_disconnect(sig, &handler)
+            sh = @signals[sig]
+            return unless sh
+            sh.delete(handler)
+            signals.delete(sig) if sh.empty?
+        end
+        def signal_fire(sig, *args)
+            sh = @signals[sig]
+            return unless sh
+            sh.each do
+                |handler|
+                handler.call(self, sig, *args)
+            end
+        end
+
         def connect(host, port, seed = nil)
             if @io
                 @io.close 
@@ -81,6 +102,7 @@ module UO
             @io << [seed||42].pack('N')
             @io.flush
             @reader = UO::Packet::Reader.new(@io)
+            signal_fire(:connect)
         end
 
         def run
@@ -121,7 +143,9 @@ module UO
                 mobile = @entities[serial]
                 mobile = @entities[serial] = Mobile.new(serial) unless mobile
                 mobile.name = name
-                
+
+                signal_fire(:movile_status, mobile)
+
             when 0x1a # world item
                 serial = packet.uint
                 item_id = packet.ushort
@@ -137,6 +161,8 @@ module UO
                 item.item_id = item_id
                 item.hue = hue
                 item.position = Position.new(x, y, z, direction)
+
+                signal_fire(:world_item, item)
 
             when 0x1b # start
                 serial = packet.uint
@@ -161,8 +187,10 @@ module UO
             when 0x1d # delete
                 serial = packet.uint
 
-                @entities.delete(serial)
+                entity = @entities.delete(serial)
                 @player = nil if @player && @player.serial == serial
+
+                signal_fire(:delete_entity, entity) if entity
 
             when 0x20 # mobile update
                 serial = packet.uint
@@ -193,7 +221,10 @@ module UO
             when 0x4e # personal light level
             when 0x4f # global light level
             when 0x54 # sound
+
             when 0x55 # redraw all
+                signal_fire(:ingame)
+
             when 0x5b # time
             when 0x6e # char action
 
@@ -213,10 +244,13 @@ module UO
 
                 mobile = @entities[serial]
                 mobile = @entities[serial] = Mobile.new(serial) unless mobile
+                oldpos = mobile.position
                 mobile.body = body
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
+
+                signal_fire(:movile_moving, mobile, oldpos)
 
             when 0x78 # mobile incoming
                 serial = packet.uint
@@ -233,6 +267,8 @@ module UO
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
+
+                signal_fire(:movile_incoming, mobile)
 
             when 0x8c # relay
                 ip = packet.data(4).unpack('C4').join('.')
