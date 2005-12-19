@@ -23,6 +23,7 @@ require 'socket'
 require 'uoclient'
 require 'uo/packet'
 require 'uo/entity'
+require 'uo/timer'
 
 module UO
     NORTH = 0x0
@@ -113,6 +114,7 @@ module UO
         def initialize(host, port, seed, username, password)
             @handlers = []
             @signals = []
+            @timer = Timer.new
 
             @username = username
             @password = password
@@ -128,6 +130,10 @@ module UO
             connect(host, port, seed)
 
             self << UO::Packet::AccountLogin.new(@username, @password)
+        end
+
+        def timer
+            @timer
         end
 
         def player
@@ -196,6 +202,8 @@ module UO
                     handled ||= handler.call(packet)
                 end
                 puts "Received unknown #{'0x%02x' % packet.command}\n" unless handled
+
+                @timer.tick
             end
         end
 
