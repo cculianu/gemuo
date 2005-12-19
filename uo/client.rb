@@ -155,6 +155,9 @@ module UO
                 @player.body = body
                 @player.position = Position.new(x, y, z, direction)
 
+            when 0x1c # speak ascii
+                # XXX
+
             when 0x1d # delete
                 serial = packet.uint
 
