@@ -23,8 +23,15 @@ module UO::Engines
         def initialize(client, destination)
             @destination = destination
             @client = client
+        end
+
+        def start
             @client.signal_connect(self)
             next_walk
+        end
+
+        def stop
+            @client.signal_disconnect(self)
         end
 
         def distance2(position)
@@ -68,7 +75,9 @@ module UO::Engines
             return unless position
             direction = direction_from(position)
             if direction == nil
-                @client.signal_disconnect(self)
+                stop
+                puts "walk complete\n"
+                @client.signal_fire(:on_engine_complete, self)
                 return
             end
             direction |= UO::RUNNING if distance2(position) >= 4
@@ -76,7 +85,9 @@ module UO::Engines
         end
 
         def on_walk_reject
-            @client.signal_disconnect(self)
+            stop
+            puts "walk failed\n"
+            @client.signal_fire(:on_engine_failed, self)
         end
 
         def on_walk_ack
