@@ -19,6 +19,41 @@
 #
 
 module UO
+    LOCK_UP = 0
+    LOCK_DOWN = 1
+    LOCK_LOCKED = 2
+
+    SKILL_ALCHEMY = 0
+    SKILL_ANATOMY = 1
+    SKILL_ITEMID = 3
+    SKILL_ARMSLORE = 4
+
+    class SkillValue
+        def initialize(value, base, lock, cap)
+            @value = value
+            @base = base
+            @lock = lock
+            @cap = cap
+        end
+
+        def value
+            @value
+        end
+        def base
+            @base
+        end
+        def lock
+            @lock
+        end
+        def cap
+            @cap
+        end
+
+        def to_s
+            "[value=#{@value} base=#{@base} lock=#{@lock} cap=#{@cap}]"
+        end
+    end
+
     class Walk
         def initialize(mobile)
             @mobile = mobile
