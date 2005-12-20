@@ -25,7 +25,7 @@ module UO
         end
 
         def restart(seconds)
-            @due = Time.new.to_f
+            @due = Time.new.to_f + seconds
         end
 
         def due
@@ -44,7 +44,6 @@ module UO
 
     class Timer
         def initialize
-            @next_check = Time.new.to_f + 1
             @events = []
         end
 
@@ -55,8 +54,6 @@ module UO
 
         def tick
             now = Time.new.to_f
-            return if now < @next_check
-            @next_check = now + 1
             until @events.empty? || now < @events.last.due
                 @events.pop.tick
             end
