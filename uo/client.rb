@@ -177,12 +177,34 @@ module UO
             when 0x1a # world item
                 serial = packet.uint
                 item_id = packet.ushort
-                amount = packet.ushort
+
+                amount = 0
+                if (serial & 0x80000000) != 0
+                    serial &= ~0x80000000
+                    amount = packet.ushort
+                end
+
                 x, y = packet.ushort, packet.ushort
-                direction = packet.byte
-                z = packet.length >= 1 ? packet.byte : nil
-                hue = packet.length >= 2 ? packet.ushort : nil
-                flags = packet.length >= 1 ? packet.byte : nil
+
+                direction = 0
+                if (x & 0x8000) != 0
+                    x &= ~0x8000
+                    direction = packet.byte
+                end
+
+                z = packet.byte
+
+                hue = 0
+                if (y & 0x8000) != 0
+                    y &= ~0x8000
+                    hue = packet.ushort
+                end
+
+                flags = 0
+                if (y & 0x4000) != 0
+                    y &= ~0x4000
+                    flags = packet.byte
+                end
 
                 item = @entities[serial]
                 item = @entities[serial] = Item.new(serial) unless item
