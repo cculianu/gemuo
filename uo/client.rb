@@ -286,6 +286,11 @@ module UO
             when 0x25 # cont add
                 # XXX
 
+            when 0x27 # lift reject
+                reason = packet.byte
+
+                signal_fire(:on_lift_reject, reason)
+
             when 0x2e # item equip
                 # XXX
 

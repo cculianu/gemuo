@@ -149,6 +149,25 @@ module UO::Packet
         end
     end
 
+    class Lift < Writer
+        def initialize(serial, amount)
+            super(0x07)
+            uint(serial)
+            ushort(amount)
+        end
+    end
+
+    class Drop < Writer
+        def initialize(serial, x, y, z, dest_serial)
+            super(0x08)
+            uint(serial)
+            ushort(x)
+            ushort(y)
+            byte(z)
+            uint(dest_serial || 0)
+        end
+    end
+
     class TextCommand < Writer
         def initialize(type, command)
             super(0x12)
