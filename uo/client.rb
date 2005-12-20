@@ -303,6 +303,8 @@ module UO
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
 
+                signal_fire(:on_mobile_update, mobile)
+
             when 0x21 # walk reject
                 seq = packet.byte
                 x, y = packet.ushort, packet.ushort
