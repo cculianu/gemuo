@@ -20,8 +20,12 @@
 
 module UO
     class TimerEvent
-        def initialize(seconds)
-            @due = Time.new.to_f + seconds
+        def initialize(seconds = nil)
+            restart(seconds) if seconds
+        end
+
+        def restart(seconds)
+            @due = Time.new.to_f
         end
 
         def due
