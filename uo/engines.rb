@@ -66,7 +66,6 @@ module UO::Engines
             return unless m
             position = m.position
             return unless position
-            puts "now at #{position.x}, #{position.y}\n"
             direction = direction_from(position)
             if direction == nil
                 @client.signal_disconnect(self)
