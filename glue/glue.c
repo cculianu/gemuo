@@ -136,13 +136,18 @@ static VALUE decompress_read(VALUE self, VALUE _length) {
 
 static VALUE packet_length(VALUE self, VALUE _cmd) {
     int cmd = NUM2INT(_cmd);
+    size_t length;
 
     (void)self;
 
     if (cmd < 0 || cmd >= 0x100)
-        return 0; /* XXX raise? */
+        return Qnil; /* XXX raise? */
 
-    return INT2FIX(packet_lengths[cmd]);
+    length = packet_lengths[cmd];
+    if (length == 0)
+        return Qnil;
+
+    return INT2FIX(length);
 }
 
 /*
