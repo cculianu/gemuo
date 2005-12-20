@@ -176,6 +176,13 @@ module UO::Packet
         end
     end
 
+    class Resynchronize < Writer
+        def initialize(type, command)
+            super(0x22)
+            ushort(0)
+        end
+    end
+
     class MobileQuery < Writer
         def initialize(type, serial)
             super(0x34)
