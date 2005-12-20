@@ -44,10 +44,16 @@ module UO::Packet
             @data << [d].pack('C')
             self
         end
+        def bool(d)
+            @data << ( d ? "\1" : "\0" )
+        end
         def fixstring(d, length)
             raise "too long" if d.length > length
             @data << d
             @data << "\0" * (length - d.length) if d.length < length
+        end
+        def cstring(d)
+            @data << d << "\0"
         end
 
         def to_s
@@ -93,6 +99,10 @@ module UO::Packet
             raise "too short" if @body.empty?
             @body.slice!(0)
         end
+        def bool
+            raise "too short" if @body.empty?
+            @body.slice!(0) != "\0"
+        end
         def fixstring(length)
             data(length).sub(/\0+$/, '')
         end
@@ -121,10 +131,10 @@ module UO::Packet
         def read
             cmd = byte
             length = UO.packet_length(cmd)
-            if length == 0
-                length = ushort - 3
-            else
+            if length
                 length -= 1
+            else
+                length = ushort - 3
             end
             return Packet.new(cmd, data(length))
         end
@@ -139,6 +149,31 @@ module UO::Packet
         end
     end
 
+    class TextCommand < Writer
+        def initialize(type, command)
+            super(0x12)
+            byte(type)
+            cstring(command)
+        end
+    end
+
+    class MobileQuery < Writer
+        def initialize(type, serial)
+            super(0x34)
+            uint(0xedededed)
+            byte(type)
+            uint(serial)
+        end
+    end
+
+    class ChangeSkillLock < Writer
+        def initialize(skill_id, lock)
+            super(0x3a)
+            ushort(skill_id)
+            byte(lock)
+        end
+    end
+
     class PlayCharacter < Writer
         def initialize(slot)
             super(0x5d)
@@ -149,6 +184,20 @@ module UO::Packet
             fixstring("", 24)
             uint(slot)
             uint(0xdeadbeef)
+        end
+    end
+
+    class TargetResponse < Writer
+        def initialize(type, target_id, flags, serial, x, y, z, graphic)
+            super(0x6c)
+            byte(type)
+            uint(target_id)
+            byte(flags)
+            uint(serial)
+            ushort(x)
+            ushort(y)
+            ushort(z)
+            ushort(graphic)
         end
     end
 

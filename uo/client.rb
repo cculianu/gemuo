@@ -48,6 +48,8 @@ module UO
 
             @entities = {}
             @player = nil
+            @walk = nil
+            @skills = {}
 
             register do
                 |packet|
@@ -65,6 +67,9 @@ module UO
 
         def player
             @player
+        end
+        def skill(skill_id)
+            @skills[skill_id]
         end
         def entity(serial)
             @entities[serial]
@@ -198,6 +203,7 @@ module UO
                 @walk = Walk.new(@player)
                 @player.body = body
                 @player.position = Position.new(x, y, z, direction)
+                @skills = {}
 
             when 0x1c # speak ascii
                 # XXX
@@ -208,6 +214,7 @@ module UO
                 entity = @entities.delete(serial)
                 if @player && @player.serial == serial
                     @player = nil 
+                    @skills = nil
                     @walk = nil
                 end
 
@@ -254,7 +261,30 @@ module UO
                 # XXX
 
             when 0x3a # skill update
-                # XXX
+                type = packet.byte
+                puts "skill_update #{type}\n"
+                case type
+                when 0x02
+                    while (skill_id = packet.ushort) > 0
+                        skill_id -= 1
+                        value, base = packet.ushort, packet.ushort
+                        lock = packet.byte
+                        cap = packet.ushort
+                        @skills[skill_id] = SkillValue.new(value, base, lock, cap)
+                    end
+
+                when 0xdf
+                    skill_id = packet.ushort
+                    value, base = packet.ushort, packet.ushort
+                    lock = packet.byte
+                    cap = packet.ushort
+                    @skills[skill_id] = SkillValue.new(value, base, lock, cap)
+
+                else
+                    puts "unknown skill_update #{type}\n"
+                end
+
+                signal_fire(:on_skill_update)
 
             when 0x4e # personal light level
             when 0x4f # global light level
@@ -264,6 +294,13 @@ module UO
                 signal_fire(:on_ingame)
 
             when 0x5b # time
+
+            when 0x6c # target
+                allow_ground = packet.bool
+                target_id = packet.uint
+                flags = packet.byte
+                signal_fire(:on_target, allow_ground, target_id, flags)
+
             when 0x6e # char action
 
             when 0xb0 # gump dialog
