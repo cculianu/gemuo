@@ -133,7 +133,13 @@ module UO
                     |handler|
                     handled ||= handler.call(packet)
                 end
-                puts "Received unknown #{'0x%02x' % packet.command}\n" unless handled
+                unless handled
+                    if packet.command == 0xbf
+                        puts "Received unknown 0xbf #{'0x%04x' % packet.extended}\n" 
+                    else
+                        puts "Received unknown #{'0x%02x' % packet.command}\n"
+                    end
+                end
 
                 @timer.tick
             end
