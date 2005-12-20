@@ -71,6 +71,12 @@ module UO
         def item_id=(v)
             @item_id = v
         end
+        def amount
+            @amount
+        end
+        def amount=(v)
+            @amount = v
+        end
     end
 
     class Mobile < Entity

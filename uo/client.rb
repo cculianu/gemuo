@@ -209,6 +209,7 @@ module UO
                 item = @entities[serial]
                 item = @entities[serial] = Item.new(serial) unless item
                 item.item_id = item_id
+                item.amount = amount
                 item.hue = hue
                 item.position = Position.new(x, y, z, direction)
 
