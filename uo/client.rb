@@ -24,6 +24,7 @@ require 'uoclient'
 require 'uo/packet'
 require 'uo/entity'
 require 'uo/timer'
+require 'uo/player'
 
 module UO
     NORTH = 0x0
@@ -35,80 +36,6 @@ module UO
     WEST = 0x6
     NORTH_WEST = 0x7
     RUNNING = 0x80
-
-    class Walk
-        def initialize(mobile)
-            @mobile = mobile
-            @next_seq = 0
-        end
-        def walk(direction)
-            return unless @mobile.position
-            return if @seq != nil
-            @direction = direction & 0x7
-            @seq = @next_seq
-            @next_seq += 1
-            @next_seq = 1 if @next_seq >= 0x100
-            return UO::Packet::Walk.new(@direction, @seq)
-        end
-        def walk_reject(seq, x, y, z, direction)
-            return unless @mobile.position
-
-            # XXX resync when seq mismatch?
-            @seq = nil
-            @direction = nil
-            @next_seq = 0
-            @mobile.position = Position.new(x, y, z, direction)
-        end
-        def walk_ack(seq, notoriety)
-            return unless @mobile.position
-
-            if @seq != seq
-                # XXX resync when seq mismatch?
-            end
-
-            oldpos = @mobile.position
-            if oldpos.direction == @direction
-                x, y = oldpos.x, oldpos.y
-                case @direction
-                when NORTH
-                    y -= 1
-
-                when NORTH_EAST
-                    x += 1
-                    y -= 1
-
-                when EAST
-                    x += 1
-
-                when SOUTH_EAST
-                    x += 1
-                    y += 1
-
-                when SOUTH
-                    y += 1
-
-                when SOUTH_WEST
-                    x -= 1
-                    y += 1
-
-                when WEST
-                    x -= 1
-
-                when NORTH_WEST
-                    x -= 1
-                    y -= 1
-                end
-
-                @mobile.position = Position.new(x, y, oldpos.z, @direction)
-            else
-                @mobile.position = Position.new(oldpos.x, oldpos.y, oldpos.z,
-                                                @direction)
-            end
-
-            @seq = nil
-            @direction = nil
-        end
-    end
 
     class Client
         def initialize(host, port, seed, username, password)
