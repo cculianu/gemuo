@@ -77,6 +77,21 @@ module UO
         def amount=(v)
             @amount = v
         end
+        # serial of the mobile which equips the item
+        def parent
+            @parent
+        end
+        def parent=(v)
+            @parent = v
+            @layer = nil
+        end
+        # only for equipped items
+        def layer
+            @layer
+        end
+        def layer=(v)
+            @layer = v
+        end
     end
 
     class Mobile < Entity

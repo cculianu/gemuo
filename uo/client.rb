@@ -68,6 +68,10 @@ module UO
         def player
             @player
         end
+        def backpack
+            return unless @player
+            equipped_item(@player, 0x15)
+        end
         def skill(skill_id)
             @skills[skill_id]
         end
@@ -91,6 +95,14 @@ module UO
                 |entity|
                 yield entity if entity.kind_of?(Mobile)
             end
+        end
+        def equipped_item(parent, layer)
+            @entities.each_value do
+                |entity|
+                next unless entity.kind_of?(Item)
+                return entity if entity.parent == parent && entity.layer == layer
+            end
+            nil
         end
 
         def signal_connect(handler)
@@ -291,8 +303,23 @@ module UO
 
                 signal_fire(:on_lift_reject, reason)
 
-            when 0x2e # item equip
-                # XXX
+            when 0x2e # equip
+                serial = packet.uint
+                item_id = packet.ushort
+                packet.byte
+                layer = packet.byte
+                parent_serial = packet.uint
+                hue = packet.short
+
+                item = @entities[serial] = Item.new(serial)
+                item.item_id = item_id
+                item.hue = hue
+                item.parent = parent_serial
+                item.layer = layer
+
+                puts "equip #{serial} to #{parent_serial} layer #{layer}\n"
+
+                signal_fire(:on_equip, item)
 
             when 0x3a # skill update
                 type = packet.byte
