@@ -309,7 +309,7 @@ module UO
                 packet.byte
                 layer = packet.byte
                 parent_serial = packet.uint
-                hue = packet.short
+                hue = packet.ushort
 
                 item = @entities[serial] = Item.new(serial)
                 item.item_id = item_id
