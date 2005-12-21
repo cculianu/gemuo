@@ -23,6 +23,7 @@ module UO
         def initialize(x, y, z = nil, direction = nil)
             @x, @y, @z, @direction = x, y, z, direction & 0x7
         end
+
         def x
             @x
         end
@@ -34,6 +35,12 @@ module UO
         end
         def direction
             @direction
+        end
+
+        def to_s
+            s = "#{@x},#{@y}"
+            s << ",#{@z}" if @z
+            s << ";#{@direction}" if @direction
         end
     end
 
@@ -91,6 +98,16 @@ module UO
         end
         def layer=(v)
             @layer = v
+        end
+
+        def to_s
+            s = '[Item serial=0x%x id=0x%x' % [ @serial, @item_id ]
+            s << ' parent=0x%x' % @parent if @parent
+            s << ' layer=0x%x' % @layer if @layer
+            s << " amount=#{@amount}" if @amount && @amount > 1
+            s << " position=#{@position}" if @position
+            s << ']'
+            s
         end
     end
 
