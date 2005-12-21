@@ -102,6 +102,7 @@ module UO
 
         def to_s
             s = '[Item serial=0x%x id=0x%x' % [ @serial, @item_id ]
+            s << " name='#{@name}'" if @name
             s << ' parent=0x%x' % @parent if @parent
             s << ' layer=0x%x' % @layer if @layer
             s << " amount=#{@amount}" if @amount && @amount > 1
@@ -123,6 +124,14 @@ module UO
         end
         def notoriety=(v)
             @notoriety = v
+        end
+
+        def to_s
+            s = '[Mobile serial=0x%x body=0x%x' % [ @serial, @body ]
+            s << " name='#{@name}'" if @name
+            s << " position=#{@position}" if @position
+            s << ']'
+            s
         end
     end
 end
