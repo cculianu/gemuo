@@ -100,7 +100,7 @@ module UO
             @entities.each_value do
                 |entity|
                 next unless entity.kind_of?(Item)
-                return entity if entity.parent == parent && entity.layer == layer
+                return entity if entity.parent == parent.serial && entity.layer == layer
             end
             nil
         end
@@ -317,13 +317,10 @@ module UO
                 item.parent = parent_serial
                 item.layer = layer
 
-                puts "equip #{serial} to #{parent_serial} layer #{layer}\n"
-
                 signal_fire(:on_equip, item)
 
             when 0x3a # skill update
                 type = packet.byte
-                puts "skill_update #{type}\n"
                 case type
                 when 0x02
                     while (skill_id = packet.ushort) > 0
