@@ -295,8 +295,22 @@ module UO
 
                 signal_fire(:on_walk_ack) if @player
 
-            when 0x25 # cont add
-                # XXX
+            when 0x25 # container update
+                serial = packet.uint
+                item_id = packet.ushort
+                packet.byte
+                amount = packet.ushort
+                x = packet.ushort
+                y = packet.ushort
+                parent_serial = packet.uint
+                hue = packet.ushort
+
+                item = @entities[serial] = Item.new(serial)
+                item.item_id = item_id
+                item.hue = hue
+                item.parent = parent_serial
+                item.amount = amount
+                item.position = Position.new(x, y)
 
             when 0x27 # lift reject
                 reason = packet.byte
@@ -343,6 +357,27 @@ module UO
                 end
 
                 signal_fire(:on_skill_update)
+
+            when 0x3c # container content
+                num = packet.ushort
+                puts "container: num=#{num}\n"
+                (1..num).each do
+                    serial = packet.uint
+                    item_id = packet.ushort
+                    packet.byte
+                    amount = packet.ushort
+                    x = packet.ushort
+                    y = packet.ushort
+                    parent_serial = packet.uint
+                    hue = packet.ushort
+
+                    item = @entities[serial] = Item.new(serial)
+                    item.item_id = item_id
+                    item.hue = hue
+                    item.parent = parent_serial
+                    item.amount = amount
+                    item.position = Position.new(x, y)
+                end
 
             when 0x4e # personal light level
             when 0x4f # global light level
