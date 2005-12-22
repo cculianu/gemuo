@@ -27,6 +27,9 @@ module UO
     SKILL_ANATOMY = 1
     SKILL_ITEMID = 3
     SKILL_ARMSLORE = 4
+    SKILL_DETECT_HIDDEN = 14
+    SKILL_HIDING = 21
+    SKILL_SPIRIT_SPEAK = 32
 
     class SkillValue
         def initialize(value, base, lock, cap)
