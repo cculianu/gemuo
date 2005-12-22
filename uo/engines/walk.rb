@@ -69,7 +69,7 @@ module UO::Engines
         end
 
         def next_walk
-            m = @client.player
+            m = @client.world.player
             return unless m
             position = m.position
             return unless position

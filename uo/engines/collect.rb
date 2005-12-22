@@ -42,9 +42,9 @@ module UO::Engines
         end
 
         def drop_target
-            backpack = @client.backpack
+            backpack = @client.world.backpack
             return unless backpack
-            @client.each_item_in(backpack) do
+            @client.world.each_item_in(backpack) do
                 |item|
                 return item if item.item_id == @item_id
             end
@@ -68,14 +68,14 @@ module UO::Engines
         end
 
         def distance2(position)
-            dx = @client.player.position.x - position.x
-            dy = @client.player.position.y - position.y
+            dx = @client.world.player.position.x - position.x
+            dy = @client.world.player.position.y - position.y
             return dx*dx + dy*dy
         end
 
         def nearest_item
             items = []
-            @client.each_item do
+            @client.world.each_item do
                 |item|
                 items << item if item.item_id == @item_id && item.position && item.parent == nil
             end
@@ -101,10 +101,10 @@ module UO::Engines
                 return
             end
 
-            if item.position.x == @client.player.position.x &&
-                    item.position.y == @client.player.position.y
+            if item.position.x == @client.world.player.position.x &&
+                    item.position.y == @client.world.player.position.y
                 # lift item
-                backpack = @client.backpack
+                backpack = @client.world.backpack
                 puts "lifting #{item} to #{backpack}\n"
                 amount = item.amount
                 amount = 1 unless amount && amount > 0

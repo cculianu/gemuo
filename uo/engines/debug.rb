@@ -21,14 +21,17 @@
 module UO::Engines
     class WalkDump
         def on_ingame
-            puts "UO::Position.new(#{$client.player.position.x}, #{$client.player.position.y})\n"
+            player = client.world.player
+            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_walk_ack
-            puts "UO::Position.new(#{$client.player.position.x}, #{$client.player.position.y})\n"
+            player = client.world.player
+            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_mobile_update(mobile)
-            return unless mobile == $client.player
-            puts "UO::Position.new(#{$client.player.position.x}, #{$client.player.position.y})\n"
+            player = client.world.player
+            return unless mobile == player
+            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
     end
 

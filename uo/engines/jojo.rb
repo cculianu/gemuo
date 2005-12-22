@@ -37,12 +37,12 @@ module UO::Engines
 
         def on_ingame
             # get skills
-            $client << UO::Packet::MobileQuery.new(0x05, $client.player.serial)
+            $client << UO::Packet::MobileQuery.new(0x05, $client.world.player.serial)
         end
 
         def on_skill_update
             if @current
-                value = $client.skill(@other)
+                value = $client.world.skill(@other)
                 if value == nil || value.value == 0
                     @current = nil
                     @other = nil
@@ -53,7 +53,7 @@ module UO::Engines
                 # decide which is current
                 values = @skills.collect do
                     |skill_id|
-                    value = $client.skill(skill_id)
+                    value = $client.world.skill(skill_id)
                     unless value
                         puts "Error: no value for skill #{skill_id}\n"
                         return
@@ -77,7 +77,7 @@ module UO::Engines
         end
 
         def find_dagger
-            $client.each_item do
+            $client.world.each_item do
                 |item|
                 #puts "item=0x%x\n" % item.item_id
                 return item if item.item_id == 0xf52

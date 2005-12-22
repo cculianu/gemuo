@@ -25,6 +25,7 @@ require 'uo/packet'
 require 'uo/entity'
 require 'uo/timer'
 require 'uo/player'
+require 'uo/world'
 
 module UO
     NORTH = 0x0
@@ -46,10 +47,7 @@ module UO
             @username = username
             @password = password
 
-            @entities = {}
-            @player = nil
-            @walk = nil
-            @skills = {}
+            @world = World.new
 
             register do
                 |packet|
@@ -65,51 +63,8 @@ module UO
             @timer
         end
 
-        def player
-            @player
-        end
-        def backpack
-            return unless @player
-            equipped_item(@player, 0x15)
-        end
-        def skill(skill_id)
-            @skills[skill_id]
-        end
-        def entity(serial)
-            @entities[serial]
-        end
-        def each_entity
-            @entities.each_value do
-                |entity|
-                yield entity
-            end
-        end
-        def each_item
-            @entities.each_value do
-                |entity|
-                yield entity if entity.kind_of?(Item)
-            end
-        end
-        def each_item_in(parent)
-            parent_serial = parent.serial
-            @entities.each_value do
-                |entity|
-                yield entity if entity.kind_of?(Item) && entity.parent == parent_serial
-            end
-        end
-        def each_mobile
-            @entities.each_value do
-                |entity|
-                yield entity if entity.kind_of?(Mobile)
-            end
-        end
-        def equipped_item(parent, layer)
-            @entities.each_value do
-                |entity|
-                next unless entity.kind_of?(Item)
-                return entity if entity.parent == parent.serial && entity.layer == layer
-            end
-            nil
+        def world
+            @world
         end
 
         def signal_connect(handler)
@@ -187,8 +142,7 @@ module UO
                 flags = packet.byte
                 # XXX
 
-                mobile = @entities[serial]
-                mobile = @entities[serial] = Mobile.new(serial) unless mobile
+                mobile = @world.make_mobile(serial)
                 mobile.name = name
 
                 signal_fire(:on_mobile_status, mobile)
@@ -225,8 +179,7 @@ module UO
                     flags = packet.byte
                 end
 
-                item = @entities[serial]
-                item = @entities[serial] = Item.new(serial) unless item
+                item = @world.new_item(serial)
                 item.item_id = item_id
                 item.amount = amount
                 item.hue = hue
@@ -246,12 +199,10 @@ module UO
                 packet.ushort
                 @map_width, @map_height = packet.ushort, packet.ushort
 
-                @entities = {}
-                @player = @entities[serial] = Mobile.new(serial)
-                @walk = Walk.new(@player)
-                @player.body = body
-                @player.position = Position.new(x, y, z, direction)
-                @skills = {}
+                @world = World.new
+                player = @world.player = @world.make_mobile(serial)
+                player.body = body
+                player.position = Position.new(x, y, z, direction)
 
             when 0x1c # speak ascii
                 # XXX
@@ -259,12 +210,7 @@ module UO
             when 0x1d # delete
                 serial = packet.uint
 
-                entity = @entities.delete(serial)
-                if @player && @player.serial == serial
-                    @player = nil 
-                    @skills = nil
-                    @walk = nil
-                end
+                entity = @world.delete(serial)
 
                 signal_fire(:on_delete_entity, entity) if entity
 
@@ -279,8 +225,7 @@ module UO
                 direction = packet.byte
                 z = packet.byte
 
-                mobile = @entities[serial]
-                mobile = @entities[serial] = Mobile.new(serial) unless mobile
+                mobile = @world.make_mobile(serial)
                 mobile.body = body
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
@@ -292,22 +237,22 @@ module UO
                 x, y = packet.ushort, packet.ushort
                 direction = packet.byte
                 z = packet.byte
-                @walk.walk_reject(seq, x, y, z, direction) if @walk
+                @world.walk.walk_reject(seq, x, y, z, direction) if @world.walk
 
-                signal_fire(:on_walk_reject) if @player
+                signal_fire(:on_walk_reject) if @world.player
 
             when 0x22 # walk ack
                 seq, notoriety = packet.byte, packet.byte
-                @walk.walk_ack(seq, notoriety) if @walk
+                @world.walk.walk_ack(seq, notoriety) if @world.walk
 
-                signal_fire(:on_walk_ack) if @player
+                signal_fire(:on_walk_ack) if @world.player
 
             when 0x24 # container open
                 serial = packet.uint
                 gump_id = packet.ushort
 
-                item = @entities[serial]
-                item = @entities[serial] = Item.new(serial) unless item
+                item = @world.entity(serial)
+                item = @world.new_item(serial) unless item
                 item.gump_id = gump_id
 
             when 0x25 # container update
@@ -320,7 +265,7 @@ module UO
                 parent_serial = packet.uint
                 hue = packet.ushort
 
-                item = @entities[serial] = Item.new(serial)
+                item = @world.new_item(serial)
                 item.item_id = item_id
                 item.hue = hue
                 item.parent = parent_serial
@@ -342,7 +287,7 @@ module UO
                 parent_serial = packet.uint
                 hue = packet.ushort
 
-                item = @entities[serial] = Item.new(serial)
+                item = @world.new_item(serial)
                 item.item_id = item_id
                 item.hue = hue
                 item.parent = parent_serial
@@ -359,7 +304,7 @@ module UO
                         value, base = packet.ushort, packet.ushort
                         lock = packet.byte
                         cap = packet.ushort
-                        @skills[skill_id] = SkillValue.new(value, base, lock, cap)
+                        @world.skills[skill_id] = SkillValue.new(value, base, lock, cap)
                     end
 
                 when 0xdf
@@ -367,7 +312,7 @@ module UO
                     value, base = packet.ushort, packet.ushort
                     lock = packet.byte
                     cap = packet.ushort
-                    @skills[skill_id] = SkillValue.new(value, base, lock, cap)
+                    @world.skills[skill_id] = SkillValue.new(value, base, lock, cap)
 
                 else
                     puts "unknown skill_update #{type}\n"
@@ -387,7 +332,7 @@ module UO
                     parent_serial = packet.uint
                     hue = packet.ushort
 
-                    item = @entities[serial] = Item.new(serial)
+                    item = @world.new_item(serial)
                     item.item_id = item_id
                     item.hue = hue
                     item.parent = parent_serial
@@ -428,8 +373,7 @@ module UO
                 flags = packet.byte
                 notoriety = packet.byte
 
-                mobile = @entities[serial]
-                mobile = @entities[serial] = Mobile.new(serial) unless mobile
+                mobile = @world.make_mobile(serial)
                 oldpos = mobile.position
                 mobile.body = body
                 mobile.hue = hue
@@ -447,8 +391,7 @@ module UO
                 flags = packet.byte
                 notoriety = packet.byte
 
-                mobile = @entities[serial]
-                mobile = @entities[serial] = Mobile.new(serial) unless mobile
+                mobile = @world.make_mobile(serial)
                 mobile.body = body
                 mobile.hue = hue
                 mobile.position = Position.new(x, y, z, direction)
@@ -526,8 +469,8 @@ module UO
         end
 
         def walk(direction)
-            return unless @walk
-            packet = @walk.walk(direction)
+            return unless @world.walk
+            packet = @world.walk.walk(direction)
             self << packet if packet
             return packet != nil
         end
