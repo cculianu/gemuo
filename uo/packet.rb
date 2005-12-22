@@ -149,6 +149,13 @@ module UO::Packet
         end
     end
 
+    class Use < Writer
+        def initialize(serial)
+            super(0x06)
+            uint(serial)
+        end
+    end
+
     class Lift < Writer
         def initialize(serial, amount)
             super(0x07)
