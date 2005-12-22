@@ -18,6 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'uo/engines/walk'
+
 module UO::Engines
     class CollectItems < UO::TimerEvent
         def initialize(client, item_id)
