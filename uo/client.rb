@@ -90,6 +90,13 @@ module UO
                 yield entity if entity.kind_of?(Item)
             end
         end
+        def each_item_in(parent)
+            parent_serial = parent.serial
+            @entities.each_value do
+                |entity|
+                yield entity if entity.kind_of?(Item) && entity.parent == parent_serial
+            end
+        end
         def each_mobile
             @entities.each_value do
                 |entity|
