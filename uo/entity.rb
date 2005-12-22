@@ -100,6 +100,14 @@ module UO
             @layer = v
         end
 
+        # only for open containers
+        def gump_id
+            @gump_id
+        end
+        def gump_id=(v)
+            @gump_id = v
+        end
+
         def to_s
             s = '[Item serial=0x%x id=0x%x' % [ @serial, @item_id ]
             s << " name='#{@name}'" if @name
@@ -107,6 +115,7 @@ module UO
             s << ' layer=0x%x' % @layer if @layer
             s << " amount=#{@amount}" if @amount && @amount > 1
             s << " position=#{@position}" if @position
+            s << " gump=#{@gump_id}" if @gump_id
             s << ']'
             s
         end

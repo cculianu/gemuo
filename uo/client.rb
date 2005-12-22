@@ -302,6 +302,14 @@ module UO
 
                 signal_fire(:on_walk_ack) if @player
 
+            when 0x24 # container open
+                serial = packet.uint
+                gump_id = packet.ushort
+
+                item = @entities[serial]
+                item = @entities[serial] = Item.new(serial) unless item
+                item.gump_id = gump_id
+
             when 0x25 # container update
                 serial = packet.uint
                 item_id = packet.ushort
@@ -318,6 +326,8 @@ module UO
                 item.parent = parent_serial
                 item.amount = amount
                 item.position = Position.new(x, y)
+
+                signal_fire(:on_container_update, item)
 
             when 0x27 # lift reject
                 reason = packet.byte
@@ -367,7 +377,6 @@ module UO
 
             when 0x3c # container content
                 num = packet.ushort
-                puts "container: num=#{num}\n"
                 (1..num).each do
                     serial = packet.uint
                     item_id = packet.ushort
@@ -384,6 +393,8 @@ module UO
                     item.parent = parent_serial
                     item.amount = amount
                     item.position = Position.new(x, y)
+
+                    signal_fire(:on_container_update, item)
                 end
 
             when 0x4e # personal light level
