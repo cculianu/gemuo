@@ -37,7 +37,7 @@ module UO
         end
 
         def <=>(other)
-            raise TypeError unless other.kind_of?(TimerEvent)
+            raise TypeError.new unless other.kind_of?(TimerEvent)
             return @due <=> other.due
         end
     end
