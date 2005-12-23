@@ -77,7 +77,7 @@ module UO::Engines
                 return
             end
 
-            if down == 0
+            if sum >= 7000 && down == 0
                 puts "No skills down\n"
                 stop
                 @client.signal_fire(:on_engine_failed, self)
