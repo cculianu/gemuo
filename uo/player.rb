@@ -18,19 +18,12 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'uo/skills'
+
 module UO
     LOCK_UP = 0
     LOCK_DOWN = 1
     LOCK_LOCKED = 2
-
-    SKILL_ALCHEMY = 0
-    SKILL_ANATOMY = 1
-    SKILL_ITEMID = 3
-    SKILL_ARMSLORE = 4
-    SKILL_DETECT_HIDDEN = 14
-    SKILL_EVAL_INT = 16
-    SKILL_HIDING = 21
-    SKILL_SPIRIT_SPEAK = 32
 
     SERIAL_PLAYER = 0x80000000
 
