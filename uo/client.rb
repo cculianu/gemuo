@@ -67,6 +67,23 @@ module UO
             @world
         end
 
+        def delete_recursive(entity)
+            @world.delete(entity)
+
+            children = []
+            @world.each_item_in(entity) do
+                |child|
+                children << child
+            end
+
+            children.each do
+                |child|
+                delete_recursive(child)
+            end
+
+            signal_fire(:on_delete_entity, entity)
+        end
+
         def signal_connect(handler)
             @signals << handler
         end
@@ -210,9 +227,8 @@ module UO
             when 0x1d # delete
                 serial = packet.uint
 
-                entity = @world.delete(serial)
-
-                signal_fire(:on_delete_entity, entity) if entity
+                entity = world.entity(serial)
+                delete_recursive(entity) if entity
 
             when 0x20 # mobile update
                 serial = packet.uint
