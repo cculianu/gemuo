@@ -263,6 +263,8 @@ module UO
 
                 signal_fire(:on_walk_ack) if @world.player
 
+            when 0x23 # drag effect
+
             when 0x24 # container open
                 serial = packet.uint
                 gump_id = packet.ushort
