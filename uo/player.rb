@@ -32,6 +32,8 @@ module UO
     SKILL_HIDING = 21
     SKILL_SPIRIT_SPEAK = 32
 
+    SERIAL_PLAYER = 0x80000000
+
     class SkillValue
         def initialize(value, base, lock, cap)
             @value = value
