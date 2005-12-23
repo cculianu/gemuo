@@ -23,8 +23,8 @@ class Ingame
         #e = UO::Engines::CollectItems.new($client, 0xdf9) # collect wool
 
         skills = [ UO::SKILL_ANATOMY,
-                   UO::SKILL_ITEMID,
-                   UO::SKILL_ARMSLORE,
+                   UO::SKILL_ITEM_ID,
+                   UO::SKILL_ARMS_LORE,
                    #UO::SKILL_DETECT_HIDDEN,
                    UO::SKILL_EVAL_INT,
                    UO::SKILL_HIDING,
