@@ -83,6 +83,10 @@ module UO::Engines
             # get backpack
             if @client.world.backpack
                 @client << UO::Packet::Use.new(@client.world.backpack.serial)
+            else
+                puts "no backpack\n"
+                # open paperdoll
+                $client << UO::Packet::Use.new(0x80000000)
             end
         end
 
