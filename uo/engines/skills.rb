@@ -38,20 +38,51 @@ module UO::Engines
         end
 
         def check_skills
+            sum = 0
+            down = 0
+            @client.world.skills.each_value do
+                |skill|
+                sum += skill.base
+                down += skill.base if skill.lock == UO::SKILL_LOCK_DOWN
+            end
+
+            line = "Skills:"
+            @skills.sort.each do
+                |id|
+                skill = @client.world.skill(id)
+                unless skill
+                    puts "No value for skill #{id}\n"
+                    stop
+                    @client.signal_fire(:on_engine_failed, self)
+                    return
+                end
+
+                line << "  #{skill.name}=#{skill.base}"
+                if skill.base == skill.cap
+                    puts "Done with skill #{skill.name}\n"
+                    @skills.delete(id)
+                elsif skill.lock != UO::SKILL_LOCK_UP
+                    puts "Skill #{skill.name} is locked\n"
+                    stop
+                    @client.signal_fire(:on_engine_failed, self)
+                    return
+                end
+            end
+            line << "  (sum=#{sum}, down=#{down})\n"
+            puts line
+
             if @skills.empty?
                 stop
                 @client.signal_fire(:on_engine_complete, self)
                 return
             end
 
-            $stdout << "Skills:"
-            @skills.sort.each do
-                |id|
-                skill = @client.world.skill(id)
-                $stdout << "  #{UO::SKILL_NAMES(id)}=#{skill ? skill.base : '?'}"
-                @skills.delete(id) if skill && skill.base == skill.cap
+            if down == 0
+                puts "No skills down\n"
+                stop
+                @client.signal_fire(:on_engine_failed, self)
+                return
             end
-            $stdout << "\n"
         end
 
         def skill_delay(skill)
