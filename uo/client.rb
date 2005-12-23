@@ -417,7 +417,7 @@ module UO
                 puts "server list:\n"
                 packet.byte
                 count = packet.ushort
-                [1..count].each do
+                (1..count).each do
                     index = packet.ushort
                     name = packet.fixstring(32)
                     packet.byte
@@ -431,7 +431,7 @@ module UO
             when 0xa9 # char list
                 puts "character list:\n"
                 count = packet.byte
-                [1..count].each do
+                (1..count).each do
                     name = packet.fixstring(30)
                     packet.fixstring(30)
                     puts "\t#{name}\n"
