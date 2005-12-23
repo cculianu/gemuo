@@ -7,10 +7,10 @@ require 'uo/engines/debug'
 require 'uo/engines/stack'
 require 'uo/engines/skills'
 
-raise "syntax: test.rb host port username password" unless ARGV.length == 4
+raise "syntax: test.rb host port username password charname" unless ARGV.length == 5
 
 $client = UO::Client.new(ARGV[0], ARGV[1], nil,
-                         ARGV[2], ARGV[3])
+                         ARGV[2], ARGV[3], ARGV[4])
 
 class TestTimer < UO::TimerEvent
     def tick

@@ -39,13 +39,14 @@ module UO
     RUNNING = 0x80
 
     class Client
-        def initialize(host, port, seed, username, password)
+        def initialize(host, port, seed, username, password, character)
             @handlers = []
             @signals = []
             @timer = Timer.new
 
             @username = username
             @password = password
+            @character = character
 
             @world = World.new
 
@@ -447,13 +448,18 @@ module UO
             when 0xa9 # char list
                 puts "character list:\n"
                 count = packet.byte
+                @characters = []
                 (1..count).each do
                     name = packet.fixstring(30)
                     packet.fixstring(30)
                     puts "\t#{name}\n"
+                    @characters << name
                 end
 
-                self << UO::Packet::PlayCharacter.new(0)
+                index = @characters.index(@character)
+                raise "character #{@character} not in list" unless index
+
+                self << UO::Packet::PlayCharacter.new(index)
 
             when 0xae # speak unicode
                 # xXX
