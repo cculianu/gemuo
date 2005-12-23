@@ -39,6 +39,9 @@ module UO
         def id
             @id
         end
+        def name
+            SKILL_NAMES[@id] || @id
+        end
         def value
             @value
         end
