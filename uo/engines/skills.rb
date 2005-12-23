@@ -31,11 +31,6 @@ module UO::Engines
             # get skills
             @client << UO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
 
-            # get backpack
-            if @client.world.backpack
-                @client << UO::Packet::Use.new(@client.world.backpack.serial)
-            end
-
             tick
         end
         def stop
@@ -84,6 +79,11 @@ module UO::Engines
 
         def on_skill_update
             check_skills
+
+            # get backpack
+            if @client.world.backpack
+                @client << UO::Packet::Use.new(@client.world.backpack.serial)
+            end
         end
 
         def find_dagger
