@@ -4,6 +4,8 @@ $:.unshift(File.dirname($0))
 require 'uo/client'
 require 'uo/engines/collect'
 require 'uo/engines/debug'
+require 'uo/engines/stack'
+require 'uo/engines/skills'
 
 raise "syntax: test.rb host port username password" unless ARGV.length == 4
 
@@ -18,7 +20,19 @@ end
 
 class Ingame
     def on_ingame
-        e = UO::Engines::CollectItems.new($client, 0xdf9) # collect wool
+        #e = UO::Engines::CollectItems.new($client, 0xdf9) # collect wool
+
+        skills = [ UO::SKILL_ANATOMY,
+                                          UO::SKILL_ITEMID,
+                   UO::SKILL_ARMSLORE,
+                   #UO::SKILL_DETECT_HIDDEN,
+                   UO::SKILL_EVAL_INT,
+                   UO::SKILL_HIDING,
+                   #UO::SKILL_SPIRIT_SPEAK,
+                 ]
+        e = UO::Engines::EasySkills.new($client, skills)
+        # e = UO::Engines::StackItems.new($client, 0x1f4c) # recall scrolls
+
         e.start
 
         # UO::Engines::SimpleWalk.new($client, UO::Position.new(1410, 1735))
@@ -39,7 +53,7 @@ cotton_eingang = UO::Position.new(4569, 1480)
 
 
 $client.signal_connect(Ingame.new)
-$client.signal_connect(UO::Engines::EntityDump.new)
+# $client.signal_connect(UO::Engines::EntityDump.new)
 # $client.signal_connect(UO::Engines::WalkDump.new)
 # $client.signal_connect(StatSkillJojo.new(UO::SKILL_ARMSLORE, UO::SKILL_ITEMID))
 
