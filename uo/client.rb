@@ -322,7 +322,7 @@ module UO
                         value, base = packet.ushort, packet.ushort
                         lock = packet.byte
                         cap = packet.ushort
-                        @world.skills[skill_id] = SkillValue.new(value, base, lock, cap)
+                        @world.skills[skill_id] = SkillValue.new(skill_id, value, base, lock, cap)
                     end
 
                 when 0xdf
@@ -330,7 +330,7 @@ module UO
                     value, base = packet.ushort, packet.ushort
                     lock = packet.byte
                     cap = packet.ushort
-                    @world.skills[skill_id] = SkillValue.new(value, base, lock, cap)
+                    @world.skills[skill_id] = SkillValue.new(skill_id, value, base, lock, cap)
 
                 else
                     puts "unknown skill_update #{type}\n"

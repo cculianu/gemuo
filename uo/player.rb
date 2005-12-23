@@ -35,13 +35,17 @@ module UO
     SERIAL_PLAYER = 0x80000000
 
     class SkillValue
-        def initialize(value, base, lock, cap)
+        def initialize(id, value, base, lock, cap)
+            @id = id
             @value = value
             @base = base
             @lock = lock
             @cap = cap
         end
 
+        def id
+            @id
+        end
         def value
             @value
         end
@@ -55,8 +59,12 @@ module UO
             @cap
         end
 
+        def <=>(other)
+            raise TypeError.new unless other.instance_of?(SkillValue)
+            return @base <=> other.base
+        end
         def to_s
-            "[value=#{@value} base=#{@base} lock=#{@lock} cap=#{@cap}]"
+            "[id=#{@id} value=#{@value} base=#{@base} lock=#{@lock} cap=#{@cap}]"
         end
     end
 
