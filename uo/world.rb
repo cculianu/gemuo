@@ -53,8 +53,8 @@ module UO
             @entities[serial]
         end
         def delete(serial)
-            @entities.delete(serial)
             self.player = nil if @player && @player.serial == serial
+            @entities.delete(serial)
         end
         def make_mobile(serial)
             m = @entities[serial]
