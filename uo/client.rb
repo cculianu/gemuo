@@ -140,7 +140,6 @@ module UO
         def <<(packet)
             raise "not a packet" unless packet.kind_of?(UO::Packet::Writer)
             @io << packet.to_s
-            puts "Sent 0x%02x\n" % packet.command
         end
 
         def register(&handler)
