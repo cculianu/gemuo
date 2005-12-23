@@ -48,7 +48,7 @@ module UO::Engines
             @skills.sort.each do
                 |id|
                 skill = @client.world.skill(id)
-                $stdout << " #{id}=#{skill ? skill.base : '?'}"
+                $stdout << "  #{UO::SKILL_NAMES(id)}=#{skill ? skill.base : '?'}"
                 @skills.delete(id) if skill && skill.base == skill.cap
             end
             $stdout << "\n"
@@ -70,7 +70,7 @@ module UO::Engines
             @skills << @current
 
             # use skill
-            puts "skill #{@current}\n"
+            puts "skill #{UO::SKILL_NAMES[@current]}\n"
             @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
 
             restart(skill_delay(@current))
