@@ -12,12 +12,6 @@ raise "syntax: test.rb host port username password charname" unless ARGV.length 
 $client = UO::Client.new(ARGV[0], ARGV[1], nil,
                          ARGV[2], ARGV[3], ARGV[4])
 
-class TestTimer < UO::TimerEvent
-    def tick
-        puts "tick!\n"
-    end
-end
-
 class Ingame
     def on_ingame
         #e = UO::Engines::CollectItems.new($client, 0xdf9) # collect wool
