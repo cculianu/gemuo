@@ -366,6 +366,7 @@ module UO
                 signal_fire(:on_ingame)
 
             when 0x5b # time
+            when 0x65 # wheather
 
             when 0x6c # target
                 allow_ground = packet.bool
