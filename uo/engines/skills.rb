@@ -117,7 +117,7 @@ module UO::Engines
             else
                 puts "no backpack\n"
                 # open paperdoll
-                $client << UO::Packet::Use.new(0x80000000)
+                @client << UO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
             end
         end
 
