@@ -149,6 +149,13 @@ module UO::Packet
         end
     end
 
+    class Attack < Writer
+        def initialize(serial)
+            super(0x05)
+            uint(serial)
+        end
+    end
+
     class Use < Writer
         def initialize(serial)
             super(0x06)
