@@ -87,12 +87,22 @@ module UO::Engines
 
         def skill_delay(skill)
             case skill
-            when UO::SKILL_HIDING
+            when UO::SKILL_HIDING, UO::SKILL_PEACEMAKING
                 return 9
 
             else
                 return 1.2
             end
+        end
+
+        def find_instrument
+            backpack = @client.world.backpack
+            return unless backpack
+            @client.world.each_item_in(backpack) do
+                |item|
+                return item if item.item_id == 0xeb2 # leap harp
+            end
+            nil
         end
 
         def tick
@@ -102,7 +112,19 @@ module UO::Engines
 
             # use skill
             puts "skill #{UO::SKILL_NAMES[@current]}\n"
-            @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
+
+            case @current
+            when UO::SKILL_MUSICIANSHIP
+                instrument = find_instrument
+                if instrument
+                    @client << UO::Packet::Use.new(instrument.serial)
+                else
+                    puts "No instrument!\n"
+                end
+
+            else
+                @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
+            end
 
             restart(skill_delay(@current))
             @client.timer << self
@@ -154,15 +176,17 @@ module UO::Engines
 
         def on_target(allow_ground, target_id, flags)
             target = nil
-            if @current == UO::SKILL_DETECT_HIDDEN
+            case @current
+            when UO::SKILL_DETECT_HIDDEN
                 # point to floor
                 p = @client.world.player.position
                 @client << UO::Packet::TargetResponse.new(1, target_id, flags, 0,
                                                           p.x, p.y, p.z, 0)
                 return
-            elsif @current == UO::SKILL_ANATOMY ||
-                    @current == UO::SKILL_EVAL_INT
+
+            when UO::SKILL_ANATOMY, UO::SKILL_EVAL_INT, UO::SKILL_PEACEMAKING
                 target = find_mobile
+
             else
                 target = find_dagger
             end
