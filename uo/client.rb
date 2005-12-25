@@ -269,9 +269,8 @@ module UO
                 serial = packet.uint
                 gump_id = packet.ushort
 
-                item = @world.entity(serial)
-                item = @world.new_item(serial) unless item
-                item.gump_id = gump_id
+                entity = @world.entity(serial)
+                entity.gump_id = gump_id if entity
 
             when 0x25 # container update
                 serial = packet.uint

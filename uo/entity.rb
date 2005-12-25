@@ -69,6 +69,14 @@ module UO
         def hue=(v)
             @hue = v
         end
+
+        # for open containers and paperdolls
+        def gump_id
+            @gump_id
+        end
+        def gump_id=(v)
+            @gump_id = v
+        end
     end
 
     class Item < Entity
@@ -98,14 +106,6 @@ module UO
         end
         def layer=(v)
             @layer = v
-        end
-
-        # only for open containers
-        def gump_id
-            @gump_id
-        end
-        def gump_id=(v)
-            @gump_id = v
         end
 
         def to_s
