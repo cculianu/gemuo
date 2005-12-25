@@ -416,6 +416,20 @@ module UO
                 mobile.position = Position.new(x, y, z, direction)
                 mobile.notoriety = notoriety
 
+                while (serial = packet.uint) != 0
+                    item = world.new_item(serial)
+                    item.parent = mobile.serial
+                    item_id = packet.ushort
+                    item.layer = packet.byte
+                    if (item_id & 0x8000) == 0
+                        item.hue = 0
+                    else
+                        item.hue = packet.ushort
+                        item_id &= ~0x8000
+                    end
+                    item.item_id = item_id
+                end
+
                 signal_fire(:on_mobile_incoming, mobile)
 
             when 0x8c # relay
