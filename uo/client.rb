@@ -253,13 +253,13 @@ module UO
                 x, y = packet.ushort, packet.ushort
                 direction = packet.byte
                 z = packet.byte
-                @world.walk.walk_reject(seq, x, y, z, direction) if @world.walk
+                @world.walk.walk_reject(seq, x, y, z, direction) if @world.get_walk
 
                 signal_fire(:on_walk_reject) if @world.player
 
             when 0x22 # walk ack
                 seq, notoriety = packet.byte, packet.byte
-                @world.walk.walk_ack(seq, notoriety) if @world.walk
+                @world.get_walk.walk_ack(seq, notoriety) if @world.get_walk
 
                 signal_fire(:on_walk_ack) if @world.player
 
@@ -506,8 +506,8 @@ module UO
         end
 
         def walk(direction)
-            return unless @world.walk
-            packet = @world.walk.walk(direction)
+            return unless @world.get_walk
+            packet = @world.get_walk.walk(direction)
             self << packet if packet
             return packet != nil
         end
