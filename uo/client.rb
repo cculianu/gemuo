@@ -97,9 +97,14 @@ module UO
                 method = nil
                 begin
                     method = handler.method(sig)
+                    method.call(*args) if method
                 rescue NameError
+                    begin
+                        method = handler.method(:on_signal)
+                        method.call(sig, *args) if method
+                    rescue NameError
+                    end
                 end
-                method.call(*args) if method
             end
         end
 
