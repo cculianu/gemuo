@@ -69,7 +69,7 @@ module UO
         end
 
         def delete_recursive(entity)
-            @world.delete(entity)
+            @world.delete(entity.serial)
 
             children = []
             @world.each_item_in(entity) do
