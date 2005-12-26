@@ -18,6 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'uo/engines/blocking'
+
 module UO::Engines
     class Melee < UO::Engines::Blocking
         PRIMARY = [ UO::SKILL_SWORDS, UO::SKILL_MACING, UO::SKILL_FENCING, UO::SKILL_WRESTLING ]
