@@ -63,7 +63,7 @@ module UO::Engines
                 @client << UO::Packet::Drop.new(@holding.serial, 0, 0, 0, target.serial)
                 @holding = nil
                 restart(0.5)
-                $client.timer << self
+                @client.timer << self
             end
         end
 
