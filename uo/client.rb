@@ -156,6 +156,13 @@ module UO
 
         def handle_packet(packet)
             case packet.command
+            when 0x0b # damage
+                serial = packet.uint
+                amount = packet.ushort
+
+                mobile = @world.entity(serial)
+                signal_fire(:on_damage, mobile, amount) if mobile
+
             when 0x11 # mobile status
                 serial = packet.uint
                 name = packet.fixstring(30)
