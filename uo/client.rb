@@ -166,6 +166,7 @@ module UO
 
                 mobile = @world.make_mobile(serial)
                 mobile.name = name
+                mobile.hits = BoundedValue.new(hits, hits_max)
 
                 signal_fire(:on_mobile_status, mobile)
 
@@ -446,9 +447,32 @@ module UO
                 @reader = UO::Packet::Reader.new(UO::Decompress.new(@io))
                 self << UO::Packet::GameLogin.new(auth_id, @username, @password)
 
-            when 0xa1 # StatChngStr
-            when 0xa2 # StatChngInt
-            when 0xa3 # StatChngDex
+            when 0xa1 # mobile hits
+                serial = packet.uint
+                hits, hits_max = packet.ushort, packet.ushort
+
+                mobile = @world.make_mobile(serial)
+                mobile.hits = BoundedValue.new(hits, hits_max)
+
+                signal_fire(:on_mobile_hits, mobile)
+
+            when 0xa2 # mobile mana
+                serial = packet.uint
+                mana, mana_max = packet.ushort, packet.ushort
+
+                mobile = @world.make_mobile(serial)
+                mobile.mana = BoundedValue.new(mana, mana_max)
+
+                signal_fire(:on_mobile_mana, mobile)
+
+            when 0xa3 # mobile stamina
+                serial = packet.uint
+                stamina, stamina_max = packet.ushort, packet.ushort
+
+                mobile = @world.make_mobile(serial)
+                mobile.stamina = BoundedValue.new(stamina, stamina_max)
+
+                signal_fire(:on_mobile_stamina, mobile)
 
             when 0xa8 # server list
                 puts "server list:\n"

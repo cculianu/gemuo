@@ -241,6 +241,13 @@ module UO::Packet
         end
     end
 
+    class WarMode < Writer
+        def initialize(war_mode)
+            super(0x72)
+            byte(war_mode ? 0x01 : 0x00)
+        end
+    end
+
     class AccountLogin < Writer
         def initialize(username, password)
             super(0x80)

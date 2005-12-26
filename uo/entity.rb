@@ -44,6 +44,19 @@ module UO
         end
     end
 
+    class BoundedValue
+        def initialize(value, max)
+            @value = value
+            @max = max
+        end
+        def value
+            @value
+        end
+        def max
+            @max
+        end
+    end
+
     class Entity
         def initialize(serial)
             @serial = serial
@@ -133,6 +146,27 @@ module UO
         end
         def notoriety=(v)
             @notoriety = v
+        end
+
+        def hits
+            @hits
+        end
+        def hits=(v)
+            @hits = v
+        end
+
+        def mana
+            @mana
+        end
+        def mana=(v)
+            @mana = v
+        end
+
+        def stamina
+            @stamina
+        end
+        def stamina=(v)
+            @stamina = v
         end
 
         def to_s
