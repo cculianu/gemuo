@@ -42,6 +42,25 @@ module UO
         end
     end
 
+    class TimerEvent2
+        def initialize(seconds, target, method, *args)
+            @due = Time.new.to_f + seconds
+            @target = target
+            @method = method
+            @args = args
+        end
+
+        def due
+            @due
+        end
+
+        def tick
+            @target.send(@method, @args)
+        ensure
+            @target, @method, @args = nil, nil, nil
+        end
+    end
+
     class Timer
         def initialize
             @events = []
