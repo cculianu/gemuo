@@ -245,6 +245,7 @@ module UO::Packet
         def initialize(war_mode)
             super(0x72)
             byte(war_mode ? 0x01 : 0x00)
+            fixstring('', 3)
         end
     end
 
