@@ -6,11 +6,14 @@ require 'uo/engines/collect'
 require 'uo/engines/debug'
 require 'uo/engines/stack'
 require 'uo/engines/skills'
+require 'uo/engines/stats'
 
-raise "syntax: test.rb host port username password charname" unless ARGV.length == 5
+raise "syntax: test.rb host port username password charname str dex int" unless ARGV.length == 8
 
 $client = UO::Client.new(ARGV[0], ARGV[1], nil,
                          ARGV[2], ARGV[3], ARGV[4])
+
+$stats_goal = [ARGV[5].to_i, ARGV[6].to_i, ARGV[7].to_i]
 
 class Ingame
     def on_ingame
@@ -30,6 +33,9 @@ class Ingame
         e = UO::Engines::EasySkills.new($client, skills)
         # e = UO::Engines::StackItems.new($client, 0x1f4c) # recall scrolls
 
+        e.start
+
+        e = UO::Engines::StatLock.new($client, $stats_goal)
         e.start
 
         # UO::Engines::SimpleWalk.new($client, UO::Position.new(1410, 1735))
