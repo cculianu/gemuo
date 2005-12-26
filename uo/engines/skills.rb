@@ -88,10 +88,10 @@ module UO::Engines
         def skill_delay(skill)
             case skill
             when UO::SKILL_HIDING, UO::SKILL_PEACEMAKING
-                return 9
+                return 10
 
             else
-                return 1.2
+                return 1.5
             end
         end
 
