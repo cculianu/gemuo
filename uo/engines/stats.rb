@@ -62,15 +62,24 @@ module UO::Engines
                 return
             end
 
+            complete = true
+
             (0..2).each do
                 |stat|
                 if stats[stat] > @goal[stat]
                     set_lock(stat, UO::LOCK_DOWN)
+                    complete = false
                 elsif stats[stat] < @goal[stat]
                     set_lock(stat, UO::LOCK_UP)
+                    complete = false
                 else
                     set_lock(stat, UO::LOCK_LOCKED)
                 end
+            end
+
+            if complete
+                stop
+                @client.signal_fire(:on_engine_complete, self)
             end
         end
 
