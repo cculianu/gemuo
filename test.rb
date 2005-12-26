@@ -15,6 +15,7 @@ $client = UO::Client.new(ARGV[0], ARGV[1], nil,
 class Ingame
     def on_ingame
         #e = UO::Engines::CollectItems.new($client, 0xdf9) # collect wool
+        #e = UO::Engines::CollectItems.new($client, 0x175d) # collect oil cloth
 
         skills = [ UO::SKILL_ANATOMY,
                    UO::SKILL_ITEM_ID,
@@ -22,6 +23,8 @@ class Ingame
                    #UO::SKILL_DETECT_HIDDEN,
                    UO::SKILL_EVAL_INT,
                    UO::SKILL_HIDING,
+                   UO::SKILL_MUSICIANSHIP,
+                   UO::SKILL_PEACEMAKING,
                    #UO::SKILL_SPIRIT_SPEAK,
                  ]
         e = UO::Engines::EasySkills.new($client, skills)
