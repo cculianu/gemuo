@@ -25,6 +25,7 @@ module UO::Engines
             @engines = engines.kind_of?(Array) ? engines : [engines]
             @ingame = false
             @started = false
+            @status = 0
         end
 
         def start
@@ -57,15 +58,20 @@ module UO::Engines
         end
 
         def on_engine_complete(engine)
-            return unless engine == @engine
-            puts "engine complete, exiting\n"
-            exit 0
+            if @engines.include?(engine)
+                @engines.delete(engine)
+                puts "engine #{engine} complete\n"
+                exit @status if @engines.empty?
+            end
         end
 
         def on_engine_failed(engine)
-            return unless engine == @engine
-            puts "engine failed, exiting\n"
-            exit 1
+            if @engines.include?(engine)
+                @engines.delete(engine)
+                @status = 1
+                puts "engine #{engine} failed\n"
+                exit @status if @engines.empty?
+            end
         end
     end
 end
