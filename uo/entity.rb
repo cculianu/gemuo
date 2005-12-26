@@ -55,6 +55,10 @@ module UO
         def max
             @max
         end
+
+        def to_s
+            "#{@value}/#{@max}"
+        end
     end
 
     class Entity
