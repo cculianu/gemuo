@@ -44,8 +44,8 @@ engines << UO::Engines::StatLock.new(client, stats_goal)
 
 UO::Engines::Main.new(client, engines).start
 
-# $client.signal_connect(UO::Engines::EntityDump.new)
-# $client.signal_connect(UO::Engines::WalkDump.new)
-# $client.signal_connect(StatSkillJojo.new(UO::SKILL_ARMSLORE, UO::SKILL_ITEMID))
+# client.signal_connect(UO::Engines::EntityDump.new)
+# client.signal_connect(UO::Engines::WalkDump.new)
+# client.signal_connect(StatSkillJojo.new(client, UO::SKILL_ARMSLORE, UO::SKILL_ITEMID))
 
 client.run

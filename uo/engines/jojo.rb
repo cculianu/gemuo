@@ -20,8 +20,9 @@
 
 module UO::Engines
     class StatSkillJojo < UO::TimerEvent
-        def initialize(skill1, skill2)
+        def initialize(client, skill1, skill2)
             super()
+            @client = client
             @skills = [ skill1, skill2 ]
         end
 
@@ -29,20 +30,20 @@ module UO::Engines
             return unless @current
 
             # use skill
-            $client << UO::Packet::TextCommand.new(0x24, @current.to_s)
+            @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
 
             restart(1.5)
-            $client.timer << self
+            @client.timer << self
         end
 
         def on_ingame
             # get skills
-            $client << UO::Packet::MobileQuery.new(0x05, $client.world.player.serial)
+            @client << UO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
         end
 
         def on_skill_update
             if @current
-                value = $client.world.skill(@other)
+                value = @client.world.skill(@other)
                 if value == nil || value.value == 0
                     @current = nil
                     @other = nil
@@ -53,7 +54,7 @@ module UO::Engines
                 # decide which is current
                 values = @skills.collect do
                     |skill_id|
-                    value = $client.world.skill(skill_id)
+                    value = @client.world.skill(skill_id)
                     unless value
                         puts "Error: no value for skill #{skill_id}\n"
                         return
@@ -69,15 +70,15 @@ module UO::Engines
                     @other = @skills[0]
                 end
 
-                $client << UO::Packet::ChangeSkillLock.new(@current, UO::LOCK_UP)
-                $client << UO::Packet::ChangeSkillLock.new(@other, UO::LOCK_DOWN)
+                @client << UO::Packet::ChangeSkillLock.new(@current, UO::LOCK_UP)
+                @client << UO::Packet::ChangeSkillLock.new(@other, UO::LOCK_DOWN)
 
                 tick
             end
         end
 
         def find_dagger
-            $client.world.each_item do
+            @client.world.each_item do
                 |item|
                 #puts "item=0x%x\n" % item.item_id
                 return item if item.item_id == 0xf52
@@ -92,7 +93,7 @@ module UO::Engines
                 return
             end
             puts "Serial=0x%x\n" % item.serial
-            $client << UO::Packet::TargetResponse.new(0, target_id, flags, item.serial,
+            @client << UO::Packet::TargetResponse.new(0, target_id, flags, item.serial,
                                                       0xffff, 0xffff, 0xffff, 0)
         end
     end
