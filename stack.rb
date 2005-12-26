@@ -22,20 +22,15 @@ $:.unshift(File.dirname($0) + '/glue')
 $:.unshift(File.dirname($0))
 
 require 'uo/client'
+require 'uo/engines/main'
 require 'uo/engines/stack'
 
-raise "usage: whatsup.rb host port username password charname" unless ARGV.length == 5
+raise "usage: stack.rb host port username password charname" unless ARGV.length == 5
 
-$client = UO::Client.new(ARGV[0], ARGV[1], nil,
-                         ARGV[2], ARGV[3], ARGV[4])
+client = UO::Client.new(ARGV[0], ARGV[1], nil,
+                        ARGV[2], ARGV[3], ARGV[4])
 
-class Ingame
-    def on_ingame
-        e = UO::Engines::StackItems.new($client, 0x1f4c) # recall scrolls
-        e.start
-    end
-end
+engine = UO::Engines::StackItems.new(client, 0x1f4c) # recall scrolls
+UO::Engines::Main.new(client, engine).start
 
-$client.signal_connect(Ingame.new)
-
-$client.run
+client.run
