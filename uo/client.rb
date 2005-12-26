@@ -456,7 +456,7 @@ module UO
 
             when 0xa1 # mobile hits
                 serial = packet.uint
-                hits, hits_max = packet.ushort, packet.ushort
+                hits_max, hits = packet.ushort, packet.ushort
 
                 mobile = @world.make_mobile(serial)
                 mobile.hits = BoundedValue.new(hits, hits_max)
