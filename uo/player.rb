@@ -24,6 +24,12 @@ module UO
     LOCK_UP = 0
     LOCK_DOWN = 1
     LOCK_LOCKED = 2
+    LOCK_NAMES = [ "Up", "Down", "Locked" ]
+
+    STAT_STRENGTH = 0
+    STAT_DEXTERITY = 1
+    STAT_INTELLIGENCE = 2
+    STAT_NAMES = ['Strength', 'Dexterity', 'Intelligence']
 
     SERIAL_PLAYER = 0x80000000
 

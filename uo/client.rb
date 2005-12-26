@@ -171,11 +171,22 @@ module UO
                 hits, hits_max = packet.ushort, packet.ushort
                 rename = packet.byte
                 flags = packet.byte
-                # XXX
 
                 mobile = @world.make_mobile(serial)
                 mobile.name = name
                 mobile.hits = BoundedValue.new(hits, hits_max)
+
+                if flags >= 0x03
+                    mobile.female = packet.byte != 0
+                    mobile.stats = [packet.ushort, packet.ushort, packet.ushort]
+                    mobile.stamina = BoundedValue.new(packet.ushort, packet.ushort)
+                    mobile.mana = BoundedValue.new(packet.ushort, packet.ushort)
+                    mobile.gold = packet.uint
+                    packet.ushort # armor
+                    mobile.mass = packet.ushort
+                    mobile.stat_cap = packet.ushort
+                    # XXX
+                end
 
                 signal_fire(:on_mobile_status, mobile)
 
@@ -526,6 +537,21 @@ module UO
                     @map_id = packet.byte
 
                 when 0x0018 # map patch
+
+                when 0x0019
+                    case packet.byte
+                    when 2 # statlock info
+                        serial = packet.uint
+                        packet.byte
+                        lockbits = packet.byte
+                        mobile = @world.make_mobile(serial)
+                        mobile.stat_locks = [(lockbits >> 4) & 0x3,
+                                             (lockbits >> 2) & 0x3,
+                                             lockbits & 0x3]
+
+                        signal_fire(:on_stat_lock, mobile)
+
+                    end
 
                 else
                     return false

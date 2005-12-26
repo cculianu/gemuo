@@ -66,6 +66,13 @@ module UO::Packet
         end
     end
 
+    class ExtWriter < Writer
+        def initialize(cmd)
+            super(0xbf)
+            ushort(cmd)
+        end
+    end
+
     class Packet
         def initialize(cmd, body)
             @cmd = cmd
@@ -271,6 +278,14 @@ module UO::Packet
         def initialize(index)
             super(0xa0)
             ushort(index)
+        end
+    end
+
+    class StatLock < ExtWriter
+        def initialize(stat, lock)
+            super(0x001a)
+            byte(stat)
+            byte(lock)
         end
     end
 end

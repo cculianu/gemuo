@@ -139,17 +139,46 @@ module UO
     end
 
     class Mobile < Entity
+        def female
+            @female
+        end
+        def female=(v)
+            @female = v
+        end
         def body
             @body
         end
         def body=(v)
             @body = v
         end
+
         def notoriety
             @notoriety
         end
         def notoriety=(v)
             @notoriety = v
+        end
+
+        def stats
+            @stats
+        end
+        def stats=(v)
+            raise TypeError.new unless v == nil || v.length == 3
+            @stats = v
+        end
+        def stat_locks
+            @stat_locks
+        end
+        def stat_locks=(v)
+            raise TypeError.new unless v == nil || v.length == 3
+            @stat_locks = v
+        end
+
+        def stat_cap
+            @stat_cap
+        end
+        def stat_cap=(v)
+            @stat_cap = v
         end
 
         def hits
@@ -171,6 +200,20 @@ module UO
         end
         def stamina=(v)
             @stamina = v
+        end
+
+        def gold
+            @gold
+        end
+        def gold=(v)
+            @gold = v
+        end
+
+        def mass
+            @mass
+        end
+        def mass=(v)
+            @mass = v
         end
 
         def to_s
