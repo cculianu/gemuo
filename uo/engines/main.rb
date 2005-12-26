@@ -20,9 +20,9 @@
 
 module UO::Engines
     class Main
-        def initialize(client, engine)
+        def initialize(client, engines)
             @client = client
-            @engine = engine
+            @engines = engines.kind_of?(Array) ? engines : [engines]
             @ingame = false
             @started = false
         end
@@ -32,18 +32,28 @@ module UO::Engines
             @started = true
 
             @client.signal_connect(self)
-            @engine.start if @ingame
+            @engines.each do
+                |engine|
+                engine.start if @ingame
+            end
         end
         def stop
             return unless @started
 
-            @engine.stop if @ingame
+            @engines.reverse_each do
+                |engine|
+                engine.stop if @ingame
+            end
+
             @client.signal_disconnect(self)
         end
 
         def on_ingame
             @ingame = true
-            @engine.start
+            @engines.each do
+                |engine|
+                engine.start
+            end
         end
 
         def on_engine_complete(engine)
