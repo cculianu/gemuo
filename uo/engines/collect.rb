@@ -1,5 +1,5 @@
 #
-#  libuoclient-ruby
+#  GemUO
 #  $Id$
 #
 #  (c) 2005 Max Kellermann <max@duempel.org>
