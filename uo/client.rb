@@ -536,6 +536,8 @@ module UO
                 when 0x0008 # map change
                     @map_id = packet.byte
 
+                when 0x0010 # equipment info
+
                 when 0x0018 # map patch
 
                 when 0x0019
