@@ -166,14 +166,14 @@ static VALUE preader_read(VALUE self) {
 
 void Init_uoclient(void);
 void Init_uoclient(void) {
-    mUO = rb_define_module("UO");
+    mUO = rb_define_module("GemUO");
 
     cDecompress = rb_define_class_under(mUO, "Decompress", rb_cObject);
     rb_define_singleton_method(cDecompress, "new", decompress_new, 1);
     rb_define_method(cDecompress, "initialize", decompress_initialize, 1);
     rb_define_method(cDecompress, "sysread", decompress_read, 1);
 
-    mUOPacket = rb_define_module("UO::Packet");
+    mUOPacket = rb_define_module("GemUO::Packet");
 
     rb_define_module_function(mUO, "packet_length", packet_length, 1);
 

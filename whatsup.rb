@@ -25,10 +25,10 @@ require 'uo/client'
 
 raise "usage: whatsup.rb host port username password charname" unless ARGV.length == 5
 
-$client = UO::Client.new(ARGV[0], ARGV[1], nil,
-                         ARGV[2], ARGV[3], ARGV[4])
+$client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
+                            ARGV[2], ARGV[3], ARGV[4])
 
-class WhatsUp < UO::TimerEvent
+class WhatsUp < GemUO::TimerEvent
     def on_skill_update
         skills = $client.world.skills.values.sort.reverse
         puts "Skills:\n"
@@ -36,7 +36,7 @@ class WhatsUp < UO::TimerEvent
         skills.each do
             |skill|
             next if skill.base == 0
-            name = UO::SKILL_NAMES[skill.id]
+            name = GemUO::SKILL_NAMES[skill.id]
             puts "#{name.rjust(20)}: #{skill.base.to_s.rjust(4)} (#{skill.lock})\n" 
             sum += skill.base
         end
@@ -47,7 +47,7 @@ class WhatsUp < UO::TimerEvent
 
     def start
         $client.signal_connect(self)
-        $client << UO::Packet::MobileQuery.new(0x05, $client.world.player.serial)
+        $client << GemUO::Packet::MobileQuery.new(0x05, $client.world.player.serial)
     end
 end
 

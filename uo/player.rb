@@ -20,7 +20,7 @@
 
 require 'uo/skills'
 
-module UO
+module GemUO
     LOCK_UP = 0
     LOCK_DOWN = 1
     LOCK_LOCKED = 2
@@ -82,7 +82,7 @@ module UO
             @seq = @next_seq
             @next_seq += 1
             @next_seq = 1 if @next_seq >= 0x100
-            return UO::Packet::Walk.new(@direction, @seq)
+            return GemUO::Packet::Walk.new(@direction, @seq)
         end
         def walk_reject(seq, x, y, z, direction)
             return unless @mobile.position

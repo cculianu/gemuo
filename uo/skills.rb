@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO
+module GemUO
     SKILL_LOCK_UP = 0
     SKILL_LOCK_DOWN = 1
     SKILL_LOCK_LOCKED = 2

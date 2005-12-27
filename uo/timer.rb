@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO
+module GemUO
     class TimerEvent
         def initialize(seconds = nil)
             restart(seconds) if seconds

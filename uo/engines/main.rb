@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
+module GemUO::Engines
     class Main
         def initialize(client, engines)
             @client = client

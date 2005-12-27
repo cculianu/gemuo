@@ -18,13 +18,13 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Packet
+module GemUO::Packet
     class Writer
         def initialize(cmd)
             @cmd = cmd
             @data = ''
             byte(@cmd)
-            @length = UO.packet_length(@cmd)
+            @length = GemUO.packet_length(@cmd)
             ushort(0xffff) unless @length
         end
 
@@ -137,7 +137,7 @@ module UO::Packet
 
         def read
             cmd = byte
-            length = UO.packet_length(cmd)
+            length = GemUO.packet_length(cmd)
             if length
                 length -= 1
             else

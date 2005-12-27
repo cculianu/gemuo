@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
+module GemUO::Engines
     class Blocking
         def initialize(client)
             @client = client
@@ -101,7 +101,7 @@ module UO::Engines
 
             if @client.world.skills.empty?
                 # query skills
-                @client << UO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
+                @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
                 wait_for_signal(:on_skill_update)
             end
 
@@ -114,7 +114,7 @@ module UO::Engines
             skills.each_value do
                 |skill|
                 sum += skill.base
-                down += skill.base if skill.lock == UO::SKILL_LOCK_DOWN
+                down += skill.base if skill.lock == GemUO::SKILL_LOCK_DOWN
             end
 
             return down if sum >= 700
@@ -124,7 +124,7 @@ module UO::Engines
         def backpack
             if @client.world.backpack == nil
                 # open paperdoll
-                @client << UO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
+                @client << GemUO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
                 wait_for_signal(:on_equip)
             end
 
@@ -134,7 +134,7 @@ module UO::Engines
         def item_in_backpack(item_id)
             items = @client.world.items_in(backpack)
             if items.empty?
-                @client << UO::Packet::Use.new(backpack.serial)
+                @client << GemUO::Packet::Use.new(backpack.serial)
                 sleep(2)
                 items = @client.world.items_in(backpack)
             end
@@ -146,10 +146,10 @@ module UO::Engines
         end
 
         def use_and_target(item, target)
-            @client << UO::Packet::Use.new(item.serial)
+            @client << GemUO::Packet::Use.new(item.serial)
             allow_ground, target_id, flags = wait_for_signal(:on_target)
-            @client << UO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
-                                                      0xffff, 0xffff, 0xffff, 0)
+            @client << GemUO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
+                                                         0xffff, 0xffff, 0xffff, 0)
         end
     end
 end

@@ -18,8 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
-    class StatLock < UO::TimerEvent
+module GemUO::Engines
+    class StatLock < GemUO::TimerEvent
         def initialize(client, goal)
             @client = client
             @goal = goal
@@ -35,8 +35,8 @@ module UO::Engines
 
         def set_lock(stat, lock)
             if @locks[stat] != lock
-                puts "Setting stat lock #{UO::STAT_NAMES[stat]} to #{UO::LOCK_NAMES[lock]}\n"
-                @client << UO::Packet::StatLock.new(stat, lock)
+                puts "Setting stat lock #{GemUO::STAT_NAMES[stat]} to #{GemUO::LOCK_NAMES[lock]}\n"
+                @client << GemUO::Packet::StatLock.new(stat, lock)
             end
         end
 
@@ -57,7 +57,7 @@ module UO::Engines
             if sum < cap
                 (0..2).each do
                     |stat|
-                    set_lock(stat, UO::LOCK_UP)
+                    set_lock(stat, GemUO::LOCK_UP)
                 end
                 return
             end
@@ -67,13 +67,13 @@ module UO::Engines
             (0..2).each do
                 |stat|
                 if stats[stat] > @goal[stat]
-                    set_lock(stat, UO::LOCK_DOWN)
+                    set_lock(stat, GemUO::LOCK_DOWN)
                     complete = false
                 elsif stats[stat] < @goal[stat]
-                    set_lock(stat, UO::LOCK_UP)
+                    set_lock(stat, GemUO::LOCK_UP)
                     complete = false
                 else
-                    set_lock(stat, UO::LOCK_LOCKED)
+                    set_lock(stat, GemUO::LOCK_LOCKED)
                 end
             end
 

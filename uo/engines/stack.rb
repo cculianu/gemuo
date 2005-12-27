@@ -20,8 +20,8 @@
 
 require 'uo/engines/walk'
 
-module UO::Engines
-    class StackItems < UO::TimerEvent
+module GemUO::Engines
+    class StackItems < GemUO::TimerEvent
         def initialize(client, item_id)
             super()
             @client = client
@@ -39,7 +39,7 @@ module UO::Engines
             @client.signal_connect(self)
 
             # get backpack contents
-            @client << UO::Packet::Use.new(@backpack.serial)
+            @client << GemUO::Packet::Use.new(@backpack.serial)
 
             restart(0.7)
             @client.timer << self
@@ -66,7 +66,7 @@ module UO::Engines
         def on_delete_entity(entity)
             if @holding && @holding.serial == entity.serial
                 puts "dropping #{@holding} onto #{@target}\n"
-                @client << UO::Packet::Drop.new(@holding.serial, 0, 0, 0, @target.serial)
+                @client << GemUO::Packet::Drop.new(@holding.serial, 0, 0, 0, @target.serial)
                 @holding = nil
                 @target = nil
                 restart(0.7)
@@ -104,7 +104,7 @@ module UO::Engines
             puts "lifting #{@holding} onto #{@target}\n"
             amount = @holding.amount
             amount = 1 unless amount && amount > 0
-            @client << UO::Packet::Lift.new(@holding.serial, amount)
+            @client << GemUO::Packet::Lift.new(@holding.serial, amount)
         end
     end
 end

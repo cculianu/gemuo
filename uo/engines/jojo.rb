@@ -18,8 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
-    class StatSkillJojo < UO::TimerEvent
+module GemUO::Engines
+    class StatSkillJojo < GemUO::TimerEvent
         def initialize(client, skill1, skill2)
             super()
             @client = client
@@ -30,7 +30,7 @@ module UO::Engines
             return unless @current
 
             # use skill
-            @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
+            @client << GemUO::Packet::TextCommand.new(0x24, @current.to_s)
 
             restart(1.5)
             @client.timer << self
@@ -38,7 +38,7 @@ module UO::Engines
 
         def on_ingame
             # get skills
-            @client << UO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
+            @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
         end
 
         def on_skill_update
@@ -70,8 +70,8 @@ module UO::Engines
                     @other = @skills[0]
                 end
 
-                @client << UO::Packet::ChangeSkillLock.new(@current, UO::LOCK_UP)
-                @client << UO::Packet::ChangeSkillLock.new(@other, UO::LOCK_DOWN)
+                @client << GemUO::Packet::ChangeSkillLock.new(@current, GemUO::LOCK_UP)
+                @client << GemUO::Packet::ChangeSkillLock.new(@other, GemUO::LOCK_DOWN)
 
                 tick
             end
@@ -93,8 +93,8 @@ module UO::Engines
                 return
             end
             puts "Serial=0x%x\n" % item.serial
-            @client << UO::Packet::TargetResponse.new(0, target_id, flags, item.serial,
-                                                      0xffff, 0xffff, 0xffff, 0)
+            @client << GemUO::Packet::TargetResponse.new(0, target_id, flags, item.serial,
+                                                         0xffff, 0xffff, 0xffff, 0)
         end
     end
 end

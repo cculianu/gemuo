@@ -20,11 +20,13 @@
 
 require 'uo/engines/blocking'
 
-module UO::Engines
-    class Melee < UO::Engines::Blocking
-        PRIMARY = [ UO::SKILL_SWORDS, UO::SKILL_MACING, UO::SKILL_FENCING, UO::SKILL_WRESTLING ]
-        SECONDARY = [ UO::SKILL_TACTICS, UO::SKILL_ANATOMY, UO::SKILL_LUMBERJACKING,
-                      UO::SKILL_HEALING, UO::SKILL_PARRY ]
+module GemUO::Engines
+    class Melee < GemUO::Engines::Blocking
+        PRIMARY = [ GemUO::SKILL_SWORDS, GemUO::SKILL_MACING,
+                    GemUO::SKILL_FENCING, GemUO::SKILL_WRESTLING ]
+        SECONDARY = [ GemUO::SKILL_TACTICS, GemUO::SKILL_ANATOMY,
+                      GemUO::SKILL_LUMBERJACKING, GemUO::SKILL_HEALING,
+                      GemUO::SKILL_PARRY ]
 
         def initialize(client, target_serial, passive)
             super(client)
@@ -45,15 +47,15 @@ module UO::Engines
 
                 skills.each_value do
                     |skill|
-                    next if skill.lock != UO::SKILL_LOCK_UP
+                    next if skill.lock != GemUO::SKILL_LOCK_UP
                     if PRIMARY.include?(skill.id)
-                        if skill.base < skill.cap && skill.lock == UO::SKILL_LOCK_UP
+                        if skill.base < skill.cap && skill.lock == GemUO::SKILL_LOCK_UP
                             primary << skill.id
                         else
                             done << skill.id
                         end
                     elsif SECONDARY.include?(skill.id)
-                        if skill.base < skill.cap && skill.lock == UO::SKILL_LOCK_UP
+                        if skill.base < skill.cap && skill.lock == GemUO::SKILL_LOCK_UP
                             secondary << skill.id 
                         end
                     end
@@ -102,11 +104,12 @@ module UO::Engines
 
                 if target_hits.value <= (target_hits.max * 2) / 3
                     # disable war mode
-                    @client << UO::Packet::WarMode.new(false)
+                    @client << GemUO::Packet::WarMode.new(false)
 
                     # heal target
-                    if secondary.include?(UO::SKILL_HEALING) ||
-                            (skills[UO::SKILL_HEALING] && skills[UO::SKILL_HEALING].value >= 300)
+                    if secondary.include?(GemUO::SKILL_HEALING) ||
+                            (skills[GemUO::SKILL_HEALING] &&
+                             skills[GemUO::SKILL_HEALING].value >= 300)
                         # got healing skill
                         puts "Healing target #{target}\n"
 
@@ -137,12 +140,12 @@ module UO::Engines
 
                 if player_hits.value <= (player_hits.max * 2) / 3
                     # disable war mode
-                    @client << UO::Packet::WarMode.new(false)
+                    @client << GemUO::Packet::WarMode.new(false)
 
                     # heal myself
-                    if secondary.include?(UO::SKILL_HEALING) ||
-                            (skills[UO::SKILL_HEALING] &&
-                             skills[UO::SKILL_HEALING].value >= 300)
+                    if secondary.include?(GemUO::SKILL_HEALING) ||
+                            (skills[GemUO::SKILL_HEALING] &&
+                             skills[GemUO::SKILL_HEALING].value >= 300)
                         # got healing skill
                         puts "Healing myself\n"
                     else
@@ -154,8 +157,8 @@ module UO::Engines
                 end
 
                 # attack
-                @client << UO::Packet::WarMode.new(true)
-                @client << UO::Packet::Attack.new(@target_serial)
+                @client << GemUO::Packet::WarMode.new(true)
+                @client << GemUO::Packet::Attack.new(@target_serial)
                 
                 # idle for a moment
                 sleep(2)

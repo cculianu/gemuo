@@ -18,8 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
-    class EasySkills < UO::TimerEvent
+module GemUO::Engines
+    class EasySkills < GemUO::TimerEvent
         def initialize(client, skills)
             @client = client
             @skills = skills
@@ -29,7 +29,7 @@ module UO::Engines
             @client.signal_connect(self)
 
             # get skills
-            @client << UO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
+            @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
 
             tick
         end
@@ -43,7 +43,7 @@ module UO::Engines
             @client.world.skills.each_value do
                 |skill|
                 sum += skill.base
-                down += skill.base if skill.lock == UO::SKILL_LOCK_DOWN
+                down += skill.base if skill.lock == GemUO::SKILL_LOCK_DOWN
             end
 
             line = "Skills:"
@@ -61,7 +61,7 @@ module UO::Engines
                 if skill.base == skill.cap
                     puts "Done with skill #{skill.name}\n"
                     @skills.delete(id)
-                elsif skill.lock != UO::SKILL_LOCK_UP
+                elsif skill.lock != GemUO::SKILL_LOCK_UP
                     puts "Skill #{skill.name} is locked\n"
                     stop
                     @client.signal_fire(:on_engine_failed, self)
@@ -87,7 +87,7 @@ module UO::Engines
 
         def skill_delay(skill)
             case skill
-            when UO::SKILL_HIDING, UO::SKILL_PEACEMAKING
+            when GemUO::SKILL_HIDING, GemUO::SKILL_PEACEMAKING
                 return 10
 
             else
@@ -111,19 +111,19 @@ module UO::Engines
             @skills << @current
 
             # use skill
-            puts "skill #{UO::SKILL_NAMES[@current]}\n"
+            puts "skill #{GemUO::SKILL_NAMES[@current]}\n"
 
             case @current
-            when UO::SKILL_MUSICIANSHIP
+            when GemUO::SKILL_MUSICIANSHIP
                 instrument = find_instrument
                 if instrument
-                    @client << UO::Packet::Use.new(instrument.serial)
+                    @client << GemUO::Packet::Use.new(instrument.serial)
                 else
                     puts "No instrument!\n"
                 end
 
             else
-                @client << UO::Packet::TextCommand.new(0x24, @current.to_s)
+                @client << GemUO::Packet::TextCommand.new(0x24, @current.to_s)
             end
 
             restart(skill_delay(@current))
@@ -135,11 +135,11 @@ module UO::Engines
 
             # get backpack
             if @client.world.backpack
-                @client << UO::Packet::Use.new(@client.world.backpack.serial)
+                @client << GemUO::Packet::Use.new(@client.world.backpack.serial)
             else
                 puts "no backpack\n"
                 # open paperdoll
-                @client << UO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
+                @client << GemUO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
             end
         end
 
@@ -177,14 +177,14 @@ module UO::Engines
         def on_target(allow_ground, target_id, flags)
             target = nil
             case @current
-            when UO::SKILL_DETECT_HIDDEN
+            when GemUO::SKILL_DETECT_HIDDEN
                 # point to floor
                 p = @client.world.player.position
-                @client << UO::Packet::TargetResponse.new(1, target_id, flags, 0,
+                @client << GemUO::Packet::TargetResponse.new(1, target_id, flags, 0,
                                                           p.x, p.y, p.z, 0)
                 return
 
-            when UO::SKILL_ANATOMY, UO::SKILL_EVAL_INT, UO::SKILL_PEACEMAKING
+            when GemUO::SKILL_ANATOMY, GemUO::SKILL_EVAL_INT, GemUO::SKILL_PEACEMAKING
                 target = find_mobile
 
             else
@@ -196,8 +196,8 @@ module UO::Engines
                 return
             end
 
-            @client << UO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
-                                                      0xffff, 0xffff, 0xffff, 0)
+            @client << GemUO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
+                                                         0xffff, 0xffff, 0xffff, 0)
         end
     end
 end

@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO
+module GemUO
     class Position
         def initialize(x, y, z = nil, direction = nil)
             @x, @y, @z, @direction = x, y, z, direction & 0x7

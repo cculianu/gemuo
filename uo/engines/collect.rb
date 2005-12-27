@@ -20,8 +20,8 @@
 
 require 'uo/engines/walk'
 
-module UO::Engines
-    class CollectItems < UO::TimerEvent
+module GemUO::Engines
+    class CollectItems < GemUO::TimerEvent
         def initialize(client, item_id)
             super()
             @client = client
@@ -60,7 +60,7 @@ module UO::Engines
                     @client.signal_fire(:on_engine_failed, self)
                     return
                 end
-                @client << UO::Packet::Drop.new(@holding.serial, 0, 0, 0, target.serial)
+                @client << GemUO::Packet::Drop.new(@holding.serial, 0, 0, 0, target.serial)
                 @holding = nil
                 restart(0.5)
                 @client.timer << self
@@ -109,10 +109,10 @@ module UO::Engines
                 amount = item.amount
                 amount = 1 unless amount && amount > 0
                 @holding = item
-                @client << UO::Packet::Lift.new(item.serial, amount)
+                @client << GemUO::Packet::Lift.new(item.serial, amount)
             else
                 puts "walk\n"
-                @walk = UO::Engines::SimpleWalk.new(@client, item.position)
+                @walk = GemUO::Engines::SimpleWalk.new(@client, item.position)
                 @walk.start
             end
         end

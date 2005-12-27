@@ -18,20 +18,20 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
+module GemUO::Engines
     class WalkDump
         def on_ingame
             player = client.world.player
-            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
+            puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_walk_ack
             player = client.world.player
-            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
+            puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_mobile_update(mobile)
             player = client.world.player
             return unless mobile == player
-            puts "UO::Position.new(#{player.position.x}, #{player.position.y})\n"
+            puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
     end
 

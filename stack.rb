@@ -27,10 +27,10 @@ require 'uo/engines/stack'
 
 raise "usage: stack.rb host port username password charname" unless ARGV.length == 5
 
-client = UO::Client.new(ARGV[0], ARGV[1], nil,
+client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                         ARGV[2], ARGV[3], ARGV[4])
 
-engine = UO::Engines::StackItems.new(client, 0x1f4c) # recall scrolls
-UO::Engines::Main.new(client, engine).start
+engine = GemUO::Engines::StackItems.new(client, 0x1f4c) # recall scrolls
+GemUO::Engines::Main.new(client, engine).start
 
 client.run

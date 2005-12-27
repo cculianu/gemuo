@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module UO::Engines
+module GemUO::Engines
     class SimpleWalk
         def initialize(client, destination)
             @destination = destination
@@ -43,25 +43,25 @@ module UO::Engines
         def direction_from(position)
             if @destination.x < position.x
                 if @destination.y < position.y
-                    return UO::NORTH_WEST
+                    return GemUO::NORTH_WEST
                 elsif @destination.y > position.y
-                    return UO::SOUTH_WEST
+                    return GemUO::SOUTH_WEST
                 else
-                    return UO::WEST
+                    return GemUO::WEST
                 end
             elsif @destination.x > position.x
                 if @destination.y < position.y
-                    return UO::NORTH_EAST
+                    return GemUO::NORTH_EAST
                 elsif @destination.y > position.y
-                    return UO::SOUTH_EAST
+                    return GemUO::SOUTH_EAST
                 else
-                    return UO::EAST
+                    return GemUO::EAST
                 end
             else
                 if @destination.y < position.y
-                    return UO::NORTH
+                    return GemUO::NORTH
                 elsif @destination.y > position.y
-                    return UO::SOUTH
+                    return GemUO::SOUTH
                 else
                     return nil
                 end
@@ -80,7 +80,7 @@ module UO::Engines
                 @client.signal_fire(:on_engine_complete, self)
                 return
             end
-            direction |= UO::RUNNING if distance2(position) >= 4
+            direction |= GemUO::RUNNING if distance2(position) >= 4
             @client.walk(direction)
         end
 

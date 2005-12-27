@@ -27,11 +27,11 @@ require 'uo/engines/melee'
 
 raise "syntax: test.rb host port username password charname target_serial" unless ARGV.length == 6
 
-client = UO::Client.new(ARGV[0], ARGV[1], nil,
+client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                         ARGV[2], ARGV[3], ARGV[4])
 
 target_serial = ARGV[5].hex
 
-UO::Engines::Main.new(client, UO::Engines::Melee.new(client, target_serial, false)).start
+GemUO::Engines::Main.new(client, GemUO::Engines::Melee.new(client, target_serial, false)).start
 
 client.run

@@ -27,7 +27,7 @@ require 'uo/timer'
 require 'uo/player'
 require 'uo/world'
 
-module UO
+module GemUO
     NORTH = 0x0
     NORTH_EAST = 0x1
     EAST = 0x2
@@ -57,7 +57,7 @@ module UO
 
             connect(host, port, seed)
 
-            self << UO::Packet::AccountLogin.new(@username, @password)
+            self << GemUO::Packet::AccountLogin.new(@username, @password)
         end
 
         def timer
@@ -120,7 +120,7 @@ module UO
             # write seed
             @io << [seed||42].pack('N')
             @io.flush
-            @reader = UO::Packet::Reader.new(@io)
+            @reader = GemUO::Packet::Reader.new(@io)
             signal_fire(:on_connect)
         end
 
@@ -145,7 +145,7 @@ module UO
         end
 
         def <<(packet)
-            raise "not a packet" unless packet.kind_of?(UO::Packet::Writer)
+            raise "not a packet" unless packet.kind_of?(GemUO::Packet::Writer)
             @io << packet.to_s
         end
 
@@ -464,8 +464,8 @@ module UO
                 puts "relay to #{ip}:#{port}\n"
                 connect(ip, port, auth_id)
                 puts "after connect\n"
-                @reader = UO::Packet::Reader.new(UO::Decompress.new(@io))
-                self << UO::Packet::GameLogin.new(auth_id, @username, @password)
+                @reader = GemUO::Packet::Reader.new(UO::Decompress.new(@io))
+                self << GemUO::Packet::GameLogin.new(auth_id, @username, @password)
 
             when 0xa1 # mobile hits
                 serial = packet.uint
@@ -507,7 +507,7 @@ module UO
                     puts "\t#{name}\n"
                 end
 
-                self << UO::Packet::PlayServer.new(0)
+                self << GemUO::Packet::PlayServer.new(0)
 
             when 0xa9 # char list
                 puts "character list:\n"
@@ -523,7 +523,7 @@ module UO
                 index = @characters.index(@character)
                 raise "character #{@character} not in list" unless index
 
-                self << UO::Packet::PlayCharacter.new(index)
+                self << GemUO::Packet::PlayCharacter.new(index)
 
             when 0xae # speak unicode
                 # xXX
