@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-require 'uo/engines/walk'
+require 'gemuo/engines/walk'
 
 module GemUO::Engines
     class CollectItems < GemUO::TimerEvent

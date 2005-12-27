@@ -1,6 +1,6 @@
 RUBY = /usr/bin/ruby
 
-all: glue/uoglue.so
+all: gemuo/glue.so
 
 clean:
 	rm -f glue/Makefile glue/*.{o,so}
@@ -8,5 +8,8 @@ clean:
 glue/Makefile: glue/extconf.rb
 	cd glue && $(RUBY) extconf.rb
 
-glue/uoglue.so: glue/Makefile
+glue/glue.so: glue/Makefile
 	$(MAKE) -C glue
+
+gemuo/glue.so: glue/glue.so
+	cp -a $< $@

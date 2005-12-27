@@ -1,13 +1,12 @@
-$:.unshift(File.dirname($0) + '/glue')
 $:.unshift(File.dirname($0))
 
-require 'uo/client'
-require 'uo/engines/main'
-require 'uo/engines/collect'
-require 'uo/engines/debug'
-require 'uo/engines/stack'
-require 'uo/engines/skills'
-require 'uo/engines/stats'
+require 'gemuo/client'
+require 'gemuo/engines/main'
+require 'gemuo/engines/collect'
+require 'gemuo/engines/debug'
+require 'gemuo/engines/stack'
+require 'gemuo/engines/skills'
+require 'gemuo/engines/stats'
 
 raise "syntax: test.rb host port username password charname str dex int" unless ARGV.length == 8
 

@@ -164,8 +164,8 @@ static VALUE preader_read(VALUE self) {
 }
 */
 
-void Init_uoclient(void);
-void Init_uoclient(void) {
+void Init_glue(void);
+void Init_glue(void) {
     mUO = rb_define_module("GemUO");
 
     cDecompress = rb_define_class_under(mUO, "Decompress", rb_cObject);

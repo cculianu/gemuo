@@ -18,7 +18,7 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-require 'uo/engines/blocking'
+require 'gemuo/engines/blocking'
 
 module GemUO::Engines
     class Melee < GemUO::Engines::Blocking

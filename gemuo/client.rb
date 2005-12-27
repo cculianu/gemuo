@@ -20,12 +20,12 @@
 
 require 'socket'
 
-require 'uoclient'
-require 'uo/packet'
-require 'uo/entity'
-require 'uo/timer'
-require 'uo/player'
-require 'uo/world'
+require 'gemuo/glue'
+require 'gemuo/packet'
+require 'gemuo/entity'
+require 'gemuo/timer'
+require 'gemuo/player'
+require 'gemuo/world'
 
 module GemUO
     NORTH = 0x0

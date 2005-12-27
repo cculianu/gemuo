@@ -18,12 +18,11 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-$:.unshift(File.dirname($0) + '/glue')
 $:.unshift(File.dirname($0))
 
-require 'uo/client'
-require 'uo/engines/main'
-require 'uo/engines/melee'
+require 'gemuo/client'
+require 'gemuo/engines/main'
+require 'gemuo/engines/melee'
 
 raise "syntax: test.rb host port username password charname target_serial" unless ARGV.length == 6
 
