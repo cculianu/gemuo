@@ -55,6 +55,12 @@ module GemUO::Packet
         def cstring(d)
             @data << d << "\0"
         end
+        def ucstring(d)
+            d.each_byte do |ch|
+                ushort(ch)
+            end
+            ushort(0)
+        end
 
         def to_s
             if @length
@@ -155,6 +161,16 @@ module GemUO::Packet
             uint(0)
         end
     end
+
+   class TalkAscii < Writer
+       def initialize(type, hue, font, text)
+           super(0x03)
+           byte(type)
+           ushort(hue)
+           ushort(font)
+           cstring(text)
+       end
+   end
 
     class Attack < Writer
         def initialize(serial)
@@ -279,6 +295,17 @@ module GemUO::Packet
             super(0xa0)
             ushort(index)
         end
+    end
+
+    class TalkUnicode < Writer
+        def initialize(type, hue, font, language, text)
+            super(0xad)
+            byte(type)
+            ushort(hue)
+            ushort(font)
+            fixstring(language, 4)
+            ucstring(text)
+        end                            
     end
 
     class StatLock < ExtWriter
