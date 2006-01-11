@@ -139,7 +139,7 @@ module GemUO::Engines
             else
                 puts "no backpack\n"
                 # open paperdoll
-                @client << GemUO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
+                @client << GemUO::Packet::Use.new(GemUO::SERIAL_PLAYER | @client.world.player.serial)
             end
         end
 

@@ -124,7 +124,7 @@ module GemUO::Engines
         def backpack
             if @client.world.backpack == nil
                 # open paperdoll
-                @client << GemUO::Packet::Use.new(UO::SERIAL_PLAYER | @client.world.player.serial)
+                @client << GemUO::Packet::Use.new(GemUO::SERIAL_PLAYER | @client.world.player.serial)
                 wait_for_signal(:on_equip)
             end
 
