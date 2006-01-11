@@ -24,7 +24,7 @@ require 'gemuo/client'
 require 'gemuo/engines/main'
 require 'gemuo/engines/melee'
 
-raise "syntax: test.rb host port username password charname target_serial" unless ARGV.length == 6
+raise "syntax: melee.rb host port username password charname target_serial" unless ARGV.length == 6
 
 client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                         ARGV[2], ARGV[3], ARGV[4])
