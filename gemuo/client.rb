@@ -464,7 +464,7 @@ module GemUO
                 puts "relay to #{ip}:#{port}\n"
                 connect(ip, port, auth_id)
                 puts "after connect\n"
-                @reader = GemUO::Packet::Reader.new(UO::Decompress.new(@io))
+                @reader = GemUO::Packet::Reader.new(GemUO::Decompress.new(@io))
                 self << GemUO::Packet::GameLogin.new(auth_id, @username, @password)
 
             when 0xa1 # mobile hits
