@@ -84,12 +84,14 @@ module GemUO
                 yield entity if entity.kind_of?(Item) && entity.parent == parent_serial
             end
         end
-        def items_in(parent)
+        def items_in(parent, item_id = nil)
             parent_serial = parent.serial
             items = []
             @entities.each_value do
                 |entity|
-                items << entity if entity.kind_of?(Item) && entity.parent == parent_serial
+                items << entity if entity.kind_of?(Item) &&
+                    entity.parent == parent_serial &&
+                    (!item_id || entity.item_id == item_id)
             end
             return items
         end
