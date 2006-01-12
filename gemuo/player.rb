@@ -42,23 +42,10 @@ module GemUO
             @cap = cap
         end
 
-        def id
-            @id
-        end
+        attr_reader :id, :value, :base, :lock, :cap
+
         def name
             SKILL_NAMES[@id] || @id
-        end
-        def value
-            @value
-        end
-        def base
-            @base
-        end
-        def lock
-            @lock
-        end
-        def cap
-            @cap
         end
 
         def <=>(other)

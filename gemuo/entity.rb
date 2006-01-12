@@ -24,18 +24,7 @@ module GemUO
             @x, @y, @z, @direction = x, y, z, direction & 0x7
         end
 
-        def x
-            @x
-        end
-        def y
-            @y
-        end
-        def z
-            @z
-        end
-        def direction
-            @direction
-        end
+        attr_reader :x, :y, :z, :direction
 
         def to_s
             s = "#{@x},#{@y}"
@@ -49,12 +38,8 @@ module GemUO
             @value = value
             @max = max
         end
-        def value
-            @value
-        end
-        def max
-            @max
-        end
+
+        attr_reader :value, :max
 
         def to_s
             "#{@value}/#{@max}"
@@ -65,65 +50,22 @@ module GemUO
         def initialize(serial)
             @serial = serial
         end
-        def serial
-            @serial
-        end
-        def name
-            @name
-        end
-        def name=(v)
-            @name = v
-        end
-        def position
-            @position
-        end
-        def position=(v)
-            @position = v
-        end
-        def hue
-            @hue
-        end
-        def hue=(v)
-            @hue = v
-        end
+
+        attr_reader :serial
+        attr_accessor :name, :position, :hue
 
         # for open containers and paperdolls
-        def gump_id
-            @gump_id
-        end
-        def gump_id=(v)
-            @gump_id = v
-        end
+        attr_accessor :gump_id
     end
 
     class Item < Entity
-        def item_id
-            @item_id
-        end
-        def item_id=(v)
-            @item_id = v
-        end
-        def amount
-            @amount
-        end
-        def amount=(v)
-            @amount = v
-        end
+        attr_accessor :item_id, :amount
+
         # serial of the mobile which equips the item
-        def parent
-            @parent
-        end
-        def parent=(v)
-            @parent = v
-            @layer = nil
-        end
+        attr_accessor :parent
+
         # only for equipped items
-        def layer
-            @layer
-        end
-        def layer=(v)
-            @layer = v
-        end
+        attr_accessor :layer
 
         def to_s
             s = '[Item serial=0x%x id=0x%x' % [ @serial, @item_id ]
@@ -139,82 +81,10 @@ module GemUO
     end
 
     class Mobile < Entity
-        def female
-            @female
-        end
-        def female=(v)
-            @female = v
-        end
-        def body
-            @body
-        end
-        def body=(v)
-            @body = v
-        end
-
-        def notoriety
-            @notoriety
-        end
-        def notoriety=(v)
-            @notoriety = v
-        end
-
-        def stats
-            @stats
-        end
-        def stats=(v)
-            raise TypeError.new unless v == nil || v.length == 3
-            @stats = v
-        end
-        def stat_locks
-            @stat_locks
-        end
-        def stat_locks=(v)
-            raise TypeError.new unless v == nil || v.length == 3
-            @stat_locks = v
-        end
-
-        def stat_cap
-            @stat_cap
-        end
-        def stat_cap=(v)
-            @stat_cap = v
-        end
-
-        def hits
-            @hits
-        end
-        def hits=(v)
-            @hits = v
-        end
-
-        def mana
-            @mana
-        end
-        def mana=(v)
-            @mana = v
-        end
-
-        def stamina
-            @stamina
-        end
-        def stamina=(v)
-            @stamina = v
-        end
-
-        def gold
-            @gold
-        end
-        def gold=(v)
-            @gold = v
-        end
-
-        def mass
-            @mass
-        end
-        def mass=(v)
-            @mass = v
-        end
+        attr_accessor :female, :body, :notoriety
+        attr_accessor :stats, :stat_locks, :stat_cap
+        attr_accessor :hits, :mana, :stamina
+        attr_accessor :gold, :mass
 
         def to_s
             s = '[Mobile serial=0x%x body=0x%x' % [ @serial, @body ]
