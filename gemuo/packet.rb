@@ -2,7 +2,7 @@
 #  GemUO
 #  $Id$
 #
-#  (c) 2005 Max Kellermann <max@duempel.org>
+#  (c) 2005-2007 Max Kellermann <max@duempel.org>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -162,15 +162,15 @@ module GemUO::Packet
         end
     end
 
-   class TalkAscii < Writer
-       def initialize(type, hue, font, text)
-           super(0x03)
-           byte(type)
-           ushort(hue)
-           ushort(font)
-           cstring(text)
-       end
-   end
+    class TalkAscii < Writer
+        def initialize(type, hue, font, text)
+            super(0x03)
+            byte(type)
+            ushort(hue)
+            ushort(font)
+            cstring(text)
+        end
+    end
 
     class Attack < Writer
         def initialize(serial)
