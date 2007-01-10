@@ -457,6 +457,11 @@ module GemUO
 
                 signal_fire(:on_mobile_incoming, mobile)
 
+            when 0x82 # account login reject
+                reason = packet.byte
+                puts "account login reject: reason=#{reason}"
+                exit(2)
+
             when 0x8c # relay
                 ip = packet.data(4).unpack('C4').join('.')
                 port = packet.ushort
