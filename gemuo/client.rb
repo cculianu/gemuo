@@ -521,8 +521,10 @@ module GemUO
                 (1..count).each do
                     name = packet.fixstring(30)
                     packet.fixstring(30)
-                    puts "\t#{name}\n"
-                    @characters << name
+                    if name != ''
+                        puts "\t#{name}\n"
+                        @characters << name
+                    end
                 end
 
                 index = @characters.index(@character)
