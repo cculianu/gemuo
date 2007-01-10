@@ -145,6 +145,21 @@ module GemUO::Engines
             return nil
         end
 
+        def items_in_backpack(item_id)
+            items = @client.world.items_in(backpack)
+            if items.empty?
+                @client << GemUO::Packet::Use.new(backpack.serial)
+                sleep(2)
+                items = @client.world.items_in(backpack)
+            end
+            result = []
+            items.each do
+                |item|
+                result << item if item.item_id == item_id
+            end
+            return result
+        end
+
         def use_and_target(item, target)
             @client << GemUO::Packet::Use.new(item.serial)
             allow_ground, target_id, flags = wait_for_signal(:on_target)
