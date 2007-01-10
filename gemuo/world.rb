@@ -27,6 +27,8 @@ module GemUO
             @skills = {}
         end
 
+        attr_reader :walk
+
         def player
             @player
         end
