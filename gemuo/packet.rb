@@ -153,6 +153,61 @@ module GemUO::Packet
         end
     end
 
+    class CreateCharacter < Writer
+        def initialize(name)
+            super(0x00)
+            # unknown
+            uint(0)
+            uint(0)
+            byte(0)
+            # name
+            fixstring(name, 30)
+            # unknown
+            fixstring('', 2)
+            # flags
+            uint(0)
+            # unknown
+            fixstring('', 8)
+            # profession
+            byte(0)
+            # unknown
+            fixstring('', 15)
+            # female
+            byte(0)
+            # str, dex, int
+            byte(45)
+            byte(10)
+            byte(10)
+            # is, vs 1-3
+            byte(0)
+            byte(0)
+            byte(0)
+            byte(0)
+            byte(0)
+            byte(0)
+            # hue
+            ushort(0)
+            # hair val, hue
+            ushort(0)
+            ushort(0)
+            # hair facial val, hue
+            ushort(0)
+            ushort(0)
+            # unknown
+            byte(0)
+            # city index
+            byte(0)
+            # char slot
+            uint(0)
+            # client_ip
+            uint(0)
+            # shirt hue
+            ushort(0)
+            # pants hue
+            ushort(0)
+        end
+    end
+
     class Walk < Writer
         def initialize(direction, seq)
             super(0x02)

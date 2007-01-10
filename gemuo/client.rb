@@ -527,6 +527,11 @@ module GemUO
                     end
                 end
 
+                if @characters.empty?
+                    self << GemUO::Packet::CreateCharacter.new(@character)
+                    return true
+                end
+
                 index = @characters.index(@character)
                 raise "character #{@character} not in list" unless index
 
