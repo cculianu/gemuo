@@ -360,7 +360,7 @@ module GemUO::Packet
             ushort(font)
             fixstring(language, 4)
             ucstring(text)
-        end                            
+        end
     end
 
     class StatLock < ExtWriter
