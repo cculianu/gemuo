@@ -363,6 +363,13 @@ module GemUO::Packet
         end
     end
 
+    class ClientVersion < Writer
+        def initialize(version)
+            super(0xbd)
+            ucstring(version)
+        end
+    end
+
     class StatLock < ExtWriter
         def initialize(stat, lock)
             super(0x001a)

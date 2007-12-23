@@ -543,6 +543,9 @@ module GemUO
             when 0xb9 # supported features
             when 0xbc # season
 
+            when 0xbd # client version
+                self << GemUO::Packet::ClientVersion.new('5.0')
+
             when 0xbf # extended
                 case packet.extended
                 when 0x0008 # map change
