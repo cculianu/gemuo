@@ -483,7 +483,7 @@ module GemUO
 
             when 0xa2 # mobile mana
                 serial = packet.uint
-                mana, mana_max = packet.ushort, packet.ushort
+                mana_max, mana = packet.ushort, packet.ushort
 
                 mobile = @world.make_mobile(serial)
                 mobile.mana = BoundedValue.new(mana, mana_max)
@@ -492,7 +492,7 @@ module GemUO
 
             when 0xa3 # mobile stamina
                 serial = packet.uint
-                stamina, stamina_max = packet.ushort, packet.ushort
+                stamina_max, stamina = packet.ushort, packet.ushort
 
                 mobile = @world.make_mobile(serial)
                 mobile.stamina = BoundedValue.new(stamina, stamina_max)
