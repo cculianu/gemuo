@@ -23,6 +23,8 @@ module GemUO::Engines
         def initialize(client, skills)
             @client = client
             @skills = skills
+
+            @target_number = 0
         end
 
         def start
@@ -123,6 +125,7 @@ module GemUO::Engines
                 end
 
             else
+                @target_number = 0
                 @client << GemUO::Packet::TextCommand.new(0x24, @current.to_s)
             end
 
@@ -174,6 +177,20 @@ module GemUO::Engines
             mobiles[0]
         end
 
+        def find_animal
+            mobiles = []
+            @client.world.each_mobile do
+                |mobile|
+                mobiles << mobile if mobile.notoriety == 3 && mobile.body == 0x1d
+            end
+            return if mobiles.empty?
+            mobiles.sort! do
+                |a,b|
+                distance2(a.position) <=> distance2(b.position)
+            end
+            mobiles[0]
+        end
+
         def on_target(allow_ground, target_id, flags)
             target = nil
             case @current
@@ -187,6 +204,13 @@ module GemUO::Engines
             when GemUO::SKILL_ANATOMY, GemUO::SKILL_EVAL_INT, GemUO::SKILL_PEACEMAKING
                 target = find_mobile
 
+            when GemUO::SKILL_PROVOCATION
+                if @target_number == 1
+                    target = @client.world.player
+                else
+                    target = find_animal
+                end
+
             else
                 target = find_dagger
             end
@@ -198,6 +222,7 @@ module GemUO::Engines
 
             @client << GemUO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
                                                          0xffff, 0xffff, 0xffff, 0)
+            @target_number += 1
         end
     end
 end
