@@ -603,5 +603,10 @@ module GemUO
             self << packet if packet
             return packet != nil
         end
+
+        def cast(spell)
+          self << Packet::TextCommand.new(0x56,spell.to_s)
+        end
+
     end
 end
