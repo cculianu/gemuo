@@ -462,6 +462,8 @@ module GemUO
                 puts "account login reject: reason=#{reason}"
                 exit(2)
 
+            when 0x89 # CorpEquip
+
             when 0x8c # relay
                 ip = packet.data(4).unpack('C4').join('.')
                 port = packet.ushort
@@ -578,6 +580,9 @@ module GemUO
 
             when 0xc0 # UnkHuedEffect
             when 0xc1 # SpeakTable
+            when 0xd6 # AOSTooltip
+            when 0xdc # AOSObjProp
+            when 0xdd # DisplayGumpPacked
 
             else
                 return false
