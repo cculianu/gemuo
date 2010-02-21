@@ -260,6 +260,13 @@ module GemUO::Packet
         end
     end
 
+    class Click < Writer
+        def initialize(serial)
+            super(0x09)
+            uint(serial)
+        end
+    end
+
     class TextCommand < Writer
         def initialize(type, command)
             super(0x12)
