@@ -18,6 +18,8 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/rules'
+
 module GemUO::Engines
     class EasySkills < GemUO::TimerEvent
         def initialize(client, skills)
@@ -87,16 +89,6 @@ module GemUO::Engines
             end
         end
 
-        def skill_delay(skill)
-            case skill
-            when GemUO::SKILL_HIDING, GemUO::SKILL_PEACEMAKING
-                return 10
-
-            else
-                return 1.5
-            end
-        end
-
         def find_instrument
             backpack = @client.world.backpack
             return unless backpack
@@ -129,7 +121,7 @@ module GemUO::Engines
                 @client << GemUO::Packet::TextCommand.new(0x24, @current.to_s)
             end
 
-            restart(skill_delay(@current))
+            restart(GemUO::Rules.skill_delay(@current))
             @client.timer << self
         end
 
