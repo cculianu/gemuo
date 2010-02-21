@@ -542,6 +542,12 @@ module GemUO
             when 0xae # speak unicode
                 # xXX
 
+            when 0xaf # CharDeath
+                killed_serial = packet.uint
+                corpse_serial = packet.uint
+                packet.uint
+                signal_fire(:on_char_death, killed_serial, corpse_serial)
+
             when 0xb9 # supported features
             when 0xbc # season
 
