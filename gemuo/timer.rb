@@ -73,8 +73,8 @@ module GemUO
 
         def tick
             now = Time.new.to_f
-            until @events.empty? || now < @events.last.due
-                @events.pop.tick
+            until @events.empty? || now < @events.first.due
+                @events.shift.tick
             end
         end
     end
