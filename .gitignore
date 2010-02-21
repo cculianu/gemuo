@@ -1,0 +1,6 @@
+*~
+.#*
+.stgit*
+*.so
+*.o
+glue/Makefile
