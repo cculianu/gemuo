@@ -20,6 +20,8 @@
 require 'gemuo/skills'
 
 module GemUO::Rules
+    T2A = true
+
     module_function
 
     def skill_delay(skill)
@@ -28,7 +30,7 @@ module GemUO::Rules
             return 10
 
         else
-            return 1.5
+            return T2A ? 10 : 1.5
         end
     end
 end
