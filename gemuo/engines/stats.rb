@@ -18,7 +18,7 @@
 #
 
 module GemUO::Engines
-    class StatLock < GemUO::TimerEvent
+    class StatLock
         def initialize(client, goal)
             @client = client
             @goal = goal

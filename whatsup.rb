@@ -26,7 +26,7 @@ raise "usage: whatsup.rb host port username password charname" unless ARGV.lengt
 $client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                             ARGV[2], ARGV[3], ARGV[4])
 
-class WhatsUp < GemUO::TimerEvent
+class WhatsUp
     def on_skill_update
         skills = $client.world.skills.values.sort.reverse
         puts "Skills:\n"
