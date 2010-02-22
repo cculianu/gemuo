@@ -17,19 +17,18 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/engines/base'
+
 module GemUO::Engines
-    class StatLock
+    class StatLock < Base
         def initialize(client, goal)
-            @client = client
+            super(client)
             @goal = goal
         end
 
         def start
-            @client.signal_connect(self)
+            super
             check_stats
-        end
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def set_lock(stat, lock)

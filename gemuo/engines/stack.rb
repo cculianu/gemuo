@@ -18,13 +18,14 @@
 #
 
 require 'gemuo/timer'
+require 'gemuo/engines/base'
 
 module GemUO::Engines
-    class StackItems
+    class StackItems < Base
         include GemUO::TimerEvent
 
         def initialize(client, item_id)
-            @client = client
+            super(client)
             @item_id = item_id
         end
 
@@ -36,17 +37,14 @@ module GemUO::Engines
                 @client.signal_fire(:on_engine_failed, self)
                 return
             end
-            @client.signal_connect(self)
+
+            super
 
             # get backpack contents
             @client << GemUO::Packet::Use.new(@backpack.serial)
 
             restart(0.7)
             @client.timer << self
-        end
-
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def tick

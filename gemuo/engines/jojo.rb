@@ -18,13 +18,14 @@
 #
 
 require 'gemuo/timer'
+require 'gemuo/engines/base'
 
 module GemUO::Engines
-    class StatSkillJojo
+    class StatSkillJojo < Base
         include GemUO::TimerEvent
 
         def initialize(client, skill1, skill2)
-            @client = client
+            super(client)
             @skills = [ skill1, skill2 ]
         end
 

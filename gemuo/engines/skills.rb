@@ -19,28 +19,25 @@
 
 require 'gemuo/rules'
 require 'gemuo/timer'
+require 'gemuo/engines/base'
 
 module GemUO::Engines
-    class EasySkills
+    class EasySkills < Base
         include GemUO::TimerEvent
 
         def initialize(client, skills)
-            @client = client
+            super(client)
             @skills = skills
-
             @targets = 0
         end
 
         def start
-            @client.signal_connect(self)
+            super
 
             # get skills
             @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
 
             tick
-        end
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def check_skills

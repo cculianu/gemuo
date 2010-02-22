@@ -17,12 +17,10 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-module GemUO::Engines
-    class Blocking
-        def initialize(client)
-            @client = client
-        end
+require 'gemuo/engines/base'
 
+module GemUO::Engines
+    class Blocking < Base
         # thread functions
 
         def start
@@ -47,13 +45,13 @@ module GemUO::Engines
                 end
             end
 
-            @client.signal_connect(self)
+            super
 
             @thread.wakeup
         end
 
         def stop
-            @client.signal_disconnect(self)
+            super
 
             if @thread
                 @thread.kill

@@ -17,24 +17,26 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/engines/base'
+
 module GemUO::Engines
-    class WalkDump
+    class WalkDump < Base
         def on_ingame
-            player = client.world.player
+            player = @client.world.player
             puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_walk_ack
-            player = client.world.player
+            player = @client.world.player
             puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
         def on_mobile_update(mobile)
-            player = client.world.player
+            player = @client.world.player
             return unless mobile == player
             puts "GemUO::Position.new(#{player.position.x}, #{player.position.y})\n"
         end
     end
 
-    class EntityDump
+    class EntityDump < Base
         def on_world_item(item)
             puts "world_item #{item}\n"
         end
@@ -49,19 +51,7 @@ module GemUO::Engines
         end
     end
 
-    class MessageDump
-        def initialize(client)
-            @client = client
-        end
-
-        def start
-            @client.signal_connect(self)
-        end
-
-        def stop
-            @client.signal_disconnect(self)
-        end
-
+    class MessageDump < Base
         def on_ascii_message(serial, graphic, type, name, text)
             puts "message from '#{name}': #{text}"
         end

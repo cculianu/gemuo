@@ -40,11 +40,10 @@ skills = [ GemUO::SKILL_ANATOMY,
          ]
 engines << GemUO::Engines::EasySkills.new(client, skills)
 engines << GemUO::Engines::StatLock.new(client, stats_goal)
+# engines << StatSkillJojo.new(client, GemUO::SKILL_ARMSLORE, GemUO::SKILL_ITEMID)
+# engines << GemUO::Engines::EntityDump.new(client)
+# engines << GemUO::Engines::WalkDump.new(client)
 
 GemUO::Engines::Main.new(client, engines).start
-
-# client.signal_connect(GemUO::Engines::EntityDump.new)
-# client.signal_connect(GemUO::Engines::WalkDump.new)
-# client.signal_connect(StatSkillJojo.new(client, GemUO::SKILL_ARMSLORE, GemUO::SKILL_ITEMID))
 
 client.run

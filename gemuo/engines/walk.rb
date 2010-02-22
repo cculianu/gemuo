@@ -17,20 +17,18 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/engines/base'
+
 module GemUO::Engines
-    class SimpleWalk
+    class SimpleWalk < Base
         def initialize(client, destination)
+            super(client)
             @destination = destination
-            @client = client
         end
 
         def start
-            @client.signal_connect(self)
+            super
             next_walk
-        end
-
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def distance2(position)

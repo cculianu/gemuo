@@ -19,28 +19,25 @@
 
 require 'gemuo/rules'
 require 'gemuo/timer'
+require 'gemuo/engines/base'
 
 module GemUO::Engines
     class Use
         include GemUO::TimerEvent
 
         def initialize(client, item_id)
-            @client = client
+            super(client)
             @item_id = item_id
         end
 
         def start
-            @client.signal_connect(self)
+            super
 
             if @client.world.backpack
                 @client << GemUO::Packet::Use.new(@client.world.backpack.serial)
             end
 
             tick
-        end
-
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def find_item

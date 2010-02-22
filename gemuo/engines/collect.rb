@@ -18,24 +18,21 @@
 #
 
 require 'gemuo/timer'
+require 'gemuo/engines/base'
 require 'gemuo/engines/walk'
 
 module GemUO::Engines
-    class CollectItems
+    class CollectItems < Base
         include GemUO::TimerEvent
 
         def initialize(client, item_id)
-            @client = client
+            super(client)
             @item_id = item_id
         end
 
         def start
-            @client.signal_connect(self)
+            super
             next_item
-        end
-
-        def stop
-            @client.signal_disconnect(self)
         end
 
         def tick

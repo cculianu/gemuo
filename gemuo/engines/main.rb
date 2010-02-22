@@ -17,10 +17,12 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/engines/base'
+
 module GemUO::Engines
-    class Main
+    class Main < Base
         def initialize(client, engines)
-            @client = client
+            super(client)
             @engines = engines.kind_of?(Array) ? engines : [engines]
             @ingame = false
             @started = false
@@ -31,7 +33,8 @@ module GemUO::Engines
             return if @started
             @started = true
 
-            @client.signal_connect(self)
+            super
+
             @engines.each do
                 |engine|
                 engine.start if @ingame
@@ -45,7 +48,7 @@ module GemUO::Engines
                 engine.stop if @ingame
             end
 
-            @client.signal_disconnect(self)
+            super
         end
 
         def on_ingame

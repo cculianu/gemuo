@@ -20,15 +20,16 @@
 $:.unshift(File.dirname($0))
 
 require 'gemuo/client'
+require 'gemuo/engines/base'
 
 raise "usage: whatsup.rb host port username password charname" unless ARGV.length == 5
 
 $client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                             ARGV[2], ARGV[3], ARGV[4])
 
-class WhatsUp
+class WhatsUp < GemUO::Engines::Base
     def on_skill_update
-        skills = $client.world.skills.values.sort.reverse
+        skills = @client.world.skills.values.sort.reverse
         puts "Skills:\n"
         sum = 0
         skills.each do
@@ -40,22 +41,23 @@ class WhatsUp
         end
         puts ' ' * 22 + sum.to_s + "\n"
         puts "\n"
+        stop
         exit
     end
 
     def start
-        $client.signal_connect(self)
-        $client << GemUO::Packet::MobileQuery.new(0x05, $client.world.player.serial)
+        super
+        @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
     end
 end
 
-class Ingame
+class Ingame < GemUO::Engines::Base
     def on_ingame
-        e = WhatsUp.new
-        e.start
+        stop
+        WhatsUp.new(@client).start
     end
 end
 
-$client.signal_connect(Ingame.new)
+Ingame.new($client).start
 
 $client.run
