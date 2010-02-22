@@ -26,8 +26,7 @@ module GemUO::Engines
             @goal = goal
         end
 
-        def start
-            super
+        def on_ingame
             check_stats
         end
 

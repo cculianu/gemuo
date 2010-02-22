@@ -30,8 +30,7 @@ module GemUO::Engines
             @item_id = item_id
         end
 
-        def start
-            super
+        def on_ingame
             next_item
         end
 

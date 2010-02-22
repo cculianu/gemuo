@@ -26,8 +26,7 @@ module GemUO::Engines
             @destination = destination
         end
 
-        def start
-            super
+        def on_ingame
             next_walk
         end
 

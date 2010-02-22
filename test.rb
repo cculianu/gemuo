@@ -1,7 +1,6 @@
 $:.unshift(File.dirname($0))
 
 require 'gemuo/client'
-require 'gemuo/engines/main'
 require 'gemuo/engines/collect'
 require 'gemuo/engines/debug'
 require 'gemuo/engines/stack'
@@ -26,8 +25,6 @@ cottonfeld1 = GemUO::Position.new(1237, 1618)
 pearfeld1 = GemUO::Position.new(1165, 1594)
 cotton_eingang = GemUO::Position.new(4569, 1480)
 
-engines = []
-
 skills = [ GemUO::SKILL_ANATOMY,
            GemUO::SKILL_ITEM_ID,
            GemUO::SKILL_ARMS_LORE,
@@ -38,12 +35,10 @@ skills = [ GemUO::SKILL_ANATOMY,
            #GemUO::SKILL_PEACEMAKING,
            #GemUO::SKILL_SPIRIT_SPEAK,
          ]
-engines << GemUO::Engines::EasySkills.new(client, skills)
-engines << GemUO::Engines::StatLock.new(client, stats_goal)
-# engines << StatSkillJojo.new(client, GemUO::SKILL_ARMSLORE, GemUO::SKILL_ITEMID)
-# engines << GemUO::Engines::EntityDump.new(client)
-# engines << GemUO::Engines::WalkDump.new(client)
-
-GemUO::Engines::Main.new(client, engines).start
+GemUO::Engines::EasySkills.new(client, skills).start
+GemUO::Engines::StatLock.new(client, stats_goal).start
+# StatSkillJojo.new(client, GemUO::SKILL_ARMSLORE, GemUO::SKILL_ITEMID).start
+# GemUO::Engines::EntityDump.new(client).start
+# GemUO::Engines::WalkDump.new(client).start
 
 client.run

@@ -31,9 +31,7 @@ module GemUO::Engines
             @targets = 0
         end
 
-        def start
-            super
-
+        def on_ingame
             # get skills
             @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
 

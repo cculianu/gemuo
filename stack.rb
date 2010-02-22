@@ -20,7 +20,6 @@
 $:.unshift(File.dirname($0))
 
 require 'gemuo/client'
-require 'gemuo/engines/main'
 require 'gemuo/engines/stack'
 
 raise "usage: stack.rb host port username password charname" unless ARGV.length == 5
@@ -28,7 +27,6 @@ raise "usage: stack.rb host port username password charname" unless ARGV.length 
 client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
                         ARGV[2], ARGV[3], ARGV[4])
 
-engine = GemUO::Engines::StackItems.new(client, 0x1f4c) # recall scrolls
-GemUO::Engines::Main.new(client, engine).start
+GemUO::Engines::StackItems.new(client, 0x1f4c).start # recall scrolls
 
 client.run

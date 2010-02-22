@@ -29,7 +29,7 @@ module GemUO::Engines
             @item_id = item_id
         end
 
-        def start
+        def on_ingame
             @backpack = @client.world.backpack
             unless @backpack
                 puts "no backpack\n"
@@ -37,8 +37,6 @@ module GemUO::Engines
                 @client.signal_fire(:on_engine_failed, self)
                 return
             end
-
-            super
 
             # get backpack contents
             @client << GemUO::Packet::Use.new(@backpack.serial)

@@ -23,8 +23,9 @@ module GemUO::Engines
     class Blocking < Base
         # thread functions
 
-        def start
-            raise "already running" if @thread
+        def on_ingame
+            puts "INGAME"
+            return if @thread
 
             @thread = Thread.new do
                 Thread.stop
@@ -44,8 +45,6 @@ module GemUO::Engines
                     @client.signal_fire(:on_engine_failed, self)
                 end
             end
-
-            super
 
             @thread.wakeup
         end

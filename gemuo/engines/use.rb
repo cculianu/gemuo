@@ -30,9 +30,7 @@ module GemUO::Engines
             @item_id = item_id
         end
 
-        def start
-            super
-
+        def on_ingame
             if @client.world.backpack
                 @client << GemUO::Packet::Use.new(@client.world.backpack.serial)
             end
