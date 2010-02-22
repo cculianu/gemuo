@@ -59,6 +59,16 @@ module GemUO
     end
 
     class Item < Entity
+        INSTRUMENTS = [
+                       0xe9c, # Drums
+                       0xe9d, # Tamourine
+                       0xe9e, # TamourineTassel
+                       0xeb1, # Harp
+                       0xeb2, # LapHarp
+                       0xeb3, # Lute
+                       0x2805, # BambooFlute
+                      ]
+
         attr_accessor :item_id, :amount
 
         # serial of the mobile which equips the item
@@ -84,7 +94,7 @@ module GemUO
         end
 
         def instrument?
-            return @item_id == 0xeb2 # leap harp
+            return INSTRUMENTS.include?(@item_id)
         end
     end
 
