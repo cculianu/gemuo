@@ -78,6 +78,14 @@ module GemUO
             s << ']'
             s
         end
+
+        def dagger?
+            return @item_id == 0xf52
+        end
+
+        def instrument?
+            return @item_id == 0xeb2 # leap harp
+        end
     end
 
     class Mobile < Entity

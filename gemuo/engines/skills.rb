@@ -94,7 +94,7 @@ module GemUO::Engines
             return unless backpack
             @client.world.each_item_in(backpack) do
                 |item|
-                return item if item.item_id == 0xf52
+                return item if item.dagger?
             end
             nil
         end
@@ -111,7 +111,7 @@ module GemUO::Engines
             return unless backpack
             @client.world.each_item_in(backpack) do
                 |item|
-                return item if item.item_id == 0xeb2 # leap harp
+                return item if item.instrument?
             end
             nil
         end

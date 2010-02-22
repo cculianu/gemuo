@@ -80,8 +80,7 @@ module GemUO::Engines
         def find_dagger
             @client.world.each_item do
                 |item|
-                #puts "item=0x%x\n" % item.item_id
-                return item if item.item_id == 0xf52
+                return item if item.dagger?
             end
             nil
         end
