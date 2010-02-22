@@ -217,8 +217,13 @@ module GemUO::Engines
         end
 
         def on_target(allow_ground, target_id, flags)
+            return unless @targets
+
+            skill = @current
+            @current = nil
+
             target = nil
-            case @current
+            case skill
             when GemUO::SKILL_DETECT_HIDDEN
                 # point to floor
                 p = @client.world.player.position
