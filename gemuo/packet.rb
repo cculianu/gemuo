@@ -119,6 +119,16 @@ module GemUO::Packet
         def fixstring(length)
             data(length).sub(/\0+$/, '')
         end
+
+        def nulstring
+            s = ''
+            while true
+                b = byte
+                break if b == 0
+                s << b
+            end
+            return s
+        end
     end
 
     class Reader
