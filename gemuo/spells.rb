@@ -1,6 +1,5 @@
 #
 #  GemUO
-#  $Id$
 #
 #  (c) 2010 Kai Sassmannshausen <kai@sassie.org>
 #
@@ -59,7 +58,7 @@ module GemUO
     SPELL_LIGHTNING = 30
     SPELL_MANA_DRAIN = 31
     SPELL_RECALL = 32
-    
+
     # 5th circle
     SPELL_BLADE_SPIRITS = 33
     SPELL_DISPEL_FIELD = 34
