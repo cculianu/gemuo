@@ -147,8 +147,7 @@ module GemUO::Engines
             count = 1
 
             case skill
-            when GemUO::SKILL_DETECT_HIDDEN
-            when GemUO::SKILL_MUSICIANSHIP
+            when GemUO::SKILL_HIDING, GemUO::SKILL_DETECT_HIDDEN, GemUO::SKILL_MUSICIANSHIP
                 count = 0
 
             when GemUO::SKILL_ANATOMY, GemUO::SKILL_EVAL_INT, GemUO::SKILL_PEACEMAKING
