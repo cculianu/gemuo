@@ -17,33 +17,28 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-$:.unshift(File.dirname($0))
+require 'gemuo/client'
 
-require 'gemuo/simple'
-require 'gemuo/engines/base'
+module GemUO
+    class SimpleClient < Client
+        def initialize
+            raise "usage: #{$0} host port username password charname" unless ARGV.length == 5
+            super(ARGV[0], ARGV[1], nil, ARGV[2], ARGV[3], ARGV[4])
 
-class WhatsUp < GemUO::Engines::Base
-    def on_skill_update
-        skills = @client.world.skills.values.sort.reverse
-        puts "Skills:\n"
-        sum = 0
-        skills.each do
-            |skill|
-            next if skill.base == 0
-            name = GemUO::SKILL_NAMES[skill.id]
-            puts "#{name.rjust(20)}: #{skill.base.to_s.rjust(4)} (#{skill.lock})\n" 
-            sum += skill.base
+            @ingame = false
         end
-        puts ' ' * 22 + sum.to_s + "\n"
-        puts "\n"
-        stop
-    end
 
-    def on_ingame
-        @client << GemUO::Packet::MobileQuery.new(0x05, @client.world.player.serial)
+        def on_ingame
+            @ingame = true
+        end
+
+        def do_ingame
+            signal_connect(self)
+            until @ingame
+                once
+            end
+            signal_disconnect(self)
+            yield
+        end
     end
 end
-
-client = GemUO::SimpleClient.new
-WhatsUp.new(client).start
-client.run

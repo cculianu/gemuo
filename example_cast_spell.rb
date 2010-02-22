@@ -19,21 +19,10 @@
 
 $:.unshift(File.dirname($0))
 
-require 'gemuo/client'
+require 'gemuo/simple'
 require 'gemuo/spells'
 
-raise "usage: whatsup.rb host port username password charname" unless ARGV.length == 5
-
-$client = GemUO::Client.new(ARGV[0], ARGV[1], nil,
-                            ARGV[2], ARGV[3], ARGV[4])
-
-class Ingame
-    def on_ingame
-        $client.cast(GemUO::SPELL_CREATE_FOOD)
-        exit
-    end
+client = GemUO::SimpleClient.new
+client.do_ingame do
+    client.cast(GemUO::SPELL_CREATE_FOOD)
 end
-
-$client.signal_connect(Ingame.new)
-
-$client.run
