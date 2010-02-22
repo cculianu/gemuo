@@ -149,17 +149,17 @@ module GemUO::Engines
         end
 
         def distance2(position)
-            dx = @player.position.x - position.x
-            dy = @player.position.y - position.y
+            player = @client.world.player.position
+            dx = player.x - position.x
+            dy = player.y - position.y
             return dx*dx + dy*dy
         end
 
         def find_mobile
             mobiles = []
-            @player = @client.world.player
             @client.world.each_mobile do
                 |mobile|
-                mobiles << mobile unless mobile == @player || mobile.position == nil
+                mobiles << mobile unless mobile == @client.world.player || mobile.position == nil
             end
             return if mobiles.empty?
             mobiles.sort! do
