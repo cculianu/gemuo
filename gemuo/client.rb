@@ -608,5 +608,10 @@ module GemUO
           self << Packet::TextCommand.new(0x56,spell.to_s)
         end
 
+        def say(text,hue)
+          self << Packet::TalkAscii.new(1,hue,1,text)
+        end
+
+
     end
 end
