@@ -29,6 +29,7 @@ module GemUO
             s = "#{@x},#{@y}"
             s << ",#{@z}" if @z
             s << ";#{@direction}" if @direction
+            s
         end
     end
 
