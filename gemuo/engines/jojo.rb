@@ -17,10 +17,13 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/timer'
+
 module GemUO::Engines
-    class StatSkillJojo < GemUO::TimerEvent
+    class StatSkillJojo
+        include GemUO::TimerEvent
+
         def initialize(client, skill1, skill2)
-            super()
             @client = client
             @skills = [ skill1, skill2 ]
         end

@@ -18,9 +18,12 @@
 #
 
 require 'gemuo/rules'
+require 'gemuo/timer'
 
 module GemUO::Engines
-    class EasySkills < GemUO::TimerEvent
+    class EasySkills
+        include GemUO::TimerEvent
+
         def initialize(client, skills)
             @client = client
             @skills = skills

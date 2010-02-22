@@ -18,11 +18,7 @@
 #
 
 module GemUO
-    class TimerEvent
-        def initialize(seconds = nil)
-            restart(seconds) if seconds
-        end
-
+    module TimerEvent
         def restart(seconds)
             @due = Time.new.to_f + seconds
         end

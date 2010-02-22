@@ -17,12 +17,14 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+require 'gemuo/timer'
 require 'gemuo/engines/walk'
 
 module GemUO::Engines
-    class CollectItems < GemUO::TimerEvent
+    class CollectItems
+        include GemUO::TimerEvent
+
         def initialize(client, item_id)
-            super()
             @client = client
             @item_id = item_id
         end

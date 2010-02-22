@@ -18,9 +18,12 @@
 #
 
 require 'gemuo/rules'
+require 'gemuo/timer'
 
 module GemUO::Engines
-    class Use < GemUO::TimerEvent
+    class Use
+        include GemUO::TimerEvent
+
         def initialize(client, item_id)
             @client = client
             @item_id = item_id
