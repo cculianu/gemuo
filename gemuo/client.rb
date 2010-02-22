@@ -123,23 +123,27 @@ module GemUO
             signal_fire(:on_connect)
         end
 
+        def once
+            packet = @reader.read
+            handled = false
+            @handlers.each do
+                |handler|
+                handled ||= handler.call(packet)
+            end
+            unless handled
+                if packet.command == 0xbf
+                    puts "Received unknown 0xbf #{'0x%04x' % packet.extended}\n"
+                else
+                    puts "Received unknown #{'0x%02x' % packet.command}\n"
+                end
+            end
+
+            @timer.tick
+        end
+
         def run
             loop do
-                packet = @reader.read
-                handled = false
-                @handlers.each do
-                    |handler|
-                    handled ||= handler.call(packet)
-                end
-                unless handled
-                    if packet.command == 0xbf
-                        puts "Received unknown 0xbf #{'0x%04x' % packet.extended}\n" 
-                    else
-                        puts "Received unknown #{'0x%02x' % packet.command}\n"
-                    end
-                end
-
-                @timer.tick
+                once
             end
         end
 
