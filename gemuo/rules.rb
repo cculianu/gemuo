@@ -29,6 +29,9 @@ module GemUO::Rules
         when GemUO::SKILL_HIDING, GemUO::SKILL_PEACEMAKING
             return 11
 
+        when GemUO::SKILL_PROVOCATION
+            return 13
+
         else
             return T2A ? 11 : 1.5
         end
