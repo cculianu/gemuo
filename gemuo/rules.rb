@@ -27,10 +27,10 @@ module GemUO::Rules
     def skill_delay(skill)
         case skill
         when GemUO::SKILL_HIDING, GemUO::SKILL_PEACEMAKING
-            return 10
+            return 11
 
         else
-            return T2A ? 10 : 1.5
+            return T2A ? 11 : 1.5
         end
     end
 end
