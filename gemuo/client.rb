@@ -1,8 +1,7 @@
 #
 #  GemUO
-#  $Id$
 #
-#  (c) 2005-2007 Max Kellermann <max@duempel.org>
+#  (c) 2005-2010 Max Kellermann <max@duempel.org>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -247,8 +246,17 @@ module GemUO
                 player.body = body
                 player.position = Position.new(x, y, z, direction)
 
-            when 0x1c # speak ascii
-                # XXX
+            when 0x1c # ascii message
+                serial = packet.uint
+                graphic = packet.ushort
+                type = packet.byte
+                hue = packet.ushort
+                font = packet.ushort
+                name = packet.fixstring(30)
+                text = packet.nulstring
+
+                signal_fire(:on_ascii_message, serial, graphic, type,
+                            name, text)
 
             when 0x1d # delete
                 serial = packet.uint

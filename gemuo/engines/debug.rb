@@ -1,8 +1,7 @@
 #
 #  GemUO
-#  $Id$
 #
-#  (c) 2005 Max Kellermann <max@duempel.org>
+#  (c) 2005-2010 Max Kellermann <max@duempel.org>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -47,6 +46,24 @@ module GemUO::Engines
         end
         def on_container_update(item)
             puts "container_update #{item}\n"
+        end
+    end
+
+    class MessageDump
+        def initialize(client)
+            @client = client
+        end
+
+        def start
+            @client.signal_connect(self)
+        end
+
+        def stop
+            @client.signal_disconnect(self)
+        end
+
+        def on_ascii_message(serial, graphic, type, name, text)
+            puts "message from '#{name}': #{text}"
         end
     end
 end
