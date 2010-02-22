@@ -26,7 +26,7 @@ module GemUO::Engines
             @client = client
             @skills = skills
 
-            @target_number = 0
+            @targets = 0
         end
 
         def start
@@ -89,6 +89,23 @@ module GemUO::Engines
             end
         end
 
+        def find_dagger
+            backpack = @client.world.backpack
+            return unless backpack
+            @client.world.each_item_in(backpack) do
+                |item|
+                return item if item.item_id == 0xf52
+            end
+            nil
+        end
+
+        def distance2(position)
+            player = @client.world.player.position
+            dx = player.x - position.x
+            dy = player.y - position.y
+            return dx*dx + dy*dy
+        end
+
         def find_instrument
             backpack = @client.world.backpack
             return unless backpack
@@ -99,6 +116,62 @@ module GemUO::Engines
             nil
         end
 
+        def find_mobiles
+            mobiles = []
+            @client.world.each_mobile do
+                |mobile|
+                mobiles << mobile unless mobile == @client.world.player || mobile.position == nil
+            end
+            mobiles.sort! do
+                |a,b|
+                distance2(a.position) <=> distance2(b.position)
+            end
+            return mobiles
+        end
+
+        def find_animals
+            mobiles = []
+            @client.world.each_mobile do
+                |mobile|
+                mobiles << mobile if mobile.notoriety == 3 && mobile.body == 0x1d
+            end
+            mobiles.sort! do
+                |a,b|
+                distance2(a.position) <=> distance2(b.position)
+            end
+            return mobiles
+        end
+
+        def find_skill_targets(skill)
+            targets = []
+            count = 1
+
+            case skill
+            when GemUO::SKILL_DETECT_HIDDEN
+            when GemUO::SKILL_MUSICIANSHIP
+                count = 0
+
+            when GemUO::SKILL_ANATOMY, GemUO::SKILL_EVAL_INT, GemUO::SKILL_PEACEMAKING
+                targets = find_mobiles
+
+            when GemUO::SKILL_PROVOCATION
+                targets = find_animals
+                count = 2
+
+                if targets.length == 1 && @client.world.player
+                    # target self if less than 2 animals found
+                    targets << @client.world.player
+                end
+
+            else
+                dagger = find_dagger
+                targets << dagger if dagger
+            end
+
+            return nil if targets.length < count
+            return targets.slice(0, count)
+        end
+
         def tick
             # roll skills
             @current = @skills.shift
@@ -106,6 +179,14 @@ module GemUO::Engines
 
             # use skill
             puts "skill #{GemUO::SKILL_NAMES[@current]}\n"
+
+            @targets = find_skill_targets(@current)
+            unless @targets
+                puts "Error: no target found for #{@current}\n"
+                restart(1)
+                @client.timer << self
+                return
+            end
 
             case @current
             when GemUO::SKILL_MUSICIANSHIP
@@ -117,7 +198,6 @@ module GemUO::Engines
                 end
 
             else
-                @target_number = 0
                 @client << GemUO::Packet::TextCommand.new(0x24, @current.to_s)
             end
 
@@ -138,51 +218,6 @@ module GemUO::Engines
             end
         end
 
-        def find_dagger
-            backpack = @client.world.backpack
-            return unless backpack
-            @client.world.each_item_in(backpack) do
-                |item|
-                return item if item.item_id == 0xf52
-            end
-            nil
-        end
-
-        def distance2(position)
-            player = @client.world.player.position
-            dx = player.x - position.x
-            dy = player.y - position.y
-            return dx*dx + dy*dy
-        end
-
-        def find_mobile
-            mobiles = []
-            @client.world.each_mobile do
-                |mobile|
-                mobiles << mobile unless mobile == @client.world.player || mobile.position == nil
-            end
-            return if mobiles.empty?
-            mobiles.sort! do
-                |a,b|
-                distance2(a.position) <=> distance2(b.position)
-            end
-            mobiles[0]
-        end
-
-        def find_animal
-            mobiles = []
-            @client.world.each_mobile do
-                |mobile|
-                mobiles << mobile if mobile.notoriety == 3 && mobile.body == 0x1d
-            end
-            return if mobiles.empty?
-            mobiles.sort! do
-                |a,b|
-                distance2(a.position) <=> distance2(b.position)
-            end
-            mobiles[0]
-        end
-
         def on_target(allow_ground, target_id, flags)
             target = nil
             case @current
@@ -193,28 +228,13 @@ module GemUO::Engines
                                                           p.x, p.y, p.z, 0)
                 return
 
-            when GemUO::SKILL_ANATOMY, GemUO::SKILL_EVAL_INT, GemUO::SKILL_PEACEMAKING
-                target = find_mobile
-
-            when GemUO::SKILL_PROVOCATION
-                if @target_number == 1
-                    target = @client.world.player
-                else
-                    target = find_animal
-                end
-
             else
-                target = find_dagger
-            end
-
-            unless target
-                puts "Error: no target found for #{@current}\n"
-                return
+                target = @targets.shift
+                return unless target
             end
 
             @client << GemUO::Packet::TargetResponse.new(0, target_id, flags, target.serial,
                                                          0xffff, 0xffff, 0xffff, 0)
-            @target_number += 1
         end
     end
 end
