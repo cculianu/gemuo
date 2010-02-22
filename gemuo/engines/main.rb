@@ -63,7 +63,7 @@ module GemUO::Engines
             if @engines.include?(engine)
                 @engines.delete(engine)
                 puts "engine #{engine} complete\n"
-                exit @status if @engines.empty?
+                stop if @engines.empty?
             end
         end
 
@@ -72,7 +72,7 @@ module GemUO::Engines
                 @engines.delete(engine)
                 @status = 1
                 puts "engine #{engine} failed\n"
-                exit @status if @engines.empty?
+                stop if @engines.empty?
             end
         end
     end

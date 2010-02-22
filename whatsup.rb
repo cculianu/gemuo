@@ -42,7 +42,6 @@ class WhatsUp < GemUO::Engines::Base
         puts ' ' * 22 + sum.to_s + "\n"
         puts "\n"
         stop
-        exit
     end
 
     def start

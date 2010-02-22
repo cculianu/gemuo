@@ -142,7 +142,7 @@ module GemUO
         end
 
         def run
-            loop do
+            until @signals.empty?
                 once
             end
         end
