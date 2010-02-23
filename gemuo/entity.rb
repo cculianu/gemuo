@@ -100,7 +100,12 @@ module GemUO
 
     class Mobile < Entity
         ANIMALS = [
+                   0x6, # Bird
+                   0x17, # DireWolf
+                   0x19, 0x1a, 0x1b, # GreyWolf,
                    0x1d, # Gorilla
+                   0x22, 0x23, 0x24, 0x25, # WhiteWolf
+                   0xe1, # TimerWolf
                   ]
 
         attr_accessor :female, :body, :notoriety
