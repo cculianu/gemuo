@@ -1,6 +1,8 @@
 *~
 .#*
 .stgit*
+*.pyc
+*.pyo
 *.so
 *.o
 glue/Makefile
