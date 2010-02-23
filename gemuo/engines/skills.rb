@@ -86,6 +86,12 @@ module GemUO::Engines
             end
         end
 
+        def next_skill
+            skill = @skills.shift
+            @skills << skill
+            return skill
+        end
+
         def find_dagger
             backpack = @client.world.backpack
             return unless backpack
@@ -170,8 +176,7 @@ module GemUO::Engines
 
         def tick
             # roll skills
-            @current = @skills.shift
-            @skills << @current
+            @current = next_skill
 
             # use skill
             puts "skill #{GemUO::SKILL_NAMES[@current]}\n"
