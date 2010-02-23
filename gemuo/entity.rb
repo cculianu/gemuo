@@ -99,6 +99,10 @@ module GemUO
     end
 
     class Mobile < Entity
+        ANIMALS = [
+                   0x1d, # Gorilla
+                  ]
+
         attr_accessor :female, :body, :notoriety
         attr_accessor :stats, :stat_locks, :stat_cap
         attr_accessor :hits, :mana, :stamina
@@ -110,6 +114,10 @@ module GemUO
             s << " position=#{@position}" if @position
             s << ']'
             s
+        end
+
+        def animal?
+            return ANIMALS.include?(@body)
         end
     end
 end
