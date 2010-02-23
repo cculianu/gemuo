@@ -25,10 +25,14 @@ module GemUO::Engines
 
         def start
             @client.signal_connect(self)
+            on_ingame if @client.ingame
         end
 
         def stop
             @client.signal_disconnect(self)
+        end
+
+        def on_ingame
         end
     end
 end

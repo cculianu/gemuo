@@ -38,6 +38,8 @@ module GemUO
     RUNNING = 0x80
 
     class Client
+        attr_reader :ingame
+
         def initialize(host, port, seed, username, password, character)
             @handlers = []
             @signals = []
@@ -46,6 +48,8 @@ module GemUO
             @username = username
             @password = password
             @character = character
+
+            @ingame = false
 
             @world = World.new
 
@@ -402,7 +406,10 @@ module GemUO
             when 0x54 # sound
 
             when 0x55 # redraw all
-                signal_fire(:on_ingame)
+                unless @ingame
+                    @ingame = true
+                    signal_fire(:on_ingame)
+                end
 
             when 0x5b # time
             when 0x65 # wheather

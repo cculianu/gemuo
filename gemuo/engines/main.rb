@@ -24,7 +24,6 @@ module GemUO::Engines
         def initialize(client, engines)
             super(client)
             @engines = engines.kind_of?(Array) ? engines : [engines]
-            @ingame = false
             @started = false
             @status = 0
         end
@@ -37,7 +36,7 @@ module GemUO::Engines
 
             @engines.each do
                 |engine|
-                engine.start if @ingame
+                engine.start if @client.ingame
             end
         end
         def stop
@@ -45,14 +44,13 @@ module GemUO::Engines
 
             @engines.reverse_each do
                 |engine|
-                engine.stop if @ingame
+                engine.stop if @client.ingame
             end
 
             super
         end
 
         def on_ingame
-            @ingame = true
             @engines.each do
                 |engine|
                 engine.start
