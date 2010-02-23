@@ -130,7 +130,7 @@ module GemUO::Engines
             mobiles = []
             @client.world.each_mobile do
                 |mobile|
-                mobiles << mobile if mobile.notoriety == 3 && mobile.animal?
+                mobiles << mobile if mobile.notoriety == 3 && mobile.animal? && distance2(mobile.position) <= 49
             end
             mobiles.sort! do
                 |a,b|
