@@ -25,9 +25,12 @@ module GemUO::Engines
     class EasySkills < Base
         include GemUO::TimerEvent
 
+        attr_accessor :round_robin
+
         def initialize(client, skills)
             super(client)
             @skills = skills
+            @round_robin = true
             @targets = 0
         end
 
@@ -87,9 +90,13 @@ module GemUO::Engines
         end
 
         def next_skill
-            skill = @skills.shift
-            @skills << skill
-            return skill
+            if round_robin
+                skill = @skills.shift
+                @skills << skill
+                return skill
+            else
+                return @skills[0]
+            end
         end
 
         def find_dagger
