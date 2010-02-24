@@ -36,6 +36,13 @@ class WhatsUp < GemUO::Engines::Base
         end
         puts ' ' * 22 + sum.to_s + "\n"
         puts "\n"
+        player = @client.world.player
+        if player.alive?
+            puts player.name + " is alive."
+        else
+            puts player.name + " is dead."
+        end
+        puts "\n"
         stop
     end
 

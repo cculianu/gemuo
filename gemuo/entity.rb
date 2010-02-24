@@ -113,6 +113,10 @@ module GemUO
         attr_accessor :hits, :mana, :stamina
         attr_accessor :gold, :mass
 
+        def alive?
+          return true if body == 400 || body == 401
+        end
+
         def to_s
             s = '[Mobile serial=0x%x body=0x%x' % [ @serial, @body ]
             s << " name='#{@name}'" if @name
