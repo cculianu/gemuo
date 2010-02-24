@@ -31,11 +31,19 @@ module GemUO
     ITEM_BAMBOO_FLUTE = 0x2805
     
     ITEM_DAGGER = 0xf52
+    ITEM_BUTCHER_KNIFE1 = 0x13F6
+    ITEM_BUTCHER_KNIFE2 = 0x13F7
+
+    ITEM_WAND1 = 0xDF2
+    ITEM_WAND2 = 0xDF3
+    ITEM_WAND3 = 0xDF4
+    ITEM_WAND4 = 0xDF5
 
     ITEM_RECALL_SCROLL = 0x1f4c
     ITEM_MARK_SCROLL = 0x1f59
 
-    ITEMS_INSTRUMENTS = [
+    ITEMS_INSTRUMENTS =
+    [
         ITEM_DRUMS,
         ITEM_TAMOURINE,
 	    ITEM_TAMOURINE_TASSEL,
@@ -45,14 +53,36 @@ module GemUO
 	    ITEM_BAMBOO_FLUTE
     ]
 
-    ITEMS_SCOLLS = [
+    ITEMS_SCOLLS = 
+    [
         ITEM_RECALL_SCROLL,
         ITEM_MARK_SCROLL
     ]
 
-    ITEMS_WEAPONS = [
-        ITEM_DAGGER
+    ITEMS_WEAPONS_FENCING =
+    [
+        ITEM_DAGGER 
+    ]
+
+    ITEMS_WEAPONS_SWORD =
+    [
+        ITEM_BUTCHER_KNIFE1,
+        ITEM_BUTCHER_KNIFE2
+    ]
+
+    ITEM_WEAPONS_MACE =
+    [
+        ITEM_WAND1,
+        ITEM_WAND2,
+        ITEM_WAND3,
+        ITEM_WAND4
+    ]
+
+    ITEMS_WEAPONS = 
+    [
+        ITEMS_WEAPONS_FENCING,
+        ITEMS_WEAPONS_SWORD,
+        ITEMS_WEAPONS_MACE
     ]
      
 end
-
