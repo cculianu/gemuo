@@ -172,6 +172,8 @@ module GemUO::Engines
                     targets << @client.world.player
                 end
 
+            when GemUO::SKILL_ANIMAL_LORE
+                targets = find_animals
             else
                 dagger = find_dagger
                 targets << dagger if dagger

@@ -17,6 +17,10 @@
 #   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+$:.unshift(File.dirname($0))
+
+require 'gemuo/creatures'
+
 module GemUO
     class Position
         def initialize(x, y, z = nil, direction = nil)
@@ -99,15 +103,6 @@ module GemUO
     end
 
     class Mobile < Entity
-        ANIMALS = [
-                   0x6, # Bird
-                   0x17, # DireWolf
-                   0x19, 0x1a, 0x1b, # GreyWolf,
-                   0x1d, # Gorilla
-                   0x22, 0x23, 0x24, 0x25, # WhiteWolf
-                   0xe1, # TimerWolf
-                  ]
-
         attr_accessor :female, :body, :notoriety
         attr_accessor :stats, :stat_locks, :stat_cap
         attr_accessor :hits, :mana, :stamina
