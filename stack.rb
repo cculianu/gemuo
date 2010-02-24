@@ -21,9 +21,10 @@ $:.unshift(File.dirname($0))
 
 require 'gemuo/simple'
 require 'gemuo/engines/stack'
+require 'gemuo/items'
 
 client = GemUO::SimpleClient.new
 
-GemUO::Engines::StackItems.new(client, 0x1f4c).start # recall scrolls
+GemUO::Engines::StackItems.new(client, GemUO::ITEM_RECALL_SCROLL).start
 
 client.run
