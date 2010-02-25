@@ -17,24 +17,29 @@ class Engine:
     def __init__(self, client):
         self._client = client
         self._client.add_engine(self)
-        self.__finished = False
+        self.__result = None
         #elf.active = True
 
     def finished(self):
-        return self.__finished
+        return self.__result is not None
+
+    def result(self):
+        assert self.__result == True or self.__result == False
+        return self.__result
 
     def _signal(self, name, *args, **keywords):
         self._client.signal(name, *args, **keywords)
 
-    def _stop(self):
-        assert not self.__finished
-        self.__finished = True
+    def __stop(self):
+        assert self.__result is None
         self._client.remove_engine(self)
 
     def _success(self, *args, **keywords):
-        self._stop()
+        self.__stop()
+        self.__result = True
         self._signal('on_engine_success', self, *args, **keywords)
 
     def _failure(self, *args, **keywords):
-        self._stop()
+        self.__stop()
+        self.__result = False
         self._signal('on_engine_failure', self, *args, **keywords)
