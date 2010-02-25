@@ -20,78 +20,32 @@ from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
 
-class SkillTraining(Engine, TimerEvent):
-    """Train one or more skills."""
-
-    def __init__(self, client, skills, round_robin=False):
+class UseSkill(Engine):
+    def __init__(self, client, skill):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
+        self._skill = skill
         self._world = client.world
-        self._skills = list(skills)
         self._target_mutex = client.target_mutex
-        self._current = None
-        self._targets = None
-        self.round_robin = round_robin
+        self._target_locked = False
+        self._targets = self._find_skill_targets(skill)
 
-        # get current skill values
-        client.send(p.MobileQuery(0x05, self._world.player.serial))
-
-        # refresh backpack contents, in case we need a target
-        if self._world.backpack() is not None:
-            client.send(p.Use(self._world.backpack().serial))
-
-        if self._world.player.skills:
-            self._check_skills(self._world.player.skills)
-
-        self.tick()
-
-    def _check_skills(self, skills):
-        total = 0
-        down = 0
-        for skill in skills.itervalues():
-            total += skill.base
-            if skill.lock == SKILL_LOCK_DOWN:
-                down += skill.base
-
-        line = "Skills:"
-        for skill_id in self._skills:
-            name = SKILL_NAMES[skill_id]
-
-            if skill_id not in skills:
-                print "No value for skill", skill_id
-                self._failure()
-                return
-
-            skill = skills[skill_id]
-
-            line += "  %s=%d" % (name, skill.base)
-            if skill.base >= skill.cap:
-                print "Done with skill", name
-                self._skills.remove(skill_id)
-            elif skill.lock != SKILL_LOCK_UP:
-                print "Skill is locked:", name
-                self._failure()
-                return
-
-        line += "  (total=%d, down=%d)" % (total, down)
-        print line
-
-        if len(self._skills) == 0:
-            self._success()
+        if self._targets is None:
+            print "Error: no target found for", SKILL_NAMES[skill]
+            self._failure()
             return
 
-        if total >= 7000 and down == 0:
-            print "No skills down"
-            self._failure()
+        if len(self._targets) == 0:
+            # the skill doesn't need a target
+            self._use_skill(skill)
+        else:
+            # wait for target cursor reservation before invoking the
+            # skill
+            self._target_mutex.get_target(self._target_ok, self._target_abort)
 
-    def _next_skill(self):
-       if len(self._skills) == 0: return None
-
-       skill = self._skills[0]
-       if self.round_robin:
-           # rotate the skill list
-           self._skills = self._skills[1:] + [skill]
-       return skill
+    def abort(self):
+        if self._target_locked:
+            self._target_mutex.put_target()
+        self._failure()
 
     def _distance2(self, position):
         player = self._world.player.position
@@ -159,41 +113,20 @@ class SkillTraining(Engine, TimerEvent):
 
         return targets[:count]
 
-    def _do_skill(self):
-        """Called by the TargetMutex class when this engine receives
-        the target cursor reservation."""
-
-        self._current = skill = self._next_skill()
-        if skill is None:
-            # this only happens when a target request was still
-            # pending after all skills have been finished
-            self._target_mutex.put_target()
-            return
+    def _use_skill(self, skill):
+        assert self._target_locked == bool(self._targets)
 
         print "train skill", SKILL_NAMES[skill]
-
-        self._targets = self._find_skill_targets(skill)
-        if self._targets is None:
-            print "Error: no target found for", SKILL_NAMES[skill]
-            self._current = None
-            self._target_mutex.put_target()
-            self._schedule(1)
-            return
-
-        if len(self._targets) == 0:
-            # the skill doesn't need a target; return the target
-            # cursor reservation
-            self._current = None
-            self._target_mutex.put_target()
 
         if skill == SKILL_MUSICIANSHIP:
             instrument = self._find_instrument()
             if instrument is not None:
                 self._client.send(p.Use(instrument.serial))
+                self._success()
             else:
                 print "No instrument!"
                 self._client.send(p.Use(SERIAL_PLAYER | self._world.player.serial))
-                self._schedule(1)
+                self._failure()
                 return
 
         elif skill == SKILL_HERDING:
@@ -203,45 +136,45 @@ class SkillTraining(Engine, TimerEvent):
             else:
                 print "No crook!"
                 self._client.send(p.Use(SERIAL_PLAYER | self._world.player.serial))
-                self._schedule(1)
+                self._target_mutex.put_target()
+                self._failure()
                 return
 
         else:
             self._client.send(p.UseSkill(skill))
 
-        self._schedule(uo.rules.skill_delay(skill))
+            if len(self._targets) == 0:
+                self._success()
+
+    def _target_ok(self):
+        """Called by the TargetMutex class when this engine receives
+        the target cursor reservation."""
+        self._target_locked = True
+        self._use_skill(self._skill)
 
     def _target_abort(self):
         """Called by the TargetMutex class when this engine times
         out."""
-        self._current = None
-        self._targets = None
-        self._schedule(1)
-
-    def tick(self):
-        self._target_mutex.get_target(self._do_skill, self._target_abort)
-
-    def on_skill_update(self, skills):
-        self._check_skills(skills)
+        self._failure()
 
     def _on_target_request(self, allow_ground, target_id, flags):
-        if self._current is None: return # not for us?
+        if not self._target_locked: return
 
-        if self._current == SKILL_DETECT_HIDDEN:
+        if self._skill == SKILL_DETECT_HIDDEN:
             # point to floor
-            self._current = None
-            self._target_mutex.put_target()
 
             position = self._world.player.position
-            if position is None: return
+            if position is None:
+                self._target_mutex.put_target()
+                self._failure()
+                return
 
             self._client.send(p.TargetResponse(1, target_id, flags, 0,
                                                position.x, position.y, position.z, 0))
+            self._target_mutex.put_target()
+            self._success()
         else:
-            if not self._targets:
-                self._current = None
-                self._target_mutex.put_target()
-                return
+            assert self._targets
 
             # get the next target from the list and send TargetResponse
             target, self._targets = self._targets[0], self._targets[1:]
@@ -251,10 +184,123 @@ class SkillTraining(Engine, TimerEvent):
             if not self._targets:
                 # all targets have been used: return the target cursor
                 # reservation
-                self._current = None
                 self._target_mutex.put_target()
+                self._success()
 
     def on_packet(self, packet):
         if isinstance(packet, p.TargetRequest):
             self._on_target_request(packet.allow_ground, packet.target_id,
                                     packet.flags)
+
+class SkillTraining(Engine, TimerEvent):
+    """Train one or more skills."""
+
+    def __init__(self, client, skills, round_robin=False):
+        Engine.__init__(self, client)
+        TimerEvent.__init__(self, client)
+        self._world = client.world
+        self._skills = list(skills)
+        self._use = None
+        self.round_robin = round_robin
+
+        # get current skill values
+        client.send(p.MobileQuery(0x05, self._world.player.serial))
+
+        # refresh backpack contents, in case we need a target
+        if self._world.backpack() is not None:
+            client.send(p.Use(self._world.backpack().serial))
+
+        if self._world.player.skills:
+            self._check_skills(self._world.player.skills)
+
+        self.tick()
+
+    def abort(self):
+        if self._use is not None:
+            self._use.abort()
+        self._unschedule()
+        self._failure()
+
+    def _check_skills(self, skills):
+        total = 0
+        down = 0
+        for skill in skills.itervalues():
+            total += skill.base
+            if skill.lock == SKILL_LOCK_DOWN:
+                down += skill.base
+
+        line = "Skills:"
+        for skill_id in self._skills:
+            name = SKILL_NAMES[skill_id]
+
+            if skill_id not in skills:
+                print "No value for skill", skill_id
+                self._failure()
+                return
+
+            skill = skills[skill_id]
+
+            line += "  %s=%d" % (name, skill.base)
+            if skill.base >= skill.cap:
+                print "Done with skill", name
+                self._skills.remove(skill_id)
+            elif skill.lock != SKILL_LOCK_UP:
+                print "Skill is locked:", name
+                self._failure()
+                return
+
+        line += "  (total=%d, down=%d)" % (total, down)
+        print line
+
+        if len(self._skills) == 0:
+            self._success()
+            return
+
+        if total >= 7000 and down == 0:
+            print "No skills down"
+            self._failure()
+
+    def _next_skill(self):
+       if len(self._skills) == 0: return None
+
+       skill = self._skills[0]
+       if self.round_robin:
+           # rotate the skill list
+           self._skills = self._skills[1:] + [skill]
+       return skill
+
+    def tick(self):
+        assert self._use is None
+
+        self._current = skill = self._next_skill()
+        assert skill is not None
+
+        # create a UseSkill sub-engine and wait for its completion
+        self._use = UseSkill(self._client, skill)
+
+        if self._use.finished():
+            # if finished within the constructor, then our
+            # on_engine_{success,failure} method won't catch it;
+            # special handling below:
+            result = self._use.result()
+            self._use = None
+            if result:
+                self._schedule(uo.rules.skill_delay(self._current))
+            else:
+                self._schedule(1)
+
+    def on_skill_update(self, skills):
+        self._check_skills(skills)
+
+    def on_engine_success(self, engine, *args, **keywords):
+        if self._use is not None and engine == self._use:
+            # the UseSkill engine has finished: schedule the next
+            # skill
+            self._use = None
+            self._schedule(uo.rules.skill_delay(self._current))
+
+    def on_engine_failure(self, engine, *args, **keywords):
+        if self._use is not None and engine == self._use:
+            # the UseSkill engine has failed: retry soon
+            self._use = None
+            self._schedule(1)
