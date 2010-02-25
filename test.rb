@@ -4,8 +4,6 @@ require 'gemuo/client'
 require 'gemuo/engines/collect'
 require 'gemuo/engines/debug'
 require 'gemuo/engines/stack'
-require 'gemuo/engines/skills'
-require 'gemuo/engines/stats'
 
 raise "syntax: test.rb host port username password charname str dex int" unless ARGV.length == 8
 
@@ -25,18 +23,6 @@ cottonfeld1 = GemUO::Position.new(1237, 1618)
 pearfeld1 = GemUO::Position.new(1165, 1594)
 cotton_eingang = GemUO::Position.new(4569, 1480)
 
-skills = [ GemUO::SKILL_ANATOMY,
-           GemUO::SKILL_ITEM_ID,
-           GemUO::SKILL_ARMS_LORE,
-           #GemUO::SKILL_DETECT_HIDDEN,
-           GemUO::SKILL_EVAL_INT,
-           GemUO::SKILL_HIDING,
-           #GemUO::SKILL_MUSICIANSHIP,
-           #GemUO::SKILL_PEACEMAKING,
-           #GemUO::SKILL_SPIRIT_SPEAK,
-         ]
-GemUO::Engines::EasySkills.new(client, skills).start
-GemUO::Engines::StatLock.new(client, stats_goal).start
 # StatSkillJojo.new(client, GemUO::SKILL_ARMSLORE, GemUO::SKILL_ITEMID).start
 # GemUO::Engines::EntityDump.new(client).start
 # GemUO::Engines::WalkDump.new(client).start
