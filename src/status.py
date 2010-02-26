@@ -13,6 +13,12 @@ client.until(AllFinished(QuerySkills(client), QueryStats(client)))
 player = client.world.player
 print "Name:", "\t", player.name
 print "Stats:", "\t", zip(("Str", "Dex", "Int"), player.stats)
+if player.hits is not None:
+    print "Hits:", "\t", player.hits.value, "/", player.hits.limit
+if player.mana is not None:
+    print "Mana:", "\t", player.mana.value, "/", player.mana.limit
+if player.stamina is not None:
+    print "Stam:", "\t", player.stamina.value, "/", player.stamina.limit
 
 print "Skills:"
 skills = filter(lambda x: x.base > 0, player.skills.itervalues())
