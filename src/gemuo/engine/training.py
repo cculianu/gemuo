@@ -61,6 +61,11 @@ class UseSkill(Engine):
         if x is not None: return x
         return self._world.find_reachable_item(lambda x: x.is_instrument())
 
+    def _find_food(self):
+        x = self._world.find_player_item(lambda x: x.is_food())
+        if x is not None: return x
+        return self._world.find_reachable_item(lambda x: x.is_food())
+
     def _find_crook(self):
         return self._world.find_player_item(lambda x: x.item_id == ITEM_CROOK)
 
@@ -90,6 +95,10 @@ class UseSkill(Engine):
             targets.append(self._world.player)
         elif skill in (SKILL_ANATOMY, SKILL_EVAL_INT):
             targets = self._find_mobiles()
+        elif skill == SKILL_TASTE_ID:
+            food = self._find_food()
+            if food is not None:
+                targets.append(food)
         elif skill == SKILL_PROVOCATION:
             targets.extend(self._find_neutral_animals())
             count = 2

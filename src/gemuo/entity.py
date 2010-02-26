@@ -13,7 +13,7 @@
 #   GNU General Public License for more details.
 #
 
-from uo.entity import ITEMS_INSTRUMENTS, ANIMALS
+from uo.entity import ITEMS_INSTRUMENTS, ITEMS_FOOD, ANIMALS
 
 class Position:
     def __init__(self, x, y, z=None, direction=None):
@@ -67,6 +67,9 @@ class Item(Entity):
 
     def is_instrument(self):
         return self.item_id in ITEMS_INSTRUMENTS
+
+    def is_food(self):
+        return self.item_id in ITEMS_FOOD
 
 class Mobile(Entity):
     def __init__(self, serial, name=None, position=None, hue=None):
