@@ -149,12 +149,19 @@ class UseSkill(Engine):
     def _target_ok(self):
         """Called by the TargetMutex class when this engine receives
         the target cursor reservation."""
+        if self.finished():
+            self._target_mutex.put_target()
+            return
+
         self._target_locked = True
         self._use_skill(self._skill)
 
     def _target_abort(self):
         """Called by the TargetMutex class when this engine times
         out."""
+        if self.finished():
+            return
+
         self._failure()
 
     def _on_target_request(self, allow_ground, target_id, flags):
