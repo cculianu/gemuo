@@ -338,6 +338,14 @@ def WalkRequest(direction, seq):
     p.uint(0)
     return p.finish()
 
+def TalkAscii(type, hue, font, text):
+    p = PacketWriter(0x03)
+    p.byte(type)
+    p.ushort(hue)
+    p.ushort(font)
+    p.cstring(text)
+    return p.finish()
+
 def Use(serial):
     p = PacketWriter(0x06)
     p.uint(serial)
