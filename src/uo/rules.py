@@ -19,7 +19,7 @@ T2A = True
 
 def skill_delay(skill):
     if skill in (SKILL_HERDING, SKILL_MUSICIANSHIP):
-        return 2
+        return 1
 
     if skill in (SKILL_HIDING, SKILL_PEACEMAKING):
         return 11
