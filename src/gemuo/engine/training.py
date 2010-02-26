@@ -253,11 +253,17 @@ class SkillTraining(Engine, TimerEvent):
         print line
 
         if len(self._skills) == 0:
+            if self._use is not None:
+                self._use.abort()
+            self._unschedule()
             self._success()
             return
 
         if total >= 7000 and down == 0:
             print "No skills down"
+            if self._use is not None:
+                self._use.abort()
+            self._unschedule()
             self._failure()
 
     def _next_skill(self):
