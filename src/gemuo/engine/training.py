@@ -84,9 +84,10 @@ class UseSkill(Engine):
         targets = []
         count = 1
 
-        if skill in (SKILL_HIDING, SKILL_DETECT_HIDDEN,
-                     SKILL_MUSICIANSHIP, SKILL_PEACEMAKING):
+        if skill in (SKILL_HIDING, SKILL_MUSICIANSHIP, SKILL_PEACEMAKING):
             count = 0
+        elif skill == SKILL_DETECT_HIDDEN:
+            targets.append(self._world.player)
         elif skill in (SKILL_ANATOMY, SKILL_EVAL_INT):
             targets = self._find_mobiles()
         elif skill == SKILL_PROVOCATION:
@@ -167,7 +168,7 @@ class UseSkill(Engine):
     def _on_target_request(self, allow_ground, target_id, flags):
         if not self._target_locked: return
 
-        if self._skill == SKILL_DETECT_HIDDEN:
+        if False:
             # point to floor
 
             position = self._world.player.position
