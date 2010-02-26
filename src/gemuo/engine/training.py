@@ -261,13 +261,13 @@ class SkillTraining(Engine, TimerEvent):
             self._failure()
 
     def _next_skill(self):
-       if len(self._skills) == 0: return None
+        if len(self._skills) == 0: return None
 
-       skill = self._skills[0]
-       if self.round_robin:
-           # rotate the skill list
-           self._skills = self._skills[1:] + [skill]
-       return skill
+        skill = self._skills[0]
+        if self.round_robin:
+            # rotate the skill list
+            self._skills = self._skills[1:] + [skill]
+        return skill
 
     def tick(self):
         assert self._use is None
