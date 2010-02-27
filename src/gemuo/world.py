@@ -82,6 +82,18 @@ class World(Engine):
                 return x
         return x
 
+    def nearest_reachable_item(self, func):
+        if self.player is None: return None
+
+        items = []
+        for x in self.entities.itervalues():
+            if self._reachable_item(x) and func(x):
+                items.append(x)
+        if len(items) == 0: return None
+
+        items.sort(lambda a, b: cmp(self._distance2(a.position), self._distance2(b.position)))
+        return items[0]
+
     def _clear(self):
         self.entities.clear()
         self.player = None
