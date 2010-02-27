@@ -131,6 +131,7 @@ class World(Engine):
             item.item_id = packet.item_id
             item.amount = packet.amount
             item.hue = packet.hue
+            item.flags = packet.flags
             item.position = Position(packet.x, packet.y,
                                      packet.z, packet.direction)
 
@@ -152,6 +153,7 @@ class World(Engine):
             mobile = self._make_mobile(packet.serial)
             mobile.body = packet.body
             mobile.hue = packet.hue
+            mobile.flags = packet.flags
             mobile.position = Position(packet.x, packet.y,
                                        packet.z, packet.direction)
 
@@ -200,6 +202,7 @@ class World(Engine):
             mobile = self._make_mobile(packet.serial)
             mobile.body = packet.body
             mobile.hue = packet.hue
+            mobile.flags = packet.flags
             mobile.position = Position(packet.x, packet.y,
                                        packet.z, packet.direction)
             mobile.notoriety = packet.notoriety
@@ -217,6 +220,7 @@ class World(Engine):
             oldpos = mobile.position
             mobile.body = packet.body
             mobile.hue = packet.hue
+            mobile.flags = packet.flags
             mobile.position = Position(packet.x, packet.y,
                                        packet.z, packet.direction)
             mobile.notoriety = packet.notoriety

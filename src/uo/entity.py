@@ -14,6 +14,13 @@
 #   GNU General Public License for more details.
 #
 
+FLAG_FEMALE = 0x02
+FLAG_POISON = 0x04
+FLAG_YELLOW = 0x08
+FLAG_MOVABLE = 0x20
+FLAG_WAR_MODE = 0x40
+FLAG_HIDDEN = 0x80
+
 NORTH = 0x0
 NORTH_EAST = 0x1
 EAST = 0x2

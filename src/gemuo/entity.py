@@ -13,7 +13,7 @@
 #   GNU General Public License for more details.
 #
 
-from uo.entity import ITEMS_INSTRUMENTS, ITEMS_FOOD, ANIMALS
+from uo.entity import *
 
 class Position:
     def __init__(self, x, y, z=None, direction=None):
@@ -36,15 +36,19 @@ class BoundedValue:
         self.limit = limit
 
 class Entity:
-    def __init__(self, serial, name=None, position=None, hue=None):
+    def __init__(self, serial, name=None, position=None, hue=None, flags=0):
         self.serial = serial
         self.name = name
         self.position = position
         self.hue = hue
+        self.flags = flags
+
+    def is_hidden(self):
+        return (self.flags & FLAG_HIDDEN) != 0
 
 class Item(Entity):
-    def __init__(self, serial, name=None, position=None, hue=None):
-        Entity.__init__(self, serial, name, position, hue)
+    def __init__(self, serial, name=None, position=None, hue=None, flags=0):
+        Entity.__init__(self, serial, name, position, hue, flags)
         self.item_id = None
         self.amount = None
         self.parent_serial = None
@@ -54,6 +58,7 @@ class Item(Entity):
     def __str__(self):
         s = '[Item serial=0x%x id=0x%x' % ( self.serial, self.item_id or 0 )
         if self.name is not None: s += " name='%s'" % self.name
+        s += " flags=0x%x" % self.flags
         if self.parent_serial is not None: s += " parent=0x%x" % self.parent_serial
         if self.layer is not None: s += " layer=0x%x" % self.layer
         if self.amount is not None: s += " amount=%d" % self.amount
@@ -72,8 +77,8 @@ class Item(Entity):
         return self.item_id in ITEMS_FOOD
 
 class Mobile(Entity):
-    def __init__(self, serial, name=None, position=None, hue=None):
-        Entity.__init__(self, serial, name, position, hue)
+    def __init__(self, serial, name=None, position=None, hue=None, flags=0):
+        Entity.__init__(self, serial, name, position, hue, flags)
         self.female = False
         self.body = None
         self.notoriety = None
@@ -90,6 +95,7 @@ class Mobile(Entity):
     def __str__(self):
         s = '[Mobile serial=0x%x body=0x%x' % ( self.serial, self.body or 0 )
         if self.name is not None: s += " name='%s'" % self.name
+        s += " flags=0x%x" % self.flags
         if self.position is not None: s += " position='%s'" % self.position
         if self.notoriety is not None: s += " notoriety=%d" % self.notoriety
         s += ']'
