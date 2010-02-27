@@ -89,7 +89,8 @@ class UseSkill(Engine):
         targets = []
         count = 1
 
-        if skill in (SKILL_HIDING, SKILL_MUSICIANSHIP, SKILL_PEACEMAKING):
+        if skill in (SKILL_HIDING, SKILL_MUSICIANSHIP, SKILL_PEACEMAKING,
+                     SKILL_SPIRIT_SPEAK):
             count = 0
         elif skill == SKILL_DETECT_HIDDEN:
             targets.append(self._world.player)
