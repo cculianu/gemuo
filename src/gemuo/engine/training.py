@@ -210,6 +210,44 @@ class UseSkill(Engine):
             self._on_target_request(packet.allow_ground, packet.target_id,
                                     packet.flags)
 
+class UseStealth(Engine, TimerEvent):
+    """Stealth is a special case: it can only be used if the player is
+    hidden already.  So this sub-engine hides first (unless already
+    hidden), and then attempts to use the Stealth skill unless the
+    player is revealed."""
+
+    def __init__(self, client):
+        Engine.__init__(self, client)
+        TimerEvent.__init__(self, client)
+
+        self._player = client.world.player
+        self._waiting = False
+
+        if self._player.is_hidden():
+            self._client.send(p.UseSkill(SKILL_STEALTH))
+        else:
+            self._client.send(p.UseSkill(SKILL_HIDING))
+        self._schedule(0.5)
+
+    def abort(self):
+        self._unschedule()
+        self._failure()
+
+    def tick(self):
+        if not self._player.is_hidden():
+            # we have been revealed or hiding has failed; finish this
+            # engine for now
+            self._success()
+        elif self._waiting:
+            # next stealth attempt
+            self._waiting = False
+            self._client.send(p.UseSkill(SKILL_STEALTH))
+            self._schedule(0.5)
+        else:
+            # still hidden; wait for skill delay
+            self._waiting = True
+            self._schedule(10)
+
 class SkillTraining(Engine, TimerEvent):
     """Train one or more skills."""
 
@@ -300,7 +338,10 @@ class SkillTraining(Engine, TimerEvent):
         assert skill is not None
 
         # create a UseSkill sub-engine and wait for its completion
-        self._use = UseSkill(self._client, skill)
+        if skill == SKILL_STEALTH:
+            self._use = UseStealth(self._client)
+        else:
+            self._use = UseSkill(self._client, skill)
 
         if self._use.finished():
             # if finished within the constructor, then our
