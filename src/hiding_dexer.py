@@ -5,6 +5,7 @@ from gemuo.simple import SimpleClient
 from gemuo.engine.stats import StatLock
 from gemuo.engine.training import SkillTraining
 from gemuo.engine.messages import PrintMessages
+from gemuo.engine.guards import Guards
 
 skills = (
     SKILL_HIDING,
@@ -17,6 +18,7 @@ skills = (
 
 client = SimpleClient()
 PrintMessages(client)
+Guards(client)
 StatLock(client, (100, 100, 25))
 st = SkillTraining(client, skills, round_robin=False)
 client.until(st.finished)
