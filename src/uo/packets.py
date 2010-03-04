@@ -317,6 +317,7 @@ parsers = {
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x8c: Relay,
+    0x97: Ignore, # MovePlayer
     0xa1: MobileHits,
     0xa2: MobileMana,
     0xa3: MobileStamina,
