@@ -141,3 +141,105 @@ class PathWalk(Engine):
             print "Walk failed"
             self.walk = None
             self._next_walk()
+
+class MapWrapper:
+    def __init__(self, map):
+        self.map = map
+        self.bad = []
+
+    def is_passable(self, x, y, z):
+        from gemuo.path import Position
+        return self.map.is_passable(x, y, z) and Position(x, y) not in self.bad
+
+    def add_bad(self, x, y):
+        from gemuo.path import Position
+        self.bad.append(Position(x, y))
+
+class PathFindWalk(Engine):
+    def __init__(self, client, map, destination):
+        Engine.__init__(self, client)
+
+        self.player = client.world.player
+        self.walk = client.world.walk
+        self.map = MapWrapper(map)
+        self.destination = destination
+        self.to = None
+
+        self._path_find()
+
+    def _direction(self, src, dest):
+        if dest.x < src.x:
+            if dest.y < src.y:
+                return NORTH_WEST
+            elif dest.y > src.y:
+                return SOUTH_WEST
+            else:
+                return WEST
+        elif dest.x > src.x:
+            if dest.y < src.y:
+                return NORTH_EAST
+            elif dest.y > src.y:
+                return SOUTH_EAST
+            else:
+                return EAST
+        else:
+            if dest.y < src.y:
+                return NORTH
+            elif dest.y > src.y:
+                return SOUTH
+            else:
+                return None
+
+    def _next_walk(self):
+        if len(self._path) == 0:
+            self._path_find()
+            return
+
+        next = self._path[0]
+
+        player = self.player
+        position = player.position
+        if position is None:
+            self._failure()
+            return
+
+        direction = self._direction(position, next)
+        if direction is None:
+            self._path = self._path[1:]
+            self._next_walk()
+            return
+
+        if player.stamina is not None and player.stamina.value > 20:
+            direction |= RUNNING
+
+        self._client.send(self.walk.walk(direction))
+        self.to = next
+
+    def _path_find(self):
+        if self.player.position.x == self.destination.x and \
+           self.player.position.y == self.destination.y:
+            self._success()
+            return
+
+        from gemuo.path import path_find
+        path = path_find(self.map, self.player.position, self.destination)
+        if path is None:
+            self._failure()
+            return
+
+        self._path = list(path)
+        self._next_walk()
+
+    def on_walk_reject(self):
+        if self.to is None: return
+
+        print "walk reject", self.to
+        self.map.add_bad(self.to.x, self.to.y)
+        self.to = None
+        self._path_find()
+
+    def on_walk_ack(self):
+        if self.to is None: return
+
+        self.to = None
+        self._next_walk()
