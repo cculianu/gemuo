@@ -12,6 +12,8 @@ client.until(AllFinished(QuerySkills(client), QueryStats(client)))
 
 player = client.world.player
 print "Name:", "\t", player.name
+if player.position is not None:
+    print "Pos:", "\t", player.position
 print "Stats:", "\t", zip(("Str", "Dex", "Int"), player.stats)
 if player.hits is not None:
     print "Hits:", "\t", player.hits.value, "/", player.hits.limit
