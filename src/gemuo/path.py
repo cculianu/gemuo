@@ -26,7 +26,7 @@ class Position:
         return '(%d,%d)' % (self.x, self.y)
 
     def __hash__(self):
-        return self.x ^ self.y
+        return hash(self.x) ^ hash(self.y)
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
