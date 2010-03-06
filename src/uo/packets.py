@@ -352,6 +352,21 @@ def Use(serial):
     p.uint(serial)
     return p.finish()
 
+def LiftRequest(serial, amount=0xffff):
+    p = PacketWriter(0x07)
+    p.uint(serial)
+    p.ushort(amount)
+    return p.finish()
+
+def Drop(serial, x, y, z, dest_serial):
+    p = PacketWriter(0x08)
+    p.uint(serial)
+    p.ushort(x)
+    p.ushort(y)
+    p.byte(z)
+    p.uint(dest_serial)
+    return p.finish()
+
 def Click(serial):
     p = PacketWriter(0x09)
     p.uint(serial)
@@ -413,6 +428,18 @@ def GameLogin(username, password, auth_id):
 def PlayServer(index):
     p = PacketWriter(0xa0)
     p.ushort(index)
+    return p.finish()
+
+def TalkUnicode(type, hue, font, text):
+    p = PacketWriter(0xad)
+    p.byte(type)
+    p.ushort(hue)
+    p.ushort(font)
+    p.fixstring('Eng', 4)
+    p.byte(0x00)
+    p.byte(0x10)
+    p.byte(0x02)
+    p.cstring(text)
     return p.finish()
 
 def ClientVersion(version):
