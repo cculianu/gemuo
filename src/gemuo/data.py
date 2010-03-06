@@ -101,14 +101,17 @@ class StaticsList:
     def __init__(self, data):
         self.data = data
 
-    def iter_at(self, x, y):
+    def __iter__(self):
         i = 0
         while i < len(self.data):
-            current_id, current_x, current_y, current_z, current_hue \
-                        = struct.unpack_from('<HBBbH', self.data, i)
-            if x == current_x and y == current_y:
-                yield current_id, current_z, current_hue
+            id, x, y, z, hue = struct.unpack_from('<HBBbH', self.data, i)
+            yield id, x, y, z, hue
             i += 7
+
+    def iter_at(self, x, y):
+        for id, ix, iy, z, hue in self:
+            if ix == x and iy == y:
+                yield id, z, hue
 
     def is_passable(self, tile_data, x, y, z):
         for current_id, current_z, current_hue in self.iter_at(x, y):
