@@ -108,6 +108,7 @@ def path_find(map, src, dest):
         # find the nearest position on the "open" list, and move it to
         # the "closed" list
         p = nearest(open_list)
+        if p is None: return None
         cost, total, direction = open_list[p]
         del open_list[p]
         closed_list[p] = (cost, total, direction)
