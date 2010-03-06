@@ -212,7 +212,12 @@ class PathFindWalk(Engine):
         if player.stamina is not None and player.stamina.value > 20:
             direction |= RUNNING
 
-        self._client.send(self.walk.walk(direction))
+        w = self.walk.walk(direction)
+        if w is None:
+            self._failure()
+            return
+
+        self._client.send(w)
         self.to = next
 
     def _path_find(self):
