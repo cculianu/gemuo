@@ -104,7 +104,7 @@ def path_find(map, src, dest):
     open_list = { src: (0, 0, None) }
     closed_list = dict()
 
-    for j in range(dest.square_distance(src)):
+    for j in range(dest.square_distance(src) * 4):
         # find the nearest position on the "open" list, and move it to
         # the "closed" list
         p = nearest(open_list)
