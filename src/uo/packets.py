@@ -378,6 +378,13 @@ def TextCommand(type, command):
     p.cstring(command)
     return p.finish()
 
+def EquipRequest(item_serial, layer, target_serial):
+    p = PacketWriter(0x13)
+    p.uint(item_serial)
+    p.byte(layer)
+    p.uint(target_serial)
+    return p.finish()
+
 def UseSkill(skill):
     return TextCommand(0x24, str(skill))
 
