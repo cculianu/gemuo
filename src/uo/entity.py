@@ -92,6 +92,10 @@ ITEMS_WEAPONS_MACE = (
     ITEM_WAND4,
     )
 
+ITEMS_AXE = (
+    0x1443, # two handed axe
+)
+
 ITEMS_WEAPONS = \
     ITEMS_WEAPONS_FENCING + \
     ITEMS_WEAPONS_SWORD + \
