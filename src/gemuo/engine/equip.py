@@ -16,6 +16,7 @@
 import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
+from gemuo.engine.items import OpenContainer
 
 class Equip(Engine):
     def __init__(self, client, func):
