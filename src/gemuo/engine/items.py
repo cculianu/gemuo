@@ -16,6 +16,18 @@
 import uo.packets as p
 from gemuo.engine import Engine
 
+class OpenBank(Engine):
+    def __init__(self, client):
+        Engine.__init__(self, client)
+        self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.'))
+
+    def abort(self):
+        self._failure()
+
+    def on_open_container(self, container):
+        if container.is_bank(self._client.world.player):
+            self._success()
+
 class OpenContainer(Engine):
     """Double-click a container, and return successfully when the gump
     opens"""
