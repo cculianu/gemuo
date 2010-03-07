@@ -94,6 +94,13 @@ class World(Engine):
         items.sort(lambda a, b: cmp(self._distance2(a.position), self._distance2(b.position)))
         return items[0]
 
+    def find_mobile_at(self, x, y):
+        for x in self.entities.itervalues():
+            if x.position is not None and x.position.x == x and \
+                   x.position.y == y and isinstance(x, Mobile):
+                return x
+        return None
+
     def _clear(self):
         self.entities.clear()
         self.player = None
