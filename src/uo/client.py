@@ -13,7 +13,7 @@
 #   GNU General Public License for more details.
 #
 
-import socket
+import socket, select
 import struct
 from uo.serialize import packet_lengths, PacketReader
 from uo.compression import Decompress
@@ -27,6 +27,10 @@ class Client:
         if decompress:
             self._decompress = Decompress()
         self._input = ''
+
+    def _poll(self, timeout):
+        x = select.select([self._socket], [], [], timeout)
+        print x
 
     def _fill_buffer(self):
         x = self._socket.recv(4096)
@@ -57,10 +61,16 @@ class Client:
             x, self._input = self._input[1:l], self._input[l:]
         return PacketReader(cmd, x)
 
-    def receive(self):
+    def receive(self, timeout=None):
         while True:
             x = self._packet_from_buffer()
             if x is not None: return x
+
+            if timeout is not None:
+                x = select.select([self._socket], [], [], timeout)
+                if len(x[0]) == 0:
+                    return None
+
             self._fill_buffer()
 
     def send(self, data):
