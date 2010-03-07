@@ -432,6 +432,14 @@ def GameLogin(username, password, auth_id):
     p.fixstring(password, 30)
     return p.finish()
 
+def VendorSellReply(vendor_serial, item_serial, amount=1):
+    p = PacketWriter(0x9f)
+    p.uint(vendor_serial)
+    p.ushort(1)
+    p.uint(item_serial)
+    p.ushort(amount)
+    return p.finish()
+
 def PlayServer(index):
     p = PacketWriter(0xa0)
     p.ushort(index)
