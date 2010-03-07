@@ -18,6 +18,11 @@ import uo.packets as p
 from uo.entity import SERIAL_PLAYER
 from gemuo.engine import Engine
 
+def should_run(mobile):
+    return mobile.stamina is not None and \
+           (mobile.stamina.value >= 20 or \
+            mobile.stamina.value >= mobile.stamina.limit / 2)
+
 class WalkPoint:
     def __init__(self, x, y):
         self.x = x
@@ -77,7 +82,7 @@ class DirectWalk(Engine):
             self._success()
             return
 
-        if player.stamina is not None and player.stamina.value > 20 and self._distance2(position) >= 4:
+        if should_run(player) and self._distance2(position) >= 4:
             direction |= RUNNING
 
         self._client.send(self.walk.walk(direction))
@@ -209,7 +214,7 @@ class PathFindWalk(Engine):
             self._next_walk()
             return
 
-        if player.stamina is not None and player.stamina.value > 20:
+        if should_run(player):
             direction |= RUNNING
 
         w = self.walk.walk(direction)
