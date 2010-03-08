@@ -99,18 +99,15 @@ class World(Engine):
         items.sort(lambda a, b: cmp(self._distance2(a.position), self._distance2(b.position)))
         return items[0]
 
-    def find_entity_at(self, x, y):
-        for x in self.entities.itervalues():
-            if x.position is not None and x.position.x == x and \
-                   x.position.y == y:
-                return x
-        return None
+    def iter_entities_at(self, x, y):
+        for e in self.entities.itervalues():
+            if e.position is not None and e.position.x == x and e.position.y == y:
+                yield e
 
     def find_mobile_at(self, x, y):
-        for x in self.entities.itervalues():
-            if x.position is not None and x.position.x == x and \
-                   x.position.y == y and isinstance(x, Mobile):
-                return x
+        for e in self.iter_entities_at(x, y):
+            if isinstance(e, Mobile):
+                return e
         return None
 
     def _clear(self):
