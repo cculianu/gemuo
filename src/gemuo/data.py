@@ -155,6 +155,11 @@ class MapGlue:
         block = self.land.load_block(x / 8, y / 8)
         return block.get_height(x % 8, y % 8)
 
+    def statics_at(self, x, y):
+        block = self.statics.load_block(x / 8, y / 8)
+        if block is None: return iter(())
+        return block.iter_at(x % 8, y %8)
+
     def is_passable(self, x, y, z):
         block = self.land.load_block(x / 8, y / 8)
         if not self.tile_data.land_passable(block.get_id(x % 8, y % 8)):
