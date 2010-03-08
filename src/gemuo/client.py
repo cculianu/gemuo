@@ -51,6 +51,7 @@ class Client(TimerManager):
         if packet is not None:
             self._handle_packet(packet)
         self._tick()
+        return packet is not None
 
     def run(self):
         while len(self._engines) > 0:
