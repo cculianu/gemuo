@@ -53,6 +53,17 @@ class Client(TimerManager):
         self._tick()
         return packet is not None
 
+    def process(self, timeout=1):
+        """Process all pending events.  The timeout is only valid for
+        the first packet."""
+
+        if not self.once(timeout):
+            return False
+
+        while len(self._engines) > 0 and self.once(0):
+            pass
+        return True
+
     def run(self):
         while len(self._engines) > 0:
             self.once()
