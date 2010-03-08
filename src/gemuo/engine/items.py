@@ -23,7 +23,11 @@ class OpenContainer(Engine):
     def __init__(self, client, container):
         Engine.__init__(self, client)
         self._serial = container.serial
-        client.send(p.Use(self._serial))
+
+        if container.is_bank(client.world.player):
+            self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.'))
+        else:
+            client.send(p.Use(self._serial))
 
     def abort(self):
         self._failure()
