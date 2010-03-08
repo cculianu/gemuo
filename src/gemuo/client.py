@@ -46,8 +46,8 @@ class Client(TimerManager):
         else:
             print "No parser for packet:", hex(packet.cmd)
 
-    def once(self):
-        packet = self._client.receive(timeout=1)
+    def once(self, timeout=1):
+        packet = self._client.receive(timeout)
         if packet is not None:
             self._handle_packet(packet)
         self._tick()
