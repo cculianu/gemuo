@@ -60,7 +60,7 @@ class Client(TimerManager):
         if not self.once(timeout):
             return False
 
-        while len(self._engines) > 0 and self.once(0):
+        while self.once(0):
             pass
         return True
 
