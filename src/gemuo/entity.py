@@ -76,6 +76,10 @@ class Item(Entity):
     def is_food(self):
         return self.item_id in ITEMS_FOOD
 
+    def is_bank(self, mobile):
+        return self.layer == 0x1d and \
+           self.parent_serial == mobile.serial
+
 class Mobile(Entity):
     def __init__(self, serial, name=None, position=None, hue=None, flags=0):
         Entity.__init__(self, serial, name, position, hue, flags)

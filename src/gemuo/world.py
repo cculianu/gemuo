@@ -56,6 +56,11 @@ class World(Engine):
         if mobile is None: return None
         return self.equipped_item(mobile, 0x15)
 
+    def bank(self, mobile=None):
+        if mobile is None: mobile = self.player
+        if mobile is None: return None
+        return self.equipped_item(mobile, 0x1d)
+
     def find_item_in(self, parent, func):
         for x in self.items_in(parent):
             if func(x): return x
