@@ -68,34 +68,37 @@ class Walk:
             # XXX resync when seq mismatch?
             pass
 
+        self.move_player(self._direction)
+
+    def move_player(self, direction):
         oldpos = self._mobile.position
-        if oldpos.direction == self._direction:
+        if oldpos.direction == direction:
             x, y = oldpos.x, oldpos.y
-            if self._direction == NORTH:
+            if direction == NORTH:
                 y -= 1
-            elif self._direction == NORTH_EAST:
+            elif direction == NORTH_EAST:
                 x += 1
                 y -= 1
-            elif self._direction == EAST:
+            elif direction == EAST:
                 x += 1
-            elif self._direction == SOUTH_EAST:
+            elif direction == SOUTH_EAST:
                 x += 1
                 y += 1
-            elif self._direction == SOUTH:
+            elif direction == SOUTH:
                 y += 1
-            elif self._direction == SOUTH_WEST:
+            elif direction == SOUTH_WEST:
                 x -= 1
                 y += 1
-            elif self._direction == WEST:
+            elif direction == WEST:
                 x -= 1
-            elif self._direction == NORTH_WEST:
+            elif direction == NORTH_WEST:
                 x -= 1
                 y -= 1
 
-            self._mobile.position = Position(x, y, oldpos.z, self._direction)
+            self._mobile.position = Position(x, y, oldpos.z, direction)
         else:
             self._mobile.position = Position(oldpos.x, oldpos.y, oldpos.z,
-                                             self._direction)
+                                             direction)
 
         self._seq = None
         self._direction = None

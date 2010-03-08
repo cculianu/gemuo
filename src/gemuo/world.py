@@ -239,6 +239,11 @@ class World(Engine):
                 item.hue = x.hue
 
             self._signal('on_mobile_incoming', mobile)
+        elif isinstance(packet, p.MovePlayer):
+            if self.walk is not None:
+                self.walk.move_player(packet.direction)
+
+            self._signal('on_move_player')
         elif isinstance(packet, p.MobileMoving):
             mobile = self._make_mobile(packet.serial)
             oldpos = mobile.position

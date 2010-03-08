@@ -220,6 +220,10 @@ class MobileIncoming(MobileMoving):
             if serial == 0: break
             self.items.append(MobileItem(serial, packet))
 
+class MovePlayer:
+    def __init__(self, packet):
+        self.direction = packet.byte()
+
 class Relay:
     def __init__(self, packet):
         self.ip = packet.ipv4()
@@ -317,7 +321,7 @@ parsers = {
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x8c: Relay,
-    0x97: Ignore, # MovePlayer
+    0x97: MovePlayer,
     0xa1: MobileHits,
     0xa2: MobileMana,
     0xa3: MobileStamina,
