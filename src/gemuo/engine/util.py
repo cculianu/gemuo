@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from gemuo.timer import TimerEvent
 from gemuo.engine import Engine
 
 class FinishCallback(Engine):
@@ -36,3 +37,14 @@ class FinishCallback(Engine):
         if engine == self._engine:
             self._func(False)
             self._success()
+
+class DelayedCallback(Engine, TimerEvent):
+    def __init__(self, client, delay, func):
+        Engine.__init__(self, client)
+        TimerEvent.__init__(self, client)
+
+        self._func = func
+        self._schedule(delay)
+
+    def tick(self):
+        self._func()
