@@ -14,6 +14,7 @@
 #
 
 import uo.packets as p
+from gemuo.entity import Item
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
 from gemuo.timer import TimerEvent
@@ -150,3 +151,55 @@ class Restock(Engine, TimerEvent):
 
     def tick(self):
         self._do_counts()
+
+class Trash(Engine):
+    """Find a trash can and throw items from the backpack into it."""
+
+    def __init__(self, client, ids):
+        Engine.__init__(self, client)
+
+        self._source = client.world.backpack()
+        if self._source is None:
+            self._failure()
+            return
+
+        self.ids = ids
+
+        FinishCallback(client, OpenContainer(client, self._source),
+                       self._source_opened)
+
+    def _find_trash_can(self):
+        for x in self._client.world.entities.itervalues():
+            if isinstance(x, Item) and x.parent_serial is None and \
+               x.item_id == 0xe77:
+                return x
+        return None
+
+    def _source_opened(self, success):
+        if not success:
+            self._failure()
+            return
+
+        items = []
+        for x in self._client.world.items_in(self._source):
+            if x.item_id in self.ids:
+                items.append(x)
+
+        if len(items) == 0:
+            self._success()
+            return
+
+        destination = self._find_trash_can()
+        if destination is None:
+            print "No trash can"
+            self._failure()
+            return
+
+        FinishCallback(self._client, MoveItems(self._client, items, destination),
+                       self._moved)
+
+    def _moved(self, success):
+        if success:
+            self._success()
+        else:
+            self._failure()
