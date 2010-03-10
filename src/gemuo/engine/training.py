@@ -285,7 +285,6 @@ class SkillTraining(Engine, TimerEvent):
             if skill.lock == SKILL_LOCK_DOWN:
                 down += skill.base
 
-        line = "Skills:"
         for skill_id in self._skills:
             name = SKILL_NAMES[skill_id]
 
@@ -296,7 +295,6 @@ class SkillTraining(Engine, TimerEvent):
 
             skill = skills[skill_id]
 
-            line += "  %s=%d" % (name, skill.base)
             if skill.base >= skill.cap:
                 print "Done with skill", name
                 self._skills.remove(skill_id)
@@ -304,9 +302,6 @@ class SkillTraining(Engine, TimerEvent):
                 print "Skill is locked:", name
                 self._failure()
                 return
-
-        line += "  (total=%d, down=%d)" % (total, down)
-        print line
 
         if len(self._skills) == 0:
             if self._use is not None:
