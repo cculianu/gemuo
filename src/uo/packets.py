@@ -220,6 +220,19 @@ class MobileIncoming(MobileMoving):
             if serial == 0: break
             self.items.append(MobileItem(serial, packet))
 
+class MenuOption:
+    def __init__(self, packet):
+        self.item_id = packet.ushort()
+        self.hue = packet.ushort()
+        self.text = packet.pstring()
+
+class Menu:
+    def __init__(self, packet):
+        self.dialog_serial = packet.uint()
+        self.menu_serial = packet.ushort()
+        self.title = packet.pstring()
+        self.options = map(lambda x: MenuOption(packet), range(packet.byte()))
+
 class MovePlayer:
     def __init__(self, packet):
         self.direction = packet.byte()
@@ -320,6 +333,7 @@ parsers = {
     0x72: Ignore, # WarMode
     0x77: MobileMoving,
     0x78: MobileIncoming,
+    0x7c: Menu,
     0x8c: Relay,
     0x97: MovePlayer,
     0xa1: MobileHits,
@@ -420,6 +434,15 @@ def TargetResponse(type, target_id, flags, serial, x, y, z, graphic):
     p.ushort(y)
     p.ushort(z)
     p.ushort(graphic)
+    return p.finish()
+
+def MenuResponse(serial, index):
+    p = PacketWriter(0x7d)
+    p.uint(serial)
+    p.ushort(0) # menu id
+    p.ushort(index)
+    p.ushort(0) # item id
+    p.ushort(0) # hue
     return p.finish()
 
 def AccountLogin(username, password):

@@ -84,6 +84,9 @@ class PacketReader:
         x, self._data = self._data[:i], self._data[i+1:]
         return x
 
+    def pstring(self):
+        return self.fixstring(self.byte())
+
     def ipv4(self):
         return string.join(map(str, struct.unpack('4B', self.data(4))), '.')
 
