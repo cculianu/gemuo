@@ -48,3 +48,4 @@ class DelayedCallback(Engine, TimerEvent):
 
     def tick(self):
         self._func()
+        self._success()
