@@ -85,7 +85,7 @@ class World(Engine):
         for x in self.entities.itervalues():
             if self._reachable_item(x) and func(x):
                 return x
-        return x
+        return None
 
     def nearest_reachable_item(self, func):
         if self.player is None: return None
