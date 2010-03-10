@@ -15,7 +15,7 @@
 
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback
+from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import OpenContainer
 
 class Equip(Engine):
@@ -38,7 +38,7 @@ class Equip(Engine):
             return
 
         if self._find_and_equip():
-            self._success()
+            DelayedCallback(self._client, 1, self._success)
             return
 
         FinishCallback(client, OpenContainer(client, self.backpack),
@@ -61,6 +61,6 @@ class Equip(Engine):
             return
 
         if self._find_and_equip():
-            self._success()
+            DelayedCallback(self._client, 1, self._success)
         else:
             self._failure()
