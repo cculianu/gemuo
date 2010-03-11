@@ -38,6 +38,16 @@ class FinishCallback(Engine):
             self._func(False)
             self._success()
 
+class Delayed(Engine, TimerEvent):
+    def __init__(self, client, delay):
+        Engine.__init__(self, client)
+        TimerEvent.__init__(self, client)
+
+        self._schedule(delay)
+
+    def tick(self):
+        self._success()
+
 class DelayedCallback(Engine, TimerEvent):
     def __init__(self, client, delay, func):
         Engine.__init__(self, client)
@@ -49,3 +59,8 @@ class DelayedCallback(Engine, TimerEvent):
     def tick(self):
         self._func()
         self._success()
+
+class Fail(Engine):
+    def __init__(self, client):
+        Engine.__init__(self, client)
+        self._failure()
