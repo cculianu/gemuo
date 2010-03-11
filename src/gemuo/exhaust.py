@@ -46,3 +46,4 @@ class ExhaustDatabase:
         now = os.times()[4]
         # this block is exhausted for 30 minutes
         self._db[key] = str(now + 30 * 60)
+        self._db.sync()
