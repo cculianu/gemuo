@@ -413,6 +413,15 @@ def MobileQuery(type, serial):
     p.uint(serial)
     return p.finish()
 
+def VendorBuyReply(vendor_serial, item_serial, amount=1):
+    p = PacketWriter(0x3b)
+    p.uint(vendor_serial)
+    p.byte(2) # flags
+    p.byte(0) # layer
+    p.uint(item_serial)
+    p.ushort(amount)
+    return p.finish()
+
 def PlayCharacter(slot):
     p = PacketWriter(0x5d)
     p.uint(0)
