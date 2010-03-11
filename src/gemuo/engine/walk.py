@@ -82,7 +82,7 @@ class DirectWalk(Engine):
             self._success()
             return
 
-        if should_run(player) and self._distance2(position) >= 4:
+        if should_run(player):
             direction |= RUNNING
 
         self._client.send(self.walk.walk(direction))
