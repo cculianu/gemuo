@@ -317,6 +317,7 @@ parsers = {
     0x20: MobileUpdate,
     0x21: WalkReject,
     0x22: WalkAck,
+    0x23: Ignore, # DragAnimation
     0x24: OpenContainer,
     0x25: ContainerItem,
     0x2e: EquipItem,
@@ -329,12 +330,14 @@ parsers = {
     0x5b: Ignore, # Time
     0x65: Ignore, # Weather
     0x6c: TargetRequest, # Target
+    0x6d: Ignore, # PlayMusic
     0x6e: Ignore, # CharAction
     0x72: Ignore, # WarMode
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x7c: Menu,
     0x8c: Relay,
+    0x95: Ignore, # HuePicker
     0x97: MovePlayer,
     0xa1: MobileHits,
     0xa2: MobileMana,
@@ -346,6 +349,8 @@ parsers = {
     0xbc: Ignore, # Season
     0xbf: Extended,
     0xbd: Ignore, # ClientVersion
+    0xc0: Ignore, # HuedEffect
+    0xc7: Ignore, # ParticleEffect
     0xdc: Ignore, # AOSObjProp
     0xd6: Ignore, # AOSToolTip
 }
