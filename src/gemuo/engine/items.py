@@ -19,7 +19,7 @@ from gemuo.engine import Engine
 class OpenBank(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.'))
+        self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x02))
 
     def abort(self):
         self._failure()
@@ -37,7 +37,7 @@ class OpenContainer(Engine):
         self._serial = container.serial
 
         if container.is_bank(client.world.player):
-            self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.'))
+            self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x02))
         else:
             client.send(p.Use(self._serial))
 

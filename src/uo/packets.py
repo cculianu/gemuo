@@ -486,7 +486,7 @@ def PlayServer(index):
     p.ushort(index)
     return p.finish()
 
-def TalkUnicode(type, hue, font, text):
+def TalkUnicode(type, hue, font, text, keyword):
     p = PacketWriter(0xad)
     p.byte(type)
     p.ushort(hue)
@@ -494,7 +494,7 @@ def TalkUnicode(type, hue, font, text):
     p.fixstring('Eng', 4)
     p.byte(0x00)
     p.byte(0x10)
-    p.byte(0x02)
+    p.byte(keyword)
     p.cstring(text)
     return p.finish()
 
