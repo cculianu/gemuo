@@ -28,7 +28,8 @@ class Guards(Engine, TimerEvent):
         self.queued = False
 
     def call_guards(self):
-        self._client.send(p.TalkAscii(type=0, hue=0, font=1, text='Guards! Help me!'))
+        print "Calling guards"
+        self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x07))
 
     def tick(self):
         self.queued = False
