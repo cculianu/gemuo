@@ -46,6 +46,19 @@ class Guards(Engine, TimerEvent):
         if name == '' and text in ('1', '2', '3'):
             self.call_guards_twice()
 
+    def on_combatant(self, serial):
+        if serial != 0:
+            self.call_guards()
+
+    def on_swing(self, flag, attacker_serial, defender_serial):
+        player = self._client.world.player
+        if defender_serial == player.serial or attacker_serial == player.serial:
+            self.call_guards()
+
     def on_packet(self, packet):
         if isinstance(packet, p.AsciiMessage):
             self.on_message(packet.serial, packet.name, packet.text)
+        elif isinstance(packet, p.ChangeCombatant):
+            self.on_combatant(packet.serial)
+        elif isinstance(packet, p.Swing):
+            self.on_swing(packet.flag, packet.attacker_serial, packet.defender_serial)

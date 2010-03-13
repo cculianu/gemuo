@@ -154,6 +154,12 @@ class EquipItem:
         self.parent_serial = packet.uint()
         self.hue = packet.ushort()
 
+class Swing:
+    def __init__(self, packet):
+        self.flag = packet.byte()
+        self.attacker_serial = packet.uint()
+        self.defender_serial = packet.uint()
+
 class SkillValue:
     def __init__(self, id, packet):
         self.id = id
@@ -289,6 +295,10 @@ class CharacterList:
                 return character
         return None
 
+class ChangeCombatant:
+    def __init__(self, packet):
+        self.serial = packet.uint()
+
 class Extended:
     def __init__(self, packet):
         self.extended = packet.ushort()
@@ -321,6 +331,7 @@ parsers = {
     0x24: OpenContainer,
     0x25: ContainerItem,
     0x2e: EquipItem,
+    0x2f: Swing,
     0x3a: SkillUpdate,
     0x3c: ContainerContent,
     0x4e: Ignore, # PersonalLight
@@ -345,6 +356,7 @@ parsers = {
     0xa6: Ignore, # Scroll
     0xa8: ServerList,
     0xa9: CharacterList,
+    0xaa: ChangeCombatant,
     0xb9: Ignore, # Features
     0xbc: Ignore, # Season
     0xbf: Extended,
