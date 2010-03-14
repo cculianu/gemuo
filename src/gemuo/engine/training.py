@@ -109,6 +109,14 @@ class UseSkill(Engine):
             food = self._find_food()
             if food is not None:
                 targets.append(food)
+        elif skill == SKILL_BEGGING:
+            # Sorry for these hard-coded serials... these are the
+            # healers on the UOSA shard
+            #serial = 0x4983
+            #serial = 0x115ab
+            serial = 0xbdcd
+            if serial in self._world.entities:
+                targets.append(self._world.entities[serial])
         elif skill == SKILL_PROVOCATION:
             targets.extend(self._find_neutral_animals())
             count = 2

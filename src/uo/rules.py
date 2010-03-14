@@ -24,6 +24,9 @@ def skill_delay(skill):
     if skill in (SKILL_HIDING, SKILL_PEACEMAKING):
         return 11
 
+    if skill in (SKILL_BEGGING,):
+        return 13
+
     if T2A:
         return 11
 
