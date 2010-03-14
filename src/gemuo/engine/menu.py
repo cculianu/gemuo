@@ -15,6 +15,7 @@
 
 import uo.packets as p
 from gemuo.engine import Engine
+from gemuo.timer import TimerEvent
 
 def select_option(menu, item):
     for i, option in enumerate(menu.options):
@@ -22,26 +23,36 @@ def select_option(menu, item):
             return i + 1
     return None
 
-class MenuResponse(Engine):
+class MenuResponse(Engine, TimerEvent):
     def __init__(self, client, responses):
         Engine.__init__(self, client)
+        TimerEvent.__init__(self, client)
+
         assert len(responses) > 0
         self.responses = list(responses)
 
+        self._schedule(5)
+
     def abort(self):
+        self._unschedule()
         self._failure()
 
     def on_packet(self, packet):
         if isinstance(packet, p.Menu):
             response, self.responses = self.responses[0], self.responses[1:]
             option = select_option(packet, response)
-            print "option", option
             if option is None:
                 print "Option not found"
+                self._unschedule()
                 self._failure()
                 return
 
             self._client.send(p.MenuResponse(packet.dialog_serial, option))
 
             if len(self.responses) == 0:
+                self._unschedule()
                 self._success()
+
+    def tick(self):
+        # waiting for the menu to appear has taken too long; give up
+        self._failure()
