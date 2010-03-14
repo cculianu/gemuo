@@ -34,9 +34,19 @@ class World(Engine):
         return position.x >= player.x - 1 and position.x <= player.x + 1 \
             and position.y >= player.y - 1 and position.y <= player.y + 1 \
 
+    def _descendant(self, entity, ancestor_entity):
+        while True:
+            if entity.serial == ancestor_entity.serial: return True
+            if not isinstance(entity, Item): return False
+            if entity.parent_serial is None: return False
+            if entity.parent_serial not in self.entities: return False
+            entity = self.entities[entity.parent_serial]
+
     def _reachable_item(self, entity):
-        return isinstance(entity, Item) and entity.parent_serial is None and \
-            entity.position is not None and self._reachable(entity.position)
+        return isinstance(entity, Item) and \
+               (self._descendant(entity, self.player) or \
+                (entity.parent_serial is None and \
+                 entity.position is not None and self._reachable(entity.position)))
 
     def mobiles(self):
         return filter(lambda x: isinstance(x, Mobile), self.entities.itervalues())
