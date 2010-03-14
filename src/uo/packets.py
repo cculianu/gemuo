@@ -462,6 +462,14 @@ def TargetResponse(type, target_id, flags, serial, x, y, z, graphic):
     p.ushort(graphic)
     return p.finish()
 
+def WarMode(warmode):
+    p = PacketWriter(0x72)
+    p.boolean(warmode)
+    p.byte(0)
+    p.byte(0)
+    p.byte(0)
+    return p.finish()
+
 def MenuResponse(serial, index):
     p = PacketWriter(0x7d)
     p.uint(serial)
