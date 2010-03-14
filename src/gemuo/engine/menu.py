@@ -19,7 +19,7 @@ from gemuo.timer import TimerEvent
 
 def select_option(menu, item):
     for i, option in enumerate(menu.options):
-        if option.text == item:
+        if option.text[:len(item)] == item:
             return i + 1
     return None
 
