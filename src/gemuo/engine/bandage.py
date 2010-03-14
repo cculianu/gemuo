@@ -36,14 +36,12 @@ class CutCloth(Engine, TimerEvent):
             self._failure()
             return
 
-        self._cloth = self._world.find_player_item(lambda x: x.item_id == 0x1766)
+        self._cloth = self._world.find_player_item(lambda x: x.item_id in (0xf9b, 0x1766))
         if self._cloth is None:
             print "No cloth"
             self._target_mutex.put_target()
             self._success()
             return
-
-        print scissors, self._cloth
 
         self._target_locked = True
         self._client.send(p.Use(scissors.serial))
