@@ -302,3 +302,8 @@ class World(Engine):
                 # statlock info
                 mobile = self._make_mobile(packet.serial)
                 mobile.stat_locks = packet.stat_locks
+        elif isinstance(packet, p.AsciiMessage):
+            if packet.serial in self.entities:
+                if packet.type == 0x06 or len(packet.name) > 0:
+                    entity = self.entities[packet.serial]
+                    entity.name = packet.text
