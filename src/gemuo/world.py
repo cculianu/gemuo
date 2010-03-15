@@ -56,6 +56,12 @@ class World(Engine):
             parent = parent.serial
         return filter(lambda x: isinstance(x, Item) and x.parent_serial == parent, self.entities.itervalues())
 
+    def is_empty(self, entity):
+        for x in self.entities.itervalues():
+            if isinstance(x, Item) and x.parent_serial == entity.serial:
+                return False
+        return True
+
     def equipped_item(self, parent, layer):
         for x in self.items_in(parent):
             if x.layer == layer: return x
