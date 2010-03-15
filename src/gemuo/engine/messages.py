@@ -21,7 +21,9 @@ class PrintMessages(Engine):
         Engine.__init__(self, client)
 
     def on_packet(self, packet):
-        if isinstance(packet, p.AsciiMessage):
+        if isinstance(packet, p.AsciiMessage) and packet.type != 0x06 and \
+           len(packet.text) > 0 and \
+           (packet.text[0] != '[' or packet.text[-1] != ']'):
             print "<%s> %s" % (packet.name, packet.text)
 
 class Parrot(Engine):
