@@ -64,3 +64,25 @@ class Fail(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
         self._failure()
+
+class Repeat(Engine):
+    def __init__(self, client, delay, func, *args, **keywords):
+        Engine.__init__(self, client)
+
+        self.delay = delay
+        self.func = func
+        self.args = args
+        self.keywords = keywords
+
+        DelayedCallback(self._client, self.delay, self._next)
+
+    def _next(self):
+        FinishCallback(self._client, self.func(self._client, *self.args,
+                                               **self.keywords),
+                       self._finished)
+
+    def _finished(self, success):
+        if success:
+            DelayedCallback(self._client, self.delay, self._next)
+        else:
+            self._failure()
