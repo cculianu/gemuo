@@ -60,7 +60,7 @@ def move_items(client, source, destination, func):
     return MoveItems(client, items, destination)
 
 class Restock(Engine, TimerEvent):
-    def __init__(self, client, container, counts={}, func=None, locked=()):
+    def __init__(self, client, container, counts=(), func=None, locked=()):
         Engine.__init__(self, client)
         TimerEvent.__init__(self, client)
 
@@ -71,7 +71,10 @@ class Restock(Engine, TimerEvent):
 
         self._destination = container
         self._counts = []
-        self._counts.extend(counts.iteritems())
+        if isinstance(counts, dict):
+            self._counts.extend(counts.iteritems())
+        else:
+            self._counts.extend(counts)
         self._func = func
         self._locked = []
         self._locked.extend(locked)
@@ -134,20 +137,25 @@ class Restock(Engine, TimerEvent):
 
         x = self._counts[0]
         item_id, count = x
+        if isinstance(item_id, int):
+            item_ids = (item_id,)
+        else:
+            item_ids = item_id
+        item_ids = set(item_ids)
 
         client = self._client
         world = client.world
 
         n = 0
         for x in world.items_in(self._source):
-            if x.item_id == item_id:
+            if x.item_id in item_ids:
                 if x.amount is None:
                     n += 1
                 else:
                     n += x.amount
 
         if n > count:
-            x = world.find_item_in(self._source, lambda x: x.item_id == item_id)
+            x = world.find_item_in(self._source, lambda x: x.item_id in item_ids)
             if x is None:
                 self._failure()
                 return
@@ -157,9 +165,9 @@ class Restock(Engine, TimerEvent):
 
             self._schedule(1)
         elif n < count:
-            x = world.find_item_in(self._destination, lambda x: x.item_id == item_id)
+            x = world.find_item_in(self._destination, lambda x: x.item_id in item_ids)
             if x is None:
-                print "Not found:", hex(item_id)
+                print "Not found:", item_ids
                 self._failure()
                 return
 
