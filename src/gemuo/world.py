@@ -234,8 +234,15 @@ class World(Engine):
                 self.player.update_skills(packet.skills)
                 self._signal('on_skill_update', self.player.skills)
         elif isinstance(packet, p.ContainerContent):
+            containers = set()
+
             for x in packet.items:
                 self.on_packet(x)
+                containers.add(x.parent_serial)
+
+            for x in containers:
+                if x in self.entities:
+                    self._signal('on_container_content', self.entities[x])
         elif isinstance(packet, p.MobileIncoming):
             mobile = self._make_mobile(packet.serial)
             mobile.body = packet.body
