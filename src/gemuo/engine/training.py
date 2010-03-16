@@ -92,6 +92,11 @@ class UseSkill(Engine):
         if skill in (SKILL_HIDING, SKILL_MUSICIANSHIP, SKILL_PEACEMAKING,
                      SKILL_SPIRIT_SPEAK):
             count = 0
+        elif skill == SKILL_ITEM_ID:
+            # use any item
+            x = self._world.find_reachable_item(lambda x: True)
+            if x is not None:
+                targets.append(x)
         elif skill == SKILL_DETECT_HIDDEN:
             targets.append(self._world.player)
         elif skill in (SKILL_ANATOMY, SKILL_EVAL_INT):
