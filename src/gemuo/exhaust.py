@@ -36,12 +36,10 @@ class ExhaustDatabase:
             return True
         else:
             # record is expired; delete it
-            print "exhausted expired:", x, y
             del self._db[key]
             return False
 
     def set_exhausted(self, x, y):
-        print "set exhausted:", x, y
         key = self._key(x, y)
         now = os.times()[4]
         # this block is exhausted for 30 minutes
