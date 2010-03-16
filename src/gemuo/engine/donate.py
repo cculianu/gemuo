@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from uo.entity import ITEM_GOLD
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback, Repeat
 from gemuo.engine.items import OpenContainer
@@ -39,7 +40,7 @@ class DonateOnce(Engine):
 
         client = self._client
         world = client.world
-        gold = world.find_item_in(self._source, lambda x: x.item_id == 0xeed)
+        gold = world.find_item_in(self._source, lambda x: x.item_id == ITEM_GOLD)
         if gold is None:
             # No gold is success, because this engine is meant for use
             # cases where you donate all your money to raise Karma

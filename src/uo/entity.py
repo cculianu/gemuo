@@ -34,6 +34,7 @@ RUNNING = 0x80
 SERIAL_PLAYER = 0x80000000
 
 ITEM_BANDAGE = 0xe21
+ITEM_GOLD = 0xeed
 
 ITEM_DRUMS = 0xe9c
 ITEM_TAMOURINE = 0xe9d
@@ -106,6 +107,25 @@ ITEMS_WEAPONS = \
 ITEMS_FOOD = (
     ITEM_FISH_STEAK,
     )
+
+ITEMS_WOODEN_BOX = (0x9aa, 0xe7d)
+ITEMS_MEDIUM_CRATE = (0xe3f, 0xe3e)
+ITEMS_LARGE_CRATE = (0xe3c, 0xe3d)
+
+ITEMS_LOGS = (0x1bdd, 0x1be0)
+ITEMS_BOARDS = (0x1bd7, 0x1bda)
+ITEMS_CARPENTRY_TOOLS = (
+    0x10e4, # draw knife
+    0x1030, 0x1031, # jointing plane
+    0x1034, 0x1035, # saw
+)
+
+ITEMS_CARPENTRY_PRODUCTS = ITEMS_MEDIUM_CRATE + ITEMS_WOODEN_BOX + (
+    0x1b7a, # wooden shield
+    0x0DC0, # fishing pole
+    0xe89, # quarter staff
+    0x13F8, # gnarled staff
+)
 
 TREES = (
     0x4CCA, 0x4CCB, 0x4CCC, 0x4CCD, 0x4CD0, 0x4CD3, 0x4CD6, 0x4CD8,
