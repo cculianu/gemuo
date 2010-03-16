@@ -97,6 +97,10 @@ class UseSkill(Engine):
             x = self._world.find_reachable_item(lambda x: True)
             if x is not None:
                 targets.append(x)
+        elif skill == SKILL_ARMS_LORE:
+            x = self._world.find_reachable_item(lambda x: x.item_id in ITEMS_WEAPONS)
+            if x is not None:
+                targets.append(x)
         elif skill == SKILL_DETECT_HIDDEN:
             targets.append(self._world.player)
         elif skill in (SKILL_ANATOMY, SKILL_EVAL_INT):
