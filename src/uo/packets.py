@@ -430,6 +430,12 @@ def MobileQuery(type, serial):
     p.uint(serial)
     return p.finish()
 
+def SkillLock(skill, lock):
+    p = PacketWriter(0x3a)
+    p.ushort(skill)
+    p.byte(lock)
+    return p.finish()
+
 def VendorBuyReply(vendor_serial, item_serial, amount=1):
     p = PacketWriter(0x3b)
     p.uint(vendor_serial)
