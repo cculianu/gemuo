@@ -204,6 +204,11 @@ class PathFindWalk(Engine):
 
         player = self.player
         position = player.position
+
+        if not self.map.is_passable(next.x, next.y, position.z):
+            self._path_find()
+            return
+
         if position is None:
             self._failure()
             return
