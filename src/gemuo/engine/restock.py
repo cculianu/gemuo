@@ -102,7 +102,6 @@ class Restock(Engine, TimerEvent):
             l = self._locked[0]
             item = world.find_item_in(self._source, lambda x: x.item_id == l.item_id and x.hue == l.hue)
             if item is not None:
-                print "move", item, l
                 client.send(p.LiftRequest(item.serial))
                 client.send(p.Drop(item.serial, l.position.x, l.position.y, l.position.z, l.serial))
                 FinishCallback(client, Delayed(client, 1), self._source_opened)
@@ -113,7 +112,6 @@ class Restock(Engine, TimerEvent):
                        self._destination_opened)
 
     def _destination_opened(self, success):
-        print "_destination_opened", success
         if not success:
             self._failure()
             return
