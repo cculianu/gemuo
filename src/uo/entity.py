@@ -95,6 +95,7 @@ ITEMS_WEAPONS_MACE = (
 
 ITEMS_AXE = (
     0xf45, # executioner's axe
+    0xf47, 0xf48, # battle axe
     0xf4b, 0xf4c, # double axe
     0x1443, # two handed axe
 )
