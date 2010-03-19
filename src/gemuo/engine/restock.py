@@ -197,11 +197,7 @@ class Trash(Engine):
                        self._source_opened)
 
     def _find_trash_can(self):
-        for x in self._client.world.entities.itervalues():
-            if isinstance(x, Item) and x.parent_serial is None and \
-               x.item_id == 0xe77:
-                return x
-        return None
+        return self._client.world.nearest_reachable_item(lambda x: x.parent_serial is None and x.item_id == 0xe77)
 
     def _source_opened(self, success):
         if not success:
