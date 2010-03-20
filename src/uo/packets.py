@@ -205,6 +205,20 @@ class MobileMoving:
         self.flags = packet.byte()
         self.notoriety = packet.byte()
 
+class VendorBuyItem:
+    def __init__(self, packet):
+        self.price = packet.uint()
+        packet.byte() # length
+        self.description = packet.cstring()
+
+class VendorBuyList:
+    def __init__(self, packet):
+        self.serial = packet.uint()
+        count = packet.byte()
+        self.items = list()
+        for i in range(count):
+            self.items.append(VendorBuyItem(packet))
+
 class MobileItem:
     def __init__(self, serial, packet):
         self.serial = serial
@@ -345,6 +359,7 @@ parsers = {
     0x6d: Ignore, # PlayMusic
     0x6e: Ignore, # CharAction
     0x72: Ignore, # WarMode
+    0x74: VendorBuyList,
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x7c: Menu,
