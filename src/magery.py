@@ -81,18 +81,17 @@ class NeedMana(Engine):
 def select_circle(skill):
     if skill < 300:
         return None
-    if skill < 400:
+    if skill < 350:
         return 3
-    if skill < 550:
+    if skill < 500:
         return 4
-    if skill < 650:
+    if skill < 600:
         return 5
-    if skill < 800:
+    if skill < 750:
         return 6
     if skill < 960:
         return 7
-    return 7
-    #return 8
+    return 8
 
 SPELLS = (
     None,

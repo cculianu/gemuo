@@ -5,6 +5,7 @@ from gemuo.simple import SimpleClient
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.bandage import CutAllCloth
 from gemuo.engine.items import OpenContainer
+from gemuo.engine.util import Delayed
 
 client = SimpleClient()
 PrintMessages(client)
