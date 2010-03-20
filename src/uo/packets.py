@@ -333,6 +333,7 @@ parsers = {
     0x2e: EquipItem,
     0x2f: Swing,
     0x3a: SkillUpdate,
+    0x3b: Ignore, # EndVendor{Sell,Buy}
     0x3c: ContainerContent,
     0x4e: Ignore, # PersonalLight
     0x4f: Ignore, # GlobalLight
@@ -347,6 +348,7 @@ parsers = {
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x7c: Menu,
+    0x89: Ignore, # CorpEquip
     0x8c: Relay,
     0x95: Ignore, # HuePicker
     0x97: MovePlayer,
