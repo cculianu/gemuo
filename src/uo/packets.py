@@ -219,6 +219,24 @@ class VendorBuyList:
         for i in range(count):
             self.items.append(VendorBuyItem(packet))
 
+class SecureTrade:
+    def __init__(self, packet):
+        self.type = packet.byte()
+        if self.type == 0x00:
+            # display
+            self.other_serial = packet.uint()
+            self.serial = packet.uint()
+            self.second_serial = packet.uint()
+            self.name = packet.fixstring(30)
+        elif self.type == 0x01:
+            # close
+            self.serial = packet.uint()
+        elif self.type == 0x02:
+            # update
+            self.serial = packet.uint()
+            self.first = packet.uint() != 0
+            self.second = packet.uint() != 0
+
 class MobileItem:
     def __init__(self, serial, packet):
         self.serial = serial
@@ -358,6 +376,7 @@ parsers = {
     0x6c: TargetRequest, # Target
     0x6d: Ignore, # PlayMusic
     0x6e: Ignore, # CharAction
+    0x6f: SecureTrade,
     0x72: Ignore, # WarMode
     0x74: VendorBuyList,
     0x77: MobileMoving,
@@ -486,6 +505,19 @@ def TargetResponse(type, target_id, flags, serial, x, y, z, graphic):
     p.ushort(y)
     p.ushort(z)
     p.ushort(graphic)
+    return p.finish()
+
+def CancelSecureTrade(serial):
+    p = PacketWriter(0x6f)
+    p.byte(0x01)
+    p.uint(serial)
+    return p.finish()
+
+def CheckSecureTrade(serial):
+    p = PacketWriter(0x6f)
+    p.byte(0x02)
+    p.uint(serial)
+    p.uint(1)
     return p.finish()
 
 def WarMode(warmode):
