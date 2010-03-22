@@ -103,6 +103,12 @@ class World(Engine):
                 return x
         return None
 
+    def _distance2(self, position):
+        player = self.player.position
+        dx = player.x - position.x
+        dy = player.y - position.y
+        return dx*dx + dy*dy
+
     def nearest_reachable_item(self, func):
         if self.player is None: return None
 
@@ -114,6 +120,21 @@ class World(Engine):
 
         items.sort(lambda a, b: cmp(self._distance2(a.position), self._distance2(b.position)))
         return items[0]
+
+    def nearest_mobile(self, func):
+        if self.player is None: return None
+
+        min_distance2 = 99999
+        min_mobile = None
+
+        for x in self.entities.itervalues():
+            if not isinstance(x, Mobile) or x.serial == self.player.serial: continue
+            d2 = self._distance2(x.position)
+            if d2 < min_distance2 and func(x):
+                min_distance2 = d2
+                min_mobile = x
+
+        return min_mobile
 
     def iter_entities_at(self, x, y):
         for e in self.entities.itervalues():
