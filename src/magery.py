@@ -61,8 +61,34 @@ class NeedMana(Engine):
     def __init__(self, client, mana):
         Engine.__init__(self, client)
 
-        self.mana = mana
         self.player = client.world.player
+
+        if self.player.skills is not None and SKILL_MEDITATION in self.player.skills:
+            skill = self.player.skills[SKILL_MEDITATION].base
+        else:
+            skill = 0
+
+        # calculate the optimal skill gain percentage
+        min_percent, max_percent = 900 - skill, 1200 - skill
+        if min_percent < 0:
+            min_percent = 0
+        if max_percent < 0:
+            max_percent = 0
+        elif max_percent > 1000:
+            max_percent = 1000
+
+        if self.player.stats is not None:
+            intelligence = self.player.stats[2]
+        else:
+            intelligence = 50
+
+        min_mana = (min_percent * intelligence) / 1000
+        max_mana = (max_percent * intelligence) / 1000
+
+        if mana < max_mana:
+            mana = max_mana
+        self.mana = mana
+
         self._check()
 
     def _check(self):
