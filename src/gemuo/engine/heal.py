@@ -94,18 +94,18 @@ class AutoHeal(Engine, TimerEvent):
 
         self._next()
 
+    def _should_heal(self, m):
+        # heal if below 2/3 health
+        return m.hits is not None and m.hits.value <= (m.hits.limit * 2) / 3
+
     def _next(self):
         client = self._client
-        m = client.world.nearest_mobile(lambda x: True)
+        m = client.world.find_reachable_mobile(self._should_heal)
         if m is None:
             self._schedule(1)
             return
 
-        if m.hits is not None and m.hits.value <= (m.hits.limit * 2) / 3:
-            # heal if target is below 2/3 health
-            FinishCallback(client, UseBandageOn(client, m), self._healed)
-        else:
-            self._schedule(1)
+        FinishCallback(client, UseBandageOn(client, m), self._healed)
 
     def _healed(self, success):
         if success:
