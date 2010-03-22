@@ -48,6 +48,10 @@ class World(Engine):
                 (entity.parent_serial is None and \
                  entity.position is not None and self._reachable(entity.position)))
 
+    def _reachable_mobile(self, entity):
+        return isinstance(entity, Mobile) and \
+               entity.position is not None and self._reachable(entity.position)
+
     def mobiles(self):
         return filter(lambda x: isinstance(x, Mobile), self.entities.itervalues())
 
@@ -100,6 +104,13 @@ class World(Engine):
         if self.player is None: return None
         for x in self.entities.itervalues():
             if self._reachable_item(x) and func(x):
+                return x
+        return None
+
+    def find_reachable_mobile(self, func):
+        if self.player is None: return None
+        for x in self.entities.itervalues():
+            if self._reachable_mobile(x) and func(x):
                 return x
         return None
 
