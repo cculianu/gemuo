@@ -77,8 +77,12 @@ class AutoHeal(Engine, TimerEvent):
         self._next()
 
     def _should_heal(self, m):
+        if m.hits is None:
+            self._client.send(p.MobileQuery(0x04, m.serial))
+            return False
+
         # heal if below 2/3 health
-        return m.hits is not None and m.hits.value <= (m.hits.limit * 2) / 3
+        return m.hits.value <= (m.hits.limit * 2) / 3
 
     def _next(self):
         client = self._client
