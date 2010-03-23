@@ -15,11 +15,12 @@
 #   GNU General Public License for more details.
 #
 
-
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.engine.ress import GetRessed
 import uo.packets as p
 
-client = SimpleClient()
-client.send(p.WarMode(True))
-client.until(GetRessed(client).finished)
+def run(client):
+    client.send(p.WarMode(True))
+    return GetRessed(client)
+
+simple_run(run)

@@ -13,20 +13,25 @@
 #   GNU General Public License for more details.
 #
 
-import uo.client
+import os
+from twisted.internet import reactor, defer
+from twisted.internet.protocol import ClientCreator
+from uo.client import UOProtocol
 import uo.packets as p
-from gemuo.timer import TimerManager
+from gemuo.timer import TimerEvent
+from gemuo.engine import Engine
+from gemuo.engine.defer import defer_engine
 
-class Client(TimerManager):
-    def __init__(self, host, port):
-        TimerManager.__init__(self)
-        self._client = uo.client.Client(host, port)
+class Client:
+    def __init__(self, client):
+        client.handler = self._handle_packet
+
+        self._client = client
         self._engines = []
 
     def relay_to(self, host, port, auth_id):
         """Connect to the game server, and switches compression on."""
-        self._client = uo.client.Client(host, port, seed=auth_id,
-                                        decompress=True)
+        self._connect(host, port, seed=auth_id, decompress=True)
 
     def add_engine(self, engine):
         self._engines.append(engine)
@@ -47,11 +52,9 @@ class Client(TimerManager):
             print "No parser for packet:", hex(packet.cmd)
 
     def once(self, timeout=1):
-        packet = self._client.receive(timeout)
-        if packet is not None:
-            self._handle_packet(packet)
+        reactor.iterate(timeout)
         self._tick()
-        return packet is not None
+        return False
 
     def process(self, timeout=1):
         """Process all pending events.  The timeout is only valid for
@@ -74,3 +77,96 @@ class Client(TimerManager):
 
     def send(self, data):
         self._client.send(data)
+
+    def schedule(self, timer):
+        assert isinstance(timer, TimerEvent)
+
+        delay = timer.due - os.times()[4]
+        if delay < 0: delay = 0
+        timer.callID = reactor.callLater(delay, timer.tick)
+
+    def unschedule(self, timer):
+        callID = timer.callID
+        delattr(timer, 'callID')
+        callID.cancel()
+
+def connect(host, port, *args, **keywords):
+    d = defer.Deferred()
+
+    c = ClientCreator(reactor, UOProtocol, *args, **keywords)
+    e = c.connectTCP(host, port)
+    e.addCallback(lambda client: d.callback(Client(client)))
+    e.addErrback(lambda f: d.errback(f))
+
+    return d
+
+class GameLogin(Engine):
+    def __init__(self, client, username, password, auth_id, character):
+        Engine.__init__(self, client)
+
+        client.send(p.GameLogin(username, password, auth_id))
+
+    def on_packet(self, packet):
+        if isinstance(packet, p.ServerList):
+            self._failure("Refusing to use second server list")
+        elif isinstance(packet, p.Relay):
+            self._failure("Refusing to follow second relay")
+        elif isinstance(packet, p.CharacterList):
+            character = packet.find(character)
+            if character:
+                self._client.send(p.PlayCharacter(character.slot))
+                self._client.send(p.ClientVersion('5.0.8.3'))
+            else:
+                self._failure("No such character")
+        elif isinstance(packet, p.LoginComplete):
+            self._success(self._client)
+
+class AccountLogin(Engine):
+    def __init__(self, client, username, password, character, connect=connect):
+        Engine.__init__(self, client)
+
+        self.username = username
+        self.password = password
+        self.character = character
+        self.connect = connect
+
+        client.send(p.AccountLogin(username, password))
+
+    def _on_connect(self, client, auth_id):
+        d = defer_engine(client, GameLogin(client, self.username, self.password,
+                                           auth_id, self.character))
+        d.addCallback(lambda client: self._success(client))
+        d.addErrback(lambda f: self._failure(f))
+
+    def on_packet(self, packet):
+        if isinstance(packet, p.ServerList):
+            self._client.send(p.PlayServer(0))
+        elif isinstance(packet, p.Relay):
+            # connect to the game server
+            d = self.connect(packet.ip, packet.port, seed=packet.auth_id, decompress=True)
+            d.addCallback(lambda client: self._on_connect(client, packet.auth_id))
+            d.addErrback(lambda f: self._failure(f))
+            self._client.send(p.GameLogin(self.username, self.password,
+                                          packet.auth_id))
+        elif isinstance(packet, p.CharacterList):
+            character = packet.find(self.character)
+            if character:
+                self._client.send(p.PlayCharacter(character.slot))
+                self._client.send(p.ClientVersion('5.0.8.3'))
+            else:
+                self._failure("No such character")
+        elif isinstance(packet, p.LoginComplete):
+            self._success(self._client)
+
+def login(host, port, username, password, character, connect=connect):
+    d = defer.Deferred()
+
+    def on_connect(client):
+        e = defer_engine(client, AccountLogin(client, username, password, character, connect))
+        e.addCallback(lambda client: d.callback(client))
+        e.addErrback(lambda f: d.errback(f))
+
+    e = connect(host, port)
+    e.addCallback(on_connect)
+    e.addErrback(lambda f: d.errback(f))
+    return d

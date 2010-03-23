@@ -16,15 +16,16 @@
 
 # This script double-clicks on the nearest moongate.
 
-import sys
+from twisted.internet import defer
 import uo.packets as p
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 
-client = SimpleClient()
-gate = client.world.find_reachable_item(lambda x: x.item_id == 0xf6c)
-if gate is None:
-    print "No nearby gate found"
-    sys.exit(1)
+def run(client):
+    gate = client.world.find_reachable_item(lambda x: x.item_id == 0xf6c)
+    if gate is None:
+        return defer.fail('No nearby gate found')
 
-print gate
-client.send(p.Use(gate.serial))
+    print gate
+    client.send(p.Use(gate.serial))
+
+simple_run(run)

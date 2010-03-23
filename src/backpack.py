@@ -1,14 +1,21 @@
 #!/usr/bin/python
 
-from gemuo.simple import SimpleClient
+from twisted.internet import defer
+from gemuo.simple import simple_run
 from gemuo.engine.items import OpenContainer
+from gemuo.engine.defer import defer_engine
 
-client = SimpleClient()
-if client.world.backpack() is None:
-    raise "No backpack"
+def print_contents(result, world, container):
+    for x in world.items_in(container):
+        print x
 
-oc = OpenContainer(client, client.world.backpack())
-client.until(oc.finished)
+def run(client):
+    backpack = client.world.backpack()
+    if backpack is None:
+        return defer.fail('No backpack')
 
-for x in client.world.items_in(client.world.backpack()):
-    print x
+    d = defer_engine(client, OpenContainer(client, backpack))
+    d.addCallback(print_contents, client.world, backpack)
+    return d
+
+simple_run(run)

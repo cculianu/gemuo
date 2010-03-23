@@ -14,10 +14,20 @@
 #   GNU General Public License for more details.
 #
 
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.engine.items import OpenBank
 
-client = SimpleClient()
-client.until(OpenBank(client).finished)
-for x in client.world.items_in(client.world.bank()):
-    print x
+def print_bank(result, world):
+    container = world.bank()
+    if container is None:
+        raise 'No bank'
+
+    for x in world.items_in(container):
+        print x
+
+def run(client):
+    d = defer_engine(client, OpenBank(client))
+    d.addCallback(print_contents, client.world)
+    return d
+
+simple_run(run)

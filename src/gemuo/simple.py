@@ -14,23 +14,70 @@
 #
 
 from sys import argv, stderr, exit
-from gemuo.client import Client
+from twisted.internet import reactor, defer
+from twisted.internet.interfaces import IDelayedCall
+from gemuo.client import login, connect
 from gemuo.engine.login import Login
 from gemuo.world import World
 from gemuo.target import TargetMutex
+from gemuo.engine import Engine
+from gemuo.engine.defer import defer_engine
 
-class SimpleClient(Client):
-    def __init__(self):
-        if len(argv) != 6:
-            print >>stderr, "Usage: %s host port username password charname"
-            exit(1)
-
-        host, port, username, password, character = argv[1:]
-        port = int(port)
-
-        Client.__init__(self, host, port)
-        login = Login(self, username, password, character)
-        self.world = World(self)
-        self.until(login.finished)
-
+class SimpleClientWrapper:
+    def __init__(self, client):
+        self.client = client
+        self.world = World(client)
         self.target_mutex = TargetMutex(self)
+
+    def __getattr__(self, name):
+        x = getattr(self.client, name)
+        setattr(self, name, x)
+        return x
+
+def simple_connect(*args, **keywords):
+    d = defer.Deferred()
+
+    e = connect(*args, **keywords)
+    e.addCallback(lambda client: d.callback(SimpleClientWrapper(client)))
+    e.addErrback(lambda f: d.errback(f))
+
+    return d
+
+def simple_login():
+    if len(argv) != 6:
+        print >>stderr, "Usage: %s host port username password charname"
+        exit(1)
+
+    host, port, username, password, character = argv[1:]
+    port = int(port)
+
+    return login(host, port, username, password, character, connect=simple_connect)
+
+def simple_callback(result):
+    if result is None:
+        reactor.stop()
+    elif IDelayedCall.implementedBy(result.__class__):
+        pass
+    elif isinstance(result, Engine):
+        d = defer_engine(result._client, result)
+        d.addCallback(simple_callback)
+        d.addErrback(simple_err)
+    else:
+        result.addCallback(simple_callback)
+        result.addErrback(simple_err)
+
+def simple_later(delay, func, *args, **keywords):
+    def cb():
+        simple_callback(func(*args, **keywords))
+    return reactor.callLater(delay, cb)
+
+def simple_err(fail):
+    fail.printTraceback()
+    reactor.stop()
+
+def simple_run(run):
+    d = simple_login()
+    d.addCallback(run)
+    d.addCallback(simple_callback)
+    d.addErrback(simple_err)
+    reactor.run()

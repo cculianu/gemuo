@@ -15,7 +15,7 @@
 #
 
 import uo.packets as p
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
@@ -79,9 +79,9 @@ class AutoTailoring(Engine):
 
         DelayedCallback(self._client, 9, self._cut)
 
-client = SimpleClient()
+def run(client):
+    PrintMessages(client)
+    Guards(client)
+    return AutoTailoring(client)
 
-PrintMessages(client)
-Guards(client)
-Watch(client)
-client.until(AutoTailoring(client).finished)
+simple_run(run)

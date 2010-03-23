@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
+from twisted.internet import defer
 import uo.packets as p
 from uo.skills import *
 from uo.entity import *
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run, simple_later
 from gemuo.target import Target, SendTarget
 from gemuo.entity import Item
 from gemuo.engine import Engine
@@ -13,6 +14,7 @@ from gemuo.engine.items import OpenContainer, UseAndTarget
 from gemuo.engine.util import FinishCallback, Delayed, DelayedCallback
 from gemuo.engine.hide import AutoHide
 from gemuo.engine.restock import Restock
+from gemuo.engine.defer import defer_engine
 
 def find_crook(world):
     return world.find_player_item(lambda x: x.item_id == ITEM_CROOK)
@@ -126,18 +128,40 @@ class HarvestWool(Engine):
 
         DelayedCallback(self._client, 1, self._next)
 
-client = SimpleClient()
-PrintMessages(client)
-Watch(client)
-AutoHide(client)
+def chest_opened(client, chest):
+    return Restock(client, chest, func=lambda x: x.item_id == ITEM_WOOL)
 
-client.until(OpenContainer(client, client.world.backpack()).finished)
-client.until(Delayed(client, 1).finished)
-client.until(HarvestWool(client).finished)
+def chest_opened0(result, *args, **keywords):
+    return simple_later(1, chest_opened, *args, **keywords)
 
-chest = find_chest_at(client.world, client.world.player.position.x - 2,
-                      client.world.player.position.y)
-if chest is not None:
-    client.until(OpenContainer(client, chest).finished)
-    client.until(Delayed(client, 1).finished)
-    client.until(Restock(client, chest, func=lambda x: x.item_id == ITEM_WOOL).finished)
+def harvested(result, client):
+    chest = find_chest_at(client.world, client.world.player.position.x - 2,
+                          client.world.player.position.y)
+    if chest is None:
+        return defer.fail('No chest')
+
+    d = defer_engine(client, OpenContainer(client, chest))
+    d.addCallback(chest_opened0, client, chest)
+    return d
+
+def backpack_opened(client):
+    d = defer_engine(client, HarvestWool(client))
+    d.addCallback(harvested, client)
+    return d
+
+def backpack_opened0(result, *args, **keywords):
+    return simple_later(1, backpack_opened, *args, **keywords)
+
+def run(client):
+    PrintMessages(client)
+    AutoHide(client)
+
+    backpack = client.world.backpack()
+    if backpack is None:
+        return defer.fail('No backpack')
+
+    d = defer_engine(client, OpenContainer(client, backpack))
+    d.addCallback(backpack_opened0, client)
+    return d
+
+simple_run(run)

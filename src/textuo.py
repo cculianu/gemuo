@@ -16,7 +16,7 @@
 import os, sys
 import curses, traceback
 from uo.entity import TREES
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run, simple_later
 from gemuo.util import AllFinished
 from gemuo.engine.player import QuerySkills, QueryStats
 from gemuo.data import TileCache
@@ -35,16 +35,15 @@ COLOR_WATER = 9
 tc = TileCache('/home/max/.wine/drive_c/uo')
 m = tc.get_map(0)
 
-client = SimpleClient()
-
 def restorescreen():
     curses.nocbreak()
     curses.echo()
     curses.endwin()
 
 class GameWindow:
-    def __init__(self, window):
+    def __init__(self, window, world):
         self.window = window
+        self.world = world
 
     def draw_land(self, origin_x, origin_y, width, height):
         window = self.window
@@ -123,7 +122,7 @@ class GameWindow:
 
     def draw_entities(self, origin_x, origin_y, width, height):
         window = self.window
-        for e in client.world.entities.itervalues():
+        for e in self.world.entities.itervalues():
             if e.position is None or \
                (e is Item and e.parent_serial is not None):
                 continue
@@ -155,7 +154,12 @@ class GameWindow:
 
         window.move(p.y - origin_y, p.x - origin_x)
 
-def main():
+def update(screen, map_window, client):
+    map_window.draw(client.world.player)
+    screen.refresh()
+    return simple_later(0.5, update, screen, map_window, client)
+
+def main(client):
     global screen
     screen = curses.initscr()
     curses.noecho()
@@ -171,18 +175,13 @@ def main():
     curses.init_pair(COLOR_INVULNERABLE, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     curses.init_pair(COLOR_WATER, curses.COLOR_BLUE, curses.COLOR_WHITE)
 
-    map_window = GameWindow(screen)
-
-    while True:
-        map_window.draw(client.world.player)
-        screen.refresh()
-        client.process()
-
-    restorescreen()
+    map_window = GameWindow(screen, client.world)
+    return update(screen, map_window, client)
 
 if __name__ == '__main__':
     try:
-        main()
+        simple_run(main)
+        restorescreen()
     except:
         restorescreen()
         traceback.print_exc()

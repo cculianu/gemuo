@@ -5,7 +5,7 @@ from uo.spells import *
 from uo.entity import *
 import uo.packets as p
 import uo.rules
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.entity import Item
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
@@ -201,11 +201,11 @@ class AutoMagery(Engine):
 
         self._next()
 
-client = SimpleClient()
+def run(client):
+    PrintMessages(client)
+    Guards(client)
+    Watch(client)
+    StatLock(client, (100, 25, 100))
+    return AutoMagery(client)
 
-PrintMessages(client)
-Guards(client)
-Watch(client)
-StatLock(client, (100, 25, 100))
-
-client.until(AutoMagery(client).finished)
+simple_run(run)

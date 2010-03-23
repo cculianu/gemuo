@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.engine.watch import Watch
 
-client = SimpleClient()
-client.until(Watch(client).finished)
+def run(client):
+    return Watch(client)
+
+simple_run(run)

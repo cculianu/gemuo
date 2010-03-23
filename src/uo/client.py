@@ -13,33 +13,25 @@
 #   GNU General Public License for more details.
 #
 
-import socket, select
 import struct
+from twisted.internet.protocol import Protocol
 from uo.serialize import packet_lengths, PacketReader
 from uo.compression import Decompress
 
-class Client:
-    def __init__(self, host, port, seed=42, decompress=False):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.connect((host, port))
-        self._socket.send(struct.pack('>I', seed))
-        self._decompress = None
-        if decompress:
-            self._decompress = Decompress()
+class UOProtocol(Protocol):
+    def __init__(self, seed=42, decompress=False):
+        self.__seed = seed
+        self.__decompress = decompress
+
+    def connectionMade(self):
+        Protocol.connectionMade(self)
+
+        self.transport.write(struct.pack('>I', self.__seed))
         self._input = ''
 
-    def _poll(self, timeout):
-        x = select.select([self._socket], [], [], timeout)
-        print x
-
-    def _fill_buffer(self):
-        x = self._socket.recv(4096)
-        if x == '':
-            raise "Connection closed"
-
-        if self._decompress:
-            x = self._decompress.decompress(x)
-        self._input += x
+        self._decompress = None
+        if self.__decompress:
+            self._decompress = Decompress()
 
     def _packet_from_buffer(self):
         if self._input == '':
@@ -61,17 +53,20 @@ class Client:
             x, self._input = self._input[1:l], self._input[l:]
         return PacketReader(cmd, x)
 
-    def receive(self, timeout=None):
+    def on_packet(self, packet):
+        self.handler(packet)
+
+    def dataReceived(self, data):
+        if self._decompress:
+            data = self._decompress.decompress(data)
+
+        self._input += data
+
         while True:
-            x = self._packet_from_buffer()
-            if x is not None: return x
+            packet = self._packet_from_buffer()
+            if packet is None: break
 
-            if timeout is not None:
-                x = select.select([self._socket], [], [], timeout)
-                if len(x[0]) == 0:
-                    return None
-
-            self._fill_buffer()
+            self.on_packet(packet)
 
     def send(self, data):
-        self._socket.send(data)
+        self.transport.write(data)

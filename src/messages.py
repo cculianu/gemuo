@@ -20,6 +20,6 @@ from gemuo.engine.guards import Guards
 
 def run(client):
     Guards(client)
-    PrintMessages(client)
+    return PrintMessages(client)
 
 simple_run(run)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from uo.skills import *
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.engine.stats import StatLock
 from gemuo.engine.training import SkillTraining
 from gemuo.engine.messages import PrintMessages
@@ -17,10 +17,11 @@ skills = (
     SKILL_ARMS_LORE,
 )
 
-client = SimpleClient()
-PrintMessages(client)
-Guards(client)
-Watch(client)
-StatLock(client, (100, 25, 100))
-st = SkillTraining(client, skills, round_robin=False)
-client.until(st.finished)
+def run(client):
+    PrintMessages(client)
+    Guards(client)
+    Watch(client)
+    StatLock(client, (100, 25, 100))
+    return SkillTraining(client, skills, round_robin=False)
+
+simple_run(run)

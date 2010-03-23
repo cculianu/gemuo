@@ -17,7 +17,7 @@
 from uo.entity import *
 import uo.packets as p
 from uo.entity import TREES, ITEMS_AXE
-from gemuo.simple import SimpleClient
+from gemuo.simple import simple_run
 from gemuo.data import TileCache
 from gemuo.entity import Position, Item
 from gemuo.exhaust import ExhaustDatabase
@@ -114,9 +114,10 @@ class AutoFletching(Engine):
 
         self._trash()
 
-client = SimpleClient()
+def run(client):
+    PrintMessages(client)
+    Guards(client)
+    Watch(client)
+    return AutoFletching(client)
 
-PrintMessages(client)
-Guards(client)
-Watch(client)
-client.until(AutoFletching(client).finished)
+simple_run(run)
