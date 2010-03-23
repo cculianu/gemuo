@@ -12,6 +12,7 @@ from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
 from gemuo.engine.util import FinishCallback, DelayedCallback
+from gemuo.engine.stats import StatLock
 from gemuo.engine.player import QuerySkills
 
 class CastSpell(Engine):
@@ -205,4 +206,6 @@ client = SimpleClient()
 PrintMessages(client)
 Guards(client)
 Watch(client)
+StatLock(client, (100, 25, 100))
+
 client.until(AutoMagery(client).finished)
