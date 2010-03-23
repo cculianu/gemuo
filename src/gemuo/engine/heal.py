@@ -77,6 +77,9 @@ class AutoHeal(Engine, TimerEvent):
         self._next()
 
     def _should_heal(self, m):
+        if not m.is_human():
+            return False
+
         if m.hits is None:
             self._client.send(p.MobileQuery(0x04, m.serial))
             return False
