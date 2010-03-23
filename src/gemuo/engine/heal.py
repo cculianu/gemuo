@@ -17,9 +17,8 @@ import uo.packets as p
 from uo.entity import ITEM_BANDAGE
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
-from gemuo.target import Target, SendTarget
 from gemuo.engine.util import FinishCallback, DelayedCallback
-from gemuo.engine.items import OpenContainer
+from gemuo.engine.items import OpenContainer, UseAndTarget
 from gemuo.engine.bandage import CutCloth
 
 def find_bandage(world):
@@ -29,8 +28,7 @@ class UseBandageOn(Engine):
     def __init__(self, client, target):
         Engine.__init__(self, client)
 
-        self.target = Target(serial=target.serial)
-        self.target_mutex = client.target_mutex
+        self.target = target
 
         world = client.world
         bandage = find_bandage(world)
@@ -62,24 +60,12 @@ class UseBandageOn(Engine):
         self._bandage(bandage)
 
     def _bandage(self, bandage):
-        self.bandage = bandage
-        self.target_mutex.get_target(self.target_ok, self.target_abort)
-
-    def target_ok(self):
         client = self._client
-        client.send(p.Use(self.bandage.serial))
-        self.engine = SendTarget(client, self.target)
-        FinishCallback(client, self.engine, self._target_sent)
+        FinishCallback(client, UseAndTarget(client, bandage, self.target), self._healed)
 
-    def target_abort(self):
-        self.engine.abort()
-        self._failure()
-
-    def _target_sent(self, success):
-        self.target_mutex.put_target()
-
+    def _healed(self, success):
         if success:
-            DelayedCallback(client, 6, self._success)
+            DelayedCallback(self._client, 6, self._success)
         else:
             self._failure()
 

@@ -14,8 +14,11 @@
 #
 
 import uo.packets as p
+from gemuo.entity import Entity
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
+from gemuo.target import Target, SendTarget
+from gemuo.engine.util import FinishCallback
 
 class OpenBank(Engine):
     def __init__(self, client):
@@ -68,3 +71,37 @@ class OpenContainer(Engine, TimerEvent):
     def tick(self):
         print "OpenContainer timeout"
         self._failure()
+
+class UseAndTarget(Engine):
+    def __init__(self, client, item, target):
+        Engine.__init__(self, client)
+
+        if isinstance(item, Entity):
+            item = item.serial
+
+        if isinstance(target, Entity):
+            target = Target(serial=target.serial)
+
+        self.item = item
+        self.target = target
+
+        self.target_mutex = client.target_mutex
+        self.target_mutex.get_target(self.target_ok, self.target_abort)
+
+    def target_ok(self):
+        client = self._client
+        client.send(p.Use(self.item))
+        self.engine = SendTarget(client, self.target)
+        FinishCallback(client, self.engine, self._target_sent)
+
+    def target_abort(self):
+        self.engine.abort()
+        self._failure()
+
+    def _target_sent(self, success):
+        self.target_mutex.put_target()
+
+        if success:
+            self._success()
+        else:
+            self._failure()
