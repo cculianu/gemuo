@@ -43,3 +43,7 @@ class Engine:
         self.__stop()
         self.__result = False
         self._signal('on_engine_failure', self, *args, **keywords)
+
+    def abort(self):
+        """Aborts this engine, does not emit a signal."""
+        self.__stop()
