@@ -60,6 +60,11 @@ class DelayedCallback(Engine, TimerEvent):
         self._func()
         self._success()
 
+class Success(Engine):
+    def __init__(self, client):
+        Engine.__init__(self, client)
+        self._success()
+
 class Fail(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
