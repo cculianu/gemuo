@@ -110,5 +110,8 @@ class Mobile(Entity):
         for x in skills:
             self.skills[x.id] = x
 
+    def is_human(self):
+        return self.body in HUMANS
+
     def is_animal(self):
         return self.body in ANIMALS
