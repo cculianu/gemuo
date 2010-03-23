@@ -26,25 +26,23 @@ class CutCloth(Engine):
         self._target_locked = False
         self._world = client.world
 
-        self._target_mutex.get_target(self._target_ok, self._target_abort)
-
-    def _target_ok(self):
-        scissors = self._world.nearest_reachable_item(lambda x: x.item_id in (0xf9e, 0xf9f))
-        if scissors is None:
+        self.scissors = self._world.nearest_reachable_item(lambda x: x.item_id in (0xf9e, 0xf9f))
+        if self.scissors is None:
             print "No scissors"
-            self._target_mutex.put_target()
             self._failure()
             return
 
         self._cloth = self._world.find_player_item(lambda x: x.item_id in (0xf9b, 0x1766))
         if self._cloth is None:
             print "No cloth"
-            self._target_mutex.put_target()
             self._success()
             return
 
+        self._target_mutex.get_target(self._target_ok, self._target_abort)
+
+    def _target_ok(self):
         self._target_locked = True
-        self._client.send(p.Use(scissors.serial))
+        self._client.send(p.Use(self.scissors.serial))
 
     def _target_abort(self):
         self._failure()
