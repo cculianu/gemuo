@@ -152,6 +152,11 @@ class World(Engine):
             if e.position is not None and e.position.x == x and e.position.y == y:
                 yield e
 
+    def iter_mobiles(self):
+        for e in self.entities.itervalues():
+            if isinstance(e, Mobile):
+                yield e
+
     def find_mobile_at(self, x, y):
         for e in self.iter_entities_at(x, y):
             if isinstance(e, Mobile):
