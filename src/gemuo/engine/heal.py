@@ -54,7 +54,7 @@ class UseBandageOn(Engine):
         bandage = find_bandage(client.world)
         if bandage is None:
             print "No bandage"
-            self._failure()
+            DelayedCallback(client, 1, self._failure)
             return
 
         self._bandage(bandage)
