@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
 
@@ -63,3 +64,25 @@ class TargetMutex(Engine, TimerEvent):
 
         self._abort_func()
         self._next()
+
+class Target:
+    def __init__(self, serial=0, x=0xffff, y=0xffff, z=0xffff, graphic=0):
+        self.serial = serial
+        self.x = x
+        self.y = y
+        self.z = z
+        self.graphic = graphic
+
+    def response(self, target_id, flags):
+        return p.TargetResponse(0, target_id, flags, self.serial,
+                                self.x, self.y, self.z, self.graphic)
+
+class SendTarget(Engine):
+    def __init__(self, client, target):
+        Engine.__init__(self, client)
+        self.target = target
+
+    def on_packet(self, packet):
+        if isinstance(packet, p.TargetRequest):
+            self._client.send(self.target.response(packet.target_id, packet.flags))
+            self._success()

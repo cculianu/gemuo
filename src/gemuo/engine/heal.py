@@ -17,6 +17,7 @@ import uo.packets as p
 from uo.entity import ITEM_BANDAGE
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
+from gemuo.target import Target, SendTarget
 from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import OpenContainer
 from gemuo.engine.bandage import CutCloth
@@ -28,9 +29,8 @@ class UseBandageOn(Engine):
     def __init__(self, client, target):
         Engine.__init__(self, client)
 
-        self.target = target
+        self.target = Target(serial=target.serial)
         self.target_mutex = client.target_mutex
-        self.target_locked = False
 
         world = client.world
         bandage = find_bandage(world)
@@ -66,26 +66,22 @@ class UseBandageOn(Engine):
         self.target_mutex.get_target(self.target_ok, self.target_abort)
 
     def target_ok(self):
-        self.target_locked = True
-        self._client.send(p.Use(self.bandage.serial))
+        client = self._client
+        client.send(p.Use(self.bandage.serial))
+        self.engine = SendTarget(client, self.target)
+        FinishCallback(client, self.engine, self._target_sent)
 
     def target_abort(self):
+        self.engine.abort()
         self._failure()
 
-    def _on_target_request(self, allow_ground, target_id, flags):
-        if not self.target_locked: return
-
-        client = self._client
-        client.send(p.TargetResponse(0, target_id, flags, self.target.serial,
-                                     0xffff, 0xffff, 0xffff, 0))
+    def _target_sent(self, success):
         self.target_mutex.put_target()
 
-        DelayedCallback(client, 6, self._success)
-
-    def on_packet(self, packet):
-        if isinstance(packet, p.TargetRequest):
-            self._on_target_request(packet.allow_ground, packet.target_id,
-                                    packet.flags)
+        if success:
+            DelayedCallback(client, 6, self._success)
+        else:
+            self._failure()
 
 class AutoHeal(Engine, TimerEvent):
     def __init__(self, client):
