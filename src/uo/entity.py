@@ -113,6 +113,12 @@ ITEMS_FOOD = (
 
 ITEM_WOOL = 0xdf8
 
+ITEMS_YARN = (
+    0xe1d,
+    0xe1e,
+    0xe1f,
+    )
+
 ITEMS_SPINNING_WHEEL = (
     0x1015,
     0x1019,
