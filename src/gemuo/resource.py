@@ -38,10 +38,10 @@ class Spiral:
         self.y += self.vector[1]
         self.remaining -= 1
 
-def find_resource(map, position, ids, exhaust_db):
+def find_resource(map, position, ids, exhaust_db=None):
     spiral = Spiral(position.x / 8, position.y / 8)
     while True:
-        if not exhaust_db.is_exhausted(spiral.x, spiral.y):
+        if exhaust_db is None or not exhaust_db.is_exhausted(spiral.x, spiral.y):
             block = map.statics.load_block(spiral.x, spiral.y)
             if block is not None:
                 for item_id, x, y, z, hue in block:
