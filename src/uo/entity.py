@@ -113,6 +113,21 @@ ITEMS_FOOD = (
 
 ITEM_WOOL = 0xdf8
 
+ITEMS_SPINNING_WHEEL = (
+    0x1015,
+    0x1019,
+    0x101c,
+    0x10a4,
+    )
+
+ITEMS_LOOM = (
+    0x105f,
+    0x1060,
+    0x1061,
+    0x1062,
+    )
+
+
 ITEM_GM_ROBE = 0x204f
 
 ITEMS_WOODEN_BOX = (0x9aa, 0xe7d)
