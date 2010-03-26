@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from gemuo.engine import Engine
 
 class FinishCallback(Engine):
