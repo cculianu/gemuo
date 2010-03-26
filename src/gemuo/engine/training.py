@@ -127,7 +127,9 @@ class UseSkill(Engine):
                 # target self if less than 2 animals found
                 targets.append(self._world.player)
         elif skill == SKILL_DISCORDANCE:
-            targets.extend(self._find_neutral_animals())
+            m = self._world.nearest_mobile(lambda x: True)
+            if m is not None:
+                targets.append(m)
         elif skill == SKILL_ANIMAL_LORE:
             targets.extend(self._find_animals())
         elif skill == SKILL_HERDING:
