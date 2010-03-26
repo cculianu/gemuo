@@ -349,35 +349,23 @@ class SkillTraining(Engine, TimerEvent):
         self._current = skill = self._next_skill()
         assert skill is not None
 
+        client = self._client
+
         # create a UseSkill sub-engine and wait for its completion
         if skill == SKILL_STEALTH:
-            self._use = UseStealth(self._client)
+            self._use = UseStealth(client)
         else:
-            self._use = UseSkill(self._client, skill)
+            self._use = UseSkill(client, skill)
 
-        if self._use.finished():
-            # if finished within the constructor, then our
-            # on_engine_{success,failure} method won't catch it;
-            # special handling below:
-            result = self._use.result()
-            self._use = None
-            if result:
-                self._schedule(uo.rules.skill_delay(self._current))
-            else:
-                self._schedule(1)
+        FinishCallback(client, self._use, self._used)
 
     def on_skill_update(self, skills):
         self._check_skills(skills)
 
-    def on_engine_success(self, engine, *args, **keywords):
-        if self._use is not None and engine == self._use:
-            # the UseSkill engine has finished: schedule the next
-            # skill
-            self._use = None
+    def _used(self, success):
+        assert self._use is not None
+        self._use = None
+        if success:
             self._schedule(uo.rules.skill_delay(self._current))
-
-    def on_engine_failure(self, engine, *args, **keywords):
-        if self._use is not None and engine == self._use:
-            # the UseSkill engine has failed: retry soon
-            self._use = None
+        else:
             self._schedule(1)
