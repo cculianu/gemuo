@@ -16,7 +16,6 @@
 import uo.packets as p
 from uo.entity import ITEM_BANDAGE
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import OpenContainer, UseAndTarget
 from gemuo.engine.bandage import CutCloth
@@ -69,10 +68,9 @@ class UseBandageOn(Engine):
         else:
             self._failure()
 
-class AutoHeal(Engine, TimerEvent):
+class AutoHeal(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         self._next()
 
@@ -91,7 +89,7 @@ class AutoHeal(Engine, TimerEvent):
         client = self._client
         m = client.world.find_reachable_mobile(self._should_heal)
         if m is None:
-            self._schedule(1)
+            reactor.callLater(1, self._next)
             return
 
         FinishCallback(client, UseBandageOn(client, m), self._healed)
@@ -109,7 +107,4 @@ class AutoHeal(Engine, TimerEvent):
             self._failure()
             return
 
-        self._next()
-
-    def tick(self):
         self._next()
