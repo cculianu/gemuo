@@ -19,6 +19,7 @@ import uo.rules
 from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
+from gemuo.engine.util import FinishCallback
 
 class UseSkill(Engine):
     def __init__(self, client, skill):
