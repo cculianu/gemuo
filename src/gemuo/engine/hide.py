@@ -14,33 +14,32 @@
 #
 
 import random
+from twisted.internet import reactor
 from uo.skills import SKILL_HIDING
 import uo.packets as p
 import uo.rules
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
-class AutoHide(Engine, TimerEvent):
+class AutoHide(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
-        self.scheduled = False
+        self.call_id = None
         self.update(client.world.player)
 
     def update(self, player):
-        if not self.scheduled and not player.is_hidden():
+        if self.call_id is None and not player.is_hidden():
             client = self._client
             client.send(p.UseSkill(SKILL_HIDING))
-            self.scheduled = True
-            self._schedule(uo.rules.skill_delay(SKILL_HIDING))
+            self.call_id = reactor.callLater(uo.rules.skill_delay(SKILL_HIDING),
+                                             self._next)
 
     def on_mobile_update(self, mobile):
         client = self._client
         if mobile == client.world.player:
             self.update(mobile)
 
-    def tick(self):
-        self.scheduled = False
+    def _next(self):
+        self.call_id = None
         client = self._client
         self.update(client.world.player)
