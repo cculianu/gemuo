@@ -382,7 +382,9 @@ parsers = {
     0x77: MobileMoving,
     0x78: MobileIncoming,
     0x7c: Menu,
+    0x88: Ignore, # DisplayPaperdoll
     0x89: Ignore, # CorpEquip
+    0x8b: Ignore, # DisplaySignGump
     0x8c: Relay,
     0x95: Ignore, # HuePicker
     0x97: MovePlayer,
@@ -393,14 +395,16 @@ parsers = {
     0xa8: ServerList,
     0xa9: CharacterList,
     0xaa: ChangeCombatant,
+    0xb0: Ignore, # DisplayGump
     0xb9: Ignore, # Features
     0xbc: Ignore, # Season
     0xbf: Extended,
     0xbd: Ignore, # ClientVersion
     0xc0: Ignore, # HuedEffect
     0xc7: Ignore, # ParticleEffect
-    0xdc: Ignore, # AOSObjProp
     0xd6: Ignore, # AOSToolTip
+    0xdc: Ignore, # AOSObjProp
+    0xdd: Ignore, # DisplayGumpPacked
 }
 
 def WalkRequest(direction, seq):
