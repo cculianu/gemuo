@@ -99,7 +99,6 @@ class PathWalk(Engine):
 
         self.player = client.world.player
         self.path = list(path)
-        self.walk = None
 
         self._next_walk()
 
@@ -133,19 +132,16 @@ class PathWalk(Engine):
             return
 
         print "Walk to", nearest, nearest_distance2
-        self.walk = DirectWalk(self._client, nearest)
+        client = self._client
+        FinishCallback(client, DirectWalk(client, nearest), self._walked)
 
-    def on_engine_success(self, engine, *args, **keywords):
-        if engine == self.walk:
-            self.walk = None
+    def _walked(self, success):
+        if success:
             self.path = self.path[1:]
             self._next_walk()
-
-    def on_engine_failure(self, engine, *args, **keywords):
-        if engine == self.walk:
+        else:
             print "Walk failed"
-            self.walk = None
-            self._next_walk()
+            DelayedCallback(self._client, 2, self._next_walk)
 
 class MapWrapper:
     def __init__(self, map):
