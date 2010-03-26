@@ -19,27 +19,20 @@ class Engine:
     def __init__(self, client):
         self._client = client
         self._client.add_engine(self)
-        self.__finished = False
         self.deferred = Deferred()
-
-    def finished(self):
-        return self.__finished
 
     def _signal(self, name, *args, **keywords):
         self._client.signal(name, *args, **keywords)
 
     def __stop(self):
-        assert not self.__finished
         self._client.remove_engine(self)
 
     def _success(self, result=None):
         self.__stop()
-        self.__finished = True
         self.deferred.callback(result)
 
     def _failure(self, fail='Engine failed'):
         self.__stop()
-        self.__finished = True
         self.deferred.errback(fail)
 
     def abort(self):

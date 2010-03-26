@@ -94,8 +94,6 @@ class StatJojo(Engine):
                     break
 
         FinishCallback(client, StatLock(client, goal), self._stat_lock_finished)
-        if self.finished():
-            return
 
         self.skills = selected
         self._next_skill()
