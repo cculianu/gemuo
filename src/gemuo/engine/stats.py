@@ -13,22 +13,18 @@
 #   GNU General Public License for more details.
 #
 
-from uo.skills import *
 from uo.stats import *
 import uo.packets as p
-import uo.rules
-from uo.entity import SERIAL_PLAYER
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
-class StatLock(Engine, TimerEvent):
+class StatLock(Engine):
     """Automatically sets the stack locks to reach the specified goal.
     Leaves all locks to "UP" as long as the sum is below the 225
     cap."""
 
     def __init__(self, client, goal):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
+
         self.player = client.world.player
         self.goal = goal
         self.tries = 10
