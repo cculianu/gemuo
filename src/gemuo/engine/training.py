@@ -13,12 +13,12 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from uo.skills import *
 import uo.packets as p
 import uo.rules
 from uo.entity import *
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 from gemuo.engine.util import FinishCallback
 from gemuo.engine.player import QuerySkills
 
@@ -233,7 +233,7 @@ class UseSkill(Engine):
             self._on_target_request(packet.allow_ground, packet.target_id,
                                     packet.flags)
 
-class UseStealth(Engine, TimerEvent):
+class UseStealth(Engine):
     """Stealth is a special case: it can only be used if the player is
     hidden already.  So this sub-engine hides first (unless already
     hidden), and then attempts to use the Stealth skill unless the
@@ -241,7 +241,6 @@ class UseStealth(Engine, TimerEvent):
 
     def __init__(self, client):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         self._player = client.world.player
         self._waiting = False
@@ -250,13 +249,13 @@ class UseStealth(Engine, TimerEvent):
             self._client.send(p.UseSkill(SKILL_STEALTH))
         else:
             self._client.send(p.UseSkill(SKILL_HIDING))
-        self._schedule(0.5)
+        self.call_id = reactor.callLater(0.5, self._next)
 
     def abort(self):
-        self._unschedule()
+        self.call_id.cancel()
         self._failure()
 
-    def tick(self):
+    def _next(self):
         if not self._player.is_hidden():
             # we have been revealed or hiding has failed; finish this
             # engine for now
@@ -265,21 +264,21 @@ class UseStealth(Engine, TimerEvent):
             # next stealth attempt
             self._waiting = False
             self._client.send(p.UseSkill(SKILL_STEALTH))
-            self._schedule(0.5)
+            self.call_id = reactor.callLater(0.5, self._next)
         else:
             # still hidden; wait for skill delay
             self._waiting = True
-            self._schedule(10)
+            self.call_id = reactor.callLater(10, self._next)
 
-class SkillTraining(Engine, TimerEvent):
+class SkillTraining(Engine):
     """Train one or more skills."""
 
     def __init__(self, client, skills, round_robin=False):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
         self._world = client.world
         self._skills = list(skills)
         self._use = None
+        self.call_id = None
         self.round_robin = round_robin
 
         # get current skill values
@@ -293,10 +292,11 @@ class SkillTraining(Engine, TimerEvent):
             self._check_skills(self._world.player.skills)
 
     def abort(self):
+        Engine.abort(self)
         if self._use is not None:
             self._use.abort()
-        self._unschedule()
-        self._failure()
+        if self.call_id is not None:
+            self.call_id.cancel()
 
     def _check_skills(self, skills):
         total = 0
@@ -327,7 +327,8 @@ class SkillTraining(Engine, TimerEvent):
         if len(self._skills) == 0:
             if self._use is not None:
                 self._use.abort()
-            self._unschedule()
+            if self.call_id is not None:
+                self.call_id.cancel()
             self._success()
             return
 
@@ -335,7 +336,8 @@ class SkillTraining(Engine, TimerEvent):
             print "No skills down"
             if self._use is not None:
                 self._use.abort()
-            self._unschedule()
+            if self.call_id is not None:
+                self.call_id.cancel()
             self._failure()
 
     def _next_skill(self):
@@ -347,7 +349,7 @@ class SkillTraining(Engine, TimerEvent):
             self._skills = self._skills[1:] + [skill]
         return skill
 
-    def tick(self):
+    def _do_next(self):
         assert self._use is None
 
         self._current = skill = self._next_skill()
@@ -368,7 +370,7 @@ class SkillTraining(Engine, TimerEvent):
             self._failure()
             return
 
-        self.tick()
+        self._do_next()
 
     def on_skill_update(self, skills):
         self._check_skills(skills)
@@ -377,6 +379,7 @@ class SkillTraining(Engine, TimerEvent):
         assert self._use is not None
         self._use = None
         if success:
-            self._schedule(uo.rules.skill_delay(self._current))
+            self.call_id = reactor.callLater(uo.rules.skill_delay(self._current),
+                                             self._do_next)
         else:
-            self._schedule(1)
+            self.call_id = reactor.callLater(1, self._do_next)
