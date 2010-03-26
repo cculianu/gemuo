@@ -18,7 +18,6 @@ from twisted.internet import reactor, defer
 from twisted.internet.protocol import ClientCreator
 from uo.client import UOProtocol
 import uo.packets as p
-from gemuo.timer import TimerEvent
 from gemuo.engine import Engine
 from gemuo.engine.defer import defer_engine
 
@@ -77,18 +76,6 @@ class Client:
 
     def send(self, data):
         self._client.send(data)
-
-    def schedule(self, timer):
-        assert isinstance(timer, TimerEvent)
-
-        delay = timer.due - os.times()[4]
-        if delay < 0: delay = 0
-        timer.callID = reactor.callLater(delay, timer.tick)
-
-    def unschedule(self, timer):
-        callID = timer.callID
-        delattr(timer, 'callID')
-        callID.cancel()
 
 def connect(host, port, *args, **keywords):
     d = defer.Deferred()
