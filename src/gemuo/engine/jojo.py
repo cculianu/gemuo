@@ -17,7 +17,6 @@ from uo.skills import *
 import uo.packets as p
 import uo.rules
 from uo.entity import *
-from gemuo.timer import TimerEvent
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.player import QuerySkills, QueryStats

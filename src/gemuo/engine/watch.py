@@ -16,10 +16,8 @@
 from uo.skills import *
 from uo.stats import *
 import uo.packets as p
-import uo.rules
 from uo.entity import *
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
 class Watch(Engine):
     """Watch skills and stats for changes."""
