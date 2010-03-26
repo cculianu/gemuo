@@ -13,36 +13,34 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet.defer import Deferred
+
 class Engine:
     def __init__(self, client):
         self._client = client
         self._client.add_engine(self)
-        self.__result = None
-        #elf.active = True
+        self.__finished = False
+        self.deferred = Deferred()
 
     def finished(self):
-        return self.__result is not None
-
-    def result(self):
-        assert self.__result == True or self.__result == False
-        return self.__result
+        return self.__finished
 
     def _signal(self, name, *args, **keywords):
         self._client.signal(name, *args, **keywords)
 
     def __stop(self):
-        assert self.__result is None
+        assert not self.__finished
         self._client.remove_engine(self)
 
-    def _success(self, *args, **keywords):
+    def _success(self, result=None):
         self.__stop()
-        self.__result = True
-        self._signal('on_engine_success', self, *args, **keywords)
+        self.__finished = True
+        self.deferred.callback(result)
 
-    def _failure(self, *args, **keywords):
+    def _failure(self, fail='Engine failed'):
         self.__stop()
-        self.__result = False
-        self._signal('on_engine_failure', self, *args, **keywords)
+        self.__finished = True
+        self.deferred.errback(fail)
 
     def abort(self):
         """Aborts this engine, does not emit a signal."""

@@ -20,23 +20,19 @@ class FinishCallback(Engine):
     def __init__(self, client, engine, func):
         Engine.__init__(self, client)
 
-        self._engine = engine
         self._func = func
 
-        if engine.finished():
-            func(engine.result())
-            self._success()
-            return
+        engine.deferred.addCallbacks(self._callback, self._errback)
 
-    def on_engine_success(self, engine, *args, **keywords):
-        if engine == self._engine:
-            self._func(True)
-            self._success()
+    def _callback(self, result):
+        self._func(True)
+        self._success()
+        return result
 
-    def on_engine_failure(self, engine, *args, **keywords):
-        if engine == self._engine:
-            self._func(False)
-            self._success()
+    def _errback(self, fail):
+        self._func(False)
+        self._success()
+        return fail
 
 class Delayed(Engine, TimerEvent):
     def __init__(self, client, delay):
