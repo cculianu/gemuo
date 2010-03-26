@@ -16,6 +16,7 @@
 import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.target import Target, SendTarget
+from gemuo.defer import deferred_nearest_reachable_item, deferred_find_item_in_backpack
 from gemuo.engine.items import UseAndTarget
 from gemuo.engine.util import FinishCallback, DelayedCallback
 
@@ -23,21 +24,22 @@ class CutCloth(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        world = client.world
+        d = deferred_find_item_in_backpack(client,
+                                           lambda x: x.item_id in (0xf9b, 0x1766))
+        d.addCallbacks(self._found_cloth, self._success)
 
-        scissors = world.nearest_reachable_item(lambda x: x.item_id in (0xf9e, 0xf9f))
-        if scissors is None:
-            print "No scissors"
-            self._failure()
-            return
+    def _found_cloth(self, result):
+        self.cloth = result
 
-        cloth = world.find_player_item(lambda x: x.item_id in (0xf9b, 0x1766))
-        if cloth is None:
-            print "No cloth"
-            self._success()
-            return
+        client = self._client
+        d = deferred_nearest_reachable_item(client,
+                                            lambda x: x.item_id in (0xf9e, 0xf9f))
+        d.addCallbacks(self._found_scissors, self._failure)
 
-        FinishCallback(client, UseAndTarget(client, scissors, cloth), self._cutted)
+    def _found_scissors(self, result):
+        client = self._client
+        FinishCallback(client, UseAndTarget(client, result, self.cloth),
+                       self._cutted)
 
     def _cutted(self, success):
         if success:
@@ -53,13 +55,12 @@ class CutAllCloth(Engine):
 
     def _next(self):
         client = self._client
-        world = client.world
+        d = deferred_find_item_in_backpack(client,
+                                           lambda x: x.item_id in (0xf9b, 0x1766))
+        d.addCallbacks(self._found_cloth, self._success)
 
-        cloth = world.find_player_item(lambda x: x.item_id in (0xf9b, 0x1766))
-        if cloth is None:
-            self._success()
-            return
-
+    def _found_cloth(self, result):
+        client = self._client
         FinishCallback(client, CutCloth(client), self._cutted)
 
     def _cutted(self, success):

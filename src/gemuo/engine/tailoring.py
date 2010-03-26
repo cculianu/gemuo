@@ -13,11 +13,13 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import defer
 from uo.skills import SKILL_TAILORING
 import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
 from gemuo.engine.menu import MenuResponse
+from gemuo.defer import deferred_find_item_in_backpack, deferred_skill
 
 def tailoring_target(skill):
     if skill < 500:
@@ -29,31 +31,29 @@ class Tailoring(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        tool = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id == 0xf9d)
-        if tool is None:
-            print "No tool"
-            self._failure()
-            return
+        d = deferred_find_item_in_backpack(client, lambda x: x.item_id == 0xf9d)
+        d.addCallbacks(self._found_tool, self._failure)
 
-        self.cloth = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id == 0x1766)
-        if self.cloth is None:
-            print "No cloth"
-            self._failure()
-            return
+    def _found_tool(self, result):
+        self.tool = result
+        d = deferred_find_item_in_backpack(self._client,
+                                           lambda x: x.item_id == 0x1766)
+        d.addCallbacks(self._found_cloth, self._failure)
 
-        skills = client.world.player.skills
-        if skills is None or SKILL_TAILORING not in skills:
-            print "No tailoring skill"
-            self._failure()
-            return
+    def _found_cloth(self, result):
+        self.cloth = result
+        d = deferred_skill(self._client, SKILL_TAILORING)
+        d.addCallbacks(self._got_skill, self._failure)
 
-        target = tailoring_target(skills[SKILL_TAILORING].value)
+    def _got_skill(self, result):
+        target = tailoring_target(result.value)
         if target is None:
             print "No tailoring target"
             self._failure()
             return
 
-        client.send(p.Use(tool.serial))
+        client = self._client
+        client.send(p.Use(self.tool.serial))
 
         FinishCallback(client, MenuResponse(client, target),
                        self._responded)

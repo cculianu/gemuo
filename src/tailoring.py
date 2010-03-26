@@ -16,6 +16,7 @@
 
 import uo.packets as p
 from gemuo.simple import simple_run
+from gemuo.defer import deferred_nearest_reachable_item
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
@@ -27,13 +28,12 @@ class Cut(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        world = client.world
-        self.scissors = world.nearest_reachable_item(lambda x: x.item_id in (0xf9e, 0xf9f))
-        if self.scissors is None:
-            print "No scissors"
-            self._failure()
-            return
+        d = deferred_nearest_reachable_item(client,
+                                            lambda x: x.item_id in (0xf9e, 0xf9f))
+        d.addCallbacks(self._found_scissors, self._failure)
 
+    def _found_scissors(self, result):
+        self.scissors = result
         self._next()
 
     def _next(self):
@@ -47,8 +47,9 @@ class Cut(Engine):
         client.send(p.Use(self.scissors.serial))
 
     def _on_target_request(self, allow_ground, target_id, flags):
-        self._client.send(p.TargetResponse(0, target_id, flags, self.target.serial,
-                                           0xffff, 0xffff, 0xffff, 0))
+        client = self._client
+        client.send(p.TargetResponse(0, target_id, flags, self.target.serial,
+                                     0xffff, 0xffff, 0xffff, 0))
         DelayedCallback(client, 1, self._next)
 
     def on_packet(self, packet):
