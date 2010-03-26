@@ -13,9 +13,10 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
+from twisted.python.failure import Failure
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
 def select_option(menu, item):
     for i, option in enumerate(menu.options):
@@ -23,19 +24,18 @@ def select_option(menu, item):
             return i + 1
     return None
 
-class MenuResponse(Engine, TimerEvent):
+class MenuResponse(Engine):
     def __init__(self, client, responses):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         assert len(responses) > 0
         self.responses = list(responses)
 
-        self._schedule(5)
+        self.call_id = reactor.callLater(5, self._timeout)
 
     def abort(self):
-        self._unschedule()
-        self._failure()
+        Engine.abort(self)
+        self.call_id.cancel()
 
     def on_packet(self, packet):
         if isinstance(packet, p.Menu):
@@ -43,16 +43,16 @@ class MenuResponse(Engine, TimerEvent):
             option = select_option(packet, response)
             if option is None:
                 print "Option not found"
-                self._unschedule()
+                self.call_id.cancel()
                 self._failure()
                 return
 
             self._client.send(p.MenuResponse(packet.dialog_serial, option))
 
             if len(self.responses) == 0:
-                self._unschedule()
+                self.call_id.cancel()
                 self._success()
 
-    def tick(self):
+    def _timeout(self):
         # waiting for the menu to appear has taken too long; give up
-        self._failure()
+        self._failure(Failure('Menu timeout'))
