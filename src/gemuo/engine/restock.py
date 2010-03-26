@@ -60,7 +60,7 @@ def move_items(client, source, destination, func):
     return MoveItems(client, items, destination)
 
 class Restock(Engine, TimerEvent):
-    def __init__(self, client, container, counts=(), func=None, locked=()):
+    def __init__(self, client, container, counts=(), func=None):
         Engine.__init__(self, client)
         TimerEvent.__init__(self, client)
 
@@ -76,8 +76,6 @@ class Restock(Engine, TimerEvent):
         else:
             self._counts.extend(counts)
         self._func = func
-        self._locked = []
-        self._locked.extend(locked)
 
         FinishCallback(client, OpenContainer(client, self._source),
                        self._source_opened)
@@ -96,17 +94,6 @@ class Restock(Engine, TimerEvent):
             return
 
         client = self._client
-        world = client.world
-
-        while len(self._locked) > 0:
-            l = self._locked[0]
-            item = world.find_item_in(self._source, lambda x: x.item_id == l.item_id and x.hue == l.hue)
-            if item is not None:
-                client.send(p.LiftRequest(item.serial))
-                client.send(p.Drop(item.serial, l.position.x, l.position.y, l.position.z, l.serial))
-                FinishCallback(client, Delayed(client, 1), self._source_opened)
-                return
-            self._locked = self._locked[1:]
 
         FinishCallback(client, OpenContainer(client, self._destination),
                        self._destination_opened)
