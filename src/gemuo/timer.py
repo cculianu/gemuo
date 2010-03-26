@@ -33,25 +33,3 @@ class TimerEvent:
     def tick(self):
         """Implement this."""
         assert False
-
-class TimerManager:
-    def __init__(self):
-        self.__timers = []
-
-    def schedule(self, timer):
-        assert isinstance(timer, TimerEvent)
-
-        if not timer in self.__timers:
-            self.__timers.append(timer)
-        self.__timers.sort(lambda a, b: cmp(a.due, b.due))
-
-    def unschedule(self, timer):
-        assert isinstance(timer, TimerEvent)
-
-        self.__timers.remove(timer)
-
-    def _tick(self):
-        now = os.times()[4]
-        while len(self.__timers) > 0 and self.__timers[0].due <= now:
-            x, self.__timers = self.__timers[0], self.__timers[1:]
-            x.tick()
