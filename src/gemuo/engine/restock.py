@@ -13,11 +13,11 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Item
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback, DelayedCallback
-from gemuo.timer import TimerEvent
 from gemuo.engine.items import OpenContainer
 
 def drop_into(client, item, container, amount=0xffff):
@@ -27,10 +27,9 @@ def drop_into(client, item, container, amount=0xffff):
     client.send(p.LiftRequest(item.serial, amount))
     client.send(p.Drop(item.serial, 0, 0, 0, dest.serial))
 
-class MoveItems(Engine, TimerEvent):
+class MoveItems(Engine):
     def __init__(self, client, items, container):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         self._items = []
         self._items.extend(items)
@@ -47,10 +46,7 @@ class MoveItems(Engine, TimerEvent):
         item, self._items = self._items[0], self._items[1:]
         drop_into(self._client, item, self._container)
 
-        self._schedule(1)
-
-    def tick(self):
-        self._next()
+        reactor.callLater(1, self._next)
 
 def move_items(client, source, destination, func):
     items = []
@@ -59,10 +55,9 @@ def move_items(client, source, destination, func):
             items.append(x)
     return MoveItems(client, items, destination)
 
-class Restock(Engine, TimerEvent):
+class Restock(Engine):
     def __init__(self, client, container, counts=(), func=None):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         self._source = client.world.backpack()
         if self._source is None:
@@ -144,7 +139,7 @@ class Restock(Engine, TimerEvent):
             client.send(p.LiftRequest(x.serial, n - count))
             client.send(p.Drop(x.serial, 0, 0, 0, self._destination.serial))
 
-            self._schedule(1)
+            reactor.callLater(1, self._do_counts)
         elif n < count:
             x = world.find_item_in(self._destination, lambda x: x.item_id in item_ids)
             if x is None:
@@ -155,13 +150,10 @@ class Restock(Engine, TimerEvent):
             client.send(p.LiftRequest(x.serial, count - n))
             client.send(p.Drop(x.serial, 0, 0, 0, self._source.serial))
 
-            self._schedule(1)
+            reactor.callLater(1, self._do_counts)
         else:
             self._counts = self._counts[1:]
-            self._schedule(0)
-
-    def tick(self):
-        self._do_counts()
+            reactor.callLater(0, self._do_counts)
 
 class Trash(Engine):
     """Find a trash can and throw items from the backpack into it."""
