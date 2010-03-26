@@ -10,8 +10,8 @@ from gemuo.engine.watch import Watch
 
 skills = (
     SKILL_PROVOCATION,
-    SKILL_PROVOCATION,
     SKILL_PEACEMAKING,
+    SKILL_DISCORDANCE,
 )
 
 def run(client):
