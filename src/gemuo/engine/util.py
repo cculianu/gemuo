@@ -13,7 +13,6 @@
 #   GNU General Public License for more details.
 #
 
-from gemuo.timer import TimerEvent
 from gemuo.engine import Engine
 
 class FinishCallback(Engine):
@@ -34,27 +33,18 @@ class FinishCallback(Engine):
         self._success()
         return fail
 
-class Delayed(Engine, TimerEvent):
+class Delayed(Engine):
     def __init__(self, client, delay):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
-        self._schedule(delay)
+        self._call_id = reactor.callLater(delay, self._success)
 
-    def tick(self):
-        self._success()
+    def abort(self):
+        Engine.abort(self)
+        self._call_id.cancel()
 
-class DelayedCallback(Engine, TimerEvent):
-    def __init__(self, client, delay, func):
-        Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
-
-        self._func = func
-        self._schedule(delay)
-
-    def tick(self):
-        self._func()
-        self._success()
+def DelayedCallback(client, delay, func):
+    reactor.callLater(delay, func)
 
 class Success(Engine):
     def __init__(self, client):
