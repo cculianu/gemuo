@@ -16,7 +16,7 @@
 import uo.packets as p
 from gemuo.entity import Item
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, Delayed
+from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.timer import TimerEvent
 from gemuo.engine.items import OpenContainer
 
@@ -86,13 +86,9 @@ class Restock(Engine, TimerEvent):
             return
 
         client = self._client
-        FinishCallback(client, Delayed(client, 1), self._foo)
+        DelayedCallback(client, 1, self._source_opened2)
 
-    def _foo(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _source_opened2(self):
         client = self._client
 
         FinishCallback(client, OpenContainer(client, self._destination),
