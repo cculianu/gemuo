@@ -13,35 +13,33 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
-class Guards(Engine, TimerEvent):
+class Guards(Engine):
     """This engine calls the guards automatically.  This is useful
     when those annoying in-town PKs attack."""
 
     def __init__(self, client):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
-        self.queued = False
+        self.call_id = None
 
     def call_guards(self):
         print "Calling guards"
         self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x07))
 
-    def tick(self):
-        self.queued = False
+    def call_guards_again(self):
+        self.call_id = None
         # cry for help again
         self.call_guards()
 
     def call_guards_twice(self):
         self.call_guards()
-        if self.queued:
-            self._unschedule()
-        self._schedule(2)
-        self.queued = True
+        if self.call_guards is not None:
+            self.call_guards.cancel()
+        self.call_id = reactor.callLater(2, self.call_guards_again)
 
     def on_message(self, serial, name, text):
         if name == '' and text in ('1', '2', '3'):
