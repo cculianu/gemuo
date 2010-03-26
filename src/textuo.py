@@ -17,7 +17,6 @@ import os, sys
 import curses, traceback
 from uo.entity import TREES
 from gemuo.simple import simple_run, simple_later
-from gemuo.util import AllFinished
 from gemuo.engine.player import QuerySkills, QueryStats
 from gemuo.data import TileCache
 from gemuo.entity import Item, Mobile
