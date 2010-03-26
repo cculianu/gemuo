@@ -13,10 +13,10 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Entity
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 from gemuo.target import Target, SendTarget
 from gemuo.engine.util import FinishCallback
 
@@ -32,13 +32,12 @@ class OpenBank(Engine):
         if container.is_bank(self._client.world.player):
             self._success()
 
-class OpenContainer(Engine, TimerEvent):
+class OpenContainer(Engine):
     """Double-click a container, and return successfully when the gump
     opens"""
 
     def __init__(self, client, container):
         Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
 
         self._serial = container.serial
 
@@ -52,23 +51,23 @@ class OpenContainer(Engine, TimerEvent):
 
             client.send(p.Use(self._serial))
 
-        self._schedule(3)
+        self.call_id = reactor.callLater(3, self._timeout)
 
     def abort(self):
-        self._unschedule()
-        self._failure()
+        Engine.abort(self)
+        self.call_id.cancel()
 
     def on_open_container(self, container):
         if container.serial == self._serial and not self._client.world.is_empty(container):
-            self._unschedule()
+            self.call_id.cancel()
             self._success()
 
     def on_container_content(self, container):
         if container.serial == self._serial:
-            self._unschedule()
+            self.call_id.cancel()
             self._success()
 
-    def tick(self):
+    def _timeout(self):
         print "OpenContainer timeout"
         self._failure()
 
