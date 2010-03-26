@@ -20,6 +20,7 @@ from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.timer import TimerEvent
 from gemuo.engine.util import FinishCallback
+from gemuo.engine.player import QuerySkills
 
 class UseSkill(Engine):
     def __init__(self, client, skill):
@@ -278,7 +279,7 @@ class SkillTraining(Engine, TimerEvent):
         self.round_robin = round_robin
 
         # get current skill values
-        client.send(p.MobileQuery(0x05, self._world.player.serial))
+        FinishCallback(client, QuerySkills(client), self._got_skills)
 
         # refresh backpack contents, in case we need a target
         if self._world.backpack() is not None:
@@ -286,8 +287,6 @@ class SkillTraining(Engine, TimerEvent):
 
         if self._world.player.skills:
             self._check_skills(self._world.player.skills)
-
-        self.tick()
 
     def abort(self):
         if self._use is not None:
@@ -359,6 +358,13 @@ class SkillTraining(Engine, TimerEvent):
             self._use = UseSkill(client, skill)
 
         FinishCallback(client, self._use, self._used)
+
+    def _got_skills(self, success):
+        if not success:
+            self._failure()
+            return
+
+        self.tick()
 
     def on_skill_update(self, skills):
         self._check_skills(skills)
