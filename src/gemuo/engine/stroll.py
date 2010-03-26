@@ -17,7 +17,7 @@ import random
 from gemuo.path import Position
 from gemuo.engine import Engine
 from gemuo.engine.walk import PathFindWalk
-from gemuo.engine.util import DelayedCallback
+from gemuo.engine.util import FinishCallback, DelayedCallback
 
 class StrollWestBritain(Engine):
     def __init__(self, client, map):
@@ -27,23 +27,13 @@ class StrollWestBritain(Engine):
         self.min_x, self.min_y = 1429,1540
         self.max_x, self.max_y = 1516,1734
         self.random = random.Random()
-        self._walk = None
         self._next_walk()
 
     def _next_walk(self):
         client = self._client
         to = Position(self.random.randint(self.min_x, self.max_x),
                       self.random.randint(self.min_y, self.max_y))
-        self._walk = PathFindWalk(client, self.map, to)
-        if self._walk.finished():
-            DelayedCallback(client, 2, self._next_walk)
+        FinishCallback(client, PathFindWalk(client, self.map, to), self._walked)
 
-    def on_engine_success(self, engine, *args, **keywords):
-        if engine == self._walk:
-            self._walk = None
-            DelayedCallback(client, 2, self._next_walk)
-
-    def on_engine_failure(self, engine, *args, **keywords):
-        if engine == self._walk:
-            self._walk = None
-            DelayedCallback(client, 2, self._next_walk)
+    def _walked(self, success):
+        DelayedCallback(self._client, 2, self._next_walk)
