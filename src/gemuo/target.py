@@ -13,17 +13,14 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.timer import TimerEvent
 
-class TargetMutex(Engine, TimerEvent):
+class TargetMutex:
     TIMEOUT = 5
 
-    def __init__(self, client):
-        Engine.__init__(self, client)
-        TimerEvent.__init__(self, client)
-
+    def __init__(self):
         self._locked = False
         self._abort_func = None
         self._queue = []
@@ -35,7 +32,7 @@ class TargetMutex(Engine, TimerEvent):
             self._locked = False
             self._abort_func = None
         else:
-            self._schedule(self.TIMEOUT)
+            self.call_id = reactor.callLater(self.TIMEOUT, self._timeout)
             x, self._queue = self._queue[0], self._queue[1:]
             func, self._abort_func = x
             func()
@@ -46,7 +43,7 @@ class TargetMutex(Engine, TimerEvent):
             self._queue.append((func, abort_func))
         else:
             # call immediately
-            self._schedule(self.TIMEOUT)
+            self.call_id = reactor.callLater(self.TIMEOUT, self._timeout)
             self._locked = True
             self._abort_func = abort_func
             func()
@@ -54,10 +51,10 @@ class TargetMutex(Engine, TimerEvent):
     def put_target(self):
         assert self._locked
 
-        self._unschedule()
+        self.call_id.cancel()
         self._next()
 
-    def tick(self):
+    def _timeout(self):
         assert self._locked
 
         print "Target timeout"

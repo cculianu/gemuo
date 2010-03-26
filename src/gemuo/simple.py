@@ -27,7 +27,7 @@ class SimpleClientWrapper:
     def __init__(self, client):
         self.client = client
         self.world = World(client)
-        self.target_mutex = TargetMutex(self)
+        self.target_mutex = TargetMutex()
 
     def __getattr__(self, name):
         x = getattr(self.client, name)
