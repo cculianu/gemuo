@@ -83,6 +83,7 @@ class AutoTailoring(Engine):
 def run(client):
     PrintMessages(client)
     Guards(client)
+    Watch(client)
     return AutoTailoring(client)
 
 simple_run(run)
