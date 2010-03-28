@@ -16,7 +16,7 @@
 
 import uo.packets as p
 from gemuo.simple import simple_run
-from gemuo.defer import deferred_nearest_reachable_item
+from gemuo.defer import deferred_nearest_reachable_item, deferred_skills
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
@@ -80,10 +80,16 @@ class AutoTailoring(Engine):
 
         DelayedCallback(self._client, 9, self._cut)
 
+def got_skills(skills, client):
+    return AutoTailoring(client)
+
 def run(client):
     PrintMessages(client)
     Guards(client)
     Watch(client)
-    return AutoTailoring(client)
+
+    d = deferred_skills(client)
+    d.addCallback(got_skills, client)
+    return d
 
 simple_run(run)
