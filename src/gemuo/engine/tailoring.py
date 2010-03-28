@@ -22,7 +22,7 @@ from gemuo.engine.menu import MenuResponse
 from gemuo.defer import deferred_find_item_in_backpack, deferred_skill
 
 def tailoring_target(skill):
-    if skill < 500:
+    if skill < 475:
         return ('Shirts', 'fancy dress')
     if skill < 600:
         return ('Shirts', 'cloak')
