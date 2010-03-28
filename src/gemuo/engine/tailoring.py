@@ -24,8 +24,10 @@ from gemuo.defer import deferred_find_item_in_backpack, deferred_skill
 def tailoring_target(skill):
     if skill < 475:
         return ('Shirts', 'fancy dress')
-    if skill < 600:
+    if skill < 560:
         return ('Shirts', 'cloak')
+    if skill < 680:
+        return ('Shirts', 'robe')
     # XXX implement more
     return None
 

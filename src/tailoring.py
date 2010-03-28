@@ -40,7 +40,7 @@ class Cut(Engine):
     def _next(self):
         client = self._client
         world = client.world
-        target = world.find_player_item(lambda x: x.item_id in (0x1F00, 0x1EFF, 0x1515))
+        target = world.find_player_item(lambda x: x.item_id in (0x1F00, 0x1EFF, 0x1515, 0x1F03, 0x1F04))
         if target is None:
             self._success()
             return
