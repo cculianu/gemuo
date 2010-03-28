@@ -18,6 +18,7 @@ from uo.skills import *
 import uo.packets as p
 import uo.rules
 from uo.entity import *
+from gemuo.defer import deferred_skills
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
 from gemuo.engine.player import QuerySkills
@@ -274,15 +275,12 @@ class SkillTraining(Engine):
         self.call_id = None
         self.round_robin = round_robin
 
-        # get current skill values
-        FinishCallback(client, QuerySkills(client), self._got_skills)
-
         # refresh backpack contents, in case we need a target
         if self._world.backpack() is not None:
             client.send(p.Use(self._world.backpack().serial))
 
-        if self._world.player.skills:
-            self._check_skills(self._world.player.skills)
+        d = deferred_skills(client)
+        d.addCallbacks(self._got_skills, self._failure)
 
     def abort(self):
         Engine.abort(self)
@@ -305,7 +303,7 @@ class SkillTraining(Engine):
             if skill_id not in skills:
                 print "No value for skill", skill_id
                 self._failure()
-                return
+                return False
 
             skill = skills[skill_id]
 
@@ -315,7 +313,7 @@ class SkillTraining(Engine):
             elif skill.lock != SKILL_LOCK_UP:
                 print "Skill is locked:", name
                 self._failure()
-                return
+                return False
 
         if len(self._skills) == 0:
             if self._use is not None:
@@ -323,7 +321,7 @@ class SkillTraining(Engine):
             if self.call_id is not None:
                 self.call_id.cancel()
             self._success()
-            return
+            return False
 
         if total >= 7000 and down == 0:
             print "No skills down"
@@ -332,6 +330,9 @@ class SkillTraining(Engine):
             if self.call_id is not None:
                 self.call_id.cancel()
             self._failure()
+            return False
+
+        return True
 
     def _next_skill(self):
         if len(self._skills) == 0: return None
@@ -358,12 +359,9 @@ class SkillTraining(Engine):
 
         FinishCallback(client, self._use, self._used)
 
-    def _got_skills(self, success):
-        if not success:
-            self._failure()
-            return
-
-        self._do_next()
+    def _got_skills(self, skills):
+        if self._check_skills(skills):
+            self._do_next()
 
     def on_skill_update(self, skills):
         self._check_skills(skills)
