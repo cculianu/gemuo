@@ -22,6 +22,7 @@ from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
 from gemuo.engine.util import FinishCallback, DelayedCallback
+from gemuo.engine.items import UseAndTarget
 from gemuo.engine.tailoring import Tailoring
 
 class Cut(Engine):
@@ -39,23 +40,16 @@ class Cut(Engine):
     def _next(self):
         client = self._client
         world = client.world
-        self.target = world.find_player_item(lambda x: x.item_id in (0x1F00, 0x1EFF))
-        if self.target is None:
+        target = world.find_player_item(lambda x: x.item_id in (0x1F00, 0x1EFF, 0x1515))
+        if target is None:
             self._success()
             return
 
-        client.send(p.Use(self.scissors.serial))
+        d = UseAndTarget(client, self.scissors, target).deferred
+        d.addCallbacks(self._cutted, self._failure)
 
-    def _on_target_request(self, allow_ground, target_id, flags):
-        client = self._client
-        client.send(p.TargetResponse(0, target_id, flags, self.target.serial,
-                                     0xffff, 0xffff, 0xffff, 0))
-        DelayedCallback(client, 1, self._next)
-
-    def on_packet(self, packet):
-        if isinstance(packet, p.TargetRequest):
-            self._on_target_request(packet.allow_ground, packet.target_id,
-                                    packet.flags)
+    def _cutted(self, result):
+        DelayedCallback(self._client, 1, self._next)
 
 class AutoTailoring(Engine):
     def __init__(self, client):
