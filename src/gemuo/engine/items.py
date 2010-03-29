@@ -23,7 +23,7 @@ from gemuo.engine.util import FinishCallback
 class OpenBank(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        self._client.send(p.TalkUnicode(text='.', keyword=0x02))
+        self._client.send(p.TalkUnicode(text='Bank!', keyword=0x02))
 
     def abort(self):
         self._failure()
@@ -43,7 +43,7 @@ class OpenContainer(Engine):
         self._open = False
 
         if container.is_bank(client.world.player):
-            self._client.send(p.TalkUnicode(text='.', keyword=0x02))
+            self._client.send(p.TalkUnicode(text='Bank!', keyword=0x02))
         else:
             if not self._client.world.is_empty(container):
                 # we know its contents, it seems already open
