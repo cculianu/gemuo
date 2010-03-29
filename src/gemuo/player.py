@@ -32,45 +32,69 @@ class SkillValue:
         else:
             return str(self.id)
 
+class WalkQueue:
+    def __init__(self):
+        self.clear()
+
+    def length(self):
+        return len(self._queue)
+
+    def _next_seq(self):
+        seq = self._seq
+        self._seq += 1
+        if self._seq >= 0x100:
+            self._seq = 1
+        return seq
+
+    def request(self):
+        if len(self._queue) >= 2:
+            return None
+
+        seq = self._next_seq()
+        self._queue.append(seq)
+        return seq
+
+    def ack(self, seq):
+        while len(self._queue) > 0:
+            i, self._queue = self._queue[0], self._queue[1:]
+            if i == seq:
+                return True
+        return False
+
+    def clear(self):
+        self._queue = []
+        self._seq = 0
+
+    def reject(self, seq):
+        self.clear()
+
 class Walk:
     def __init__(self, mobile):
         self._mobile = mobile
-        self._seq = None
-        self._next_seq = 0
-        self._direction = None
+        self._queue = WalkQueue()
+
+    def finished(self):
+        return self._queue.length() == 0
 
     def walk(self, direction):
         assert isinstance(direction, int)
 
-        if self._mobile.position is None: return
-        if self._seq is not None: return
+        seq = self._queue.request()
+        if seq is None: return None
 
-        self._direction = direction & 0x7
-        self._seq = self._next_seq
-        self._next_seq += 1
-        if self._next_seq >= 0x100:
-            self._next_seq = 1
-        return p.WalkRequest(self._direction, self._seq)
+        self._move_player(direction & 0x7)
+        return p.WalkRequest(direction, seq)
 
     def walk_reject(self, seq, x, y, z, direction):
-        if self._mobile.position is None: return
-
-        # XXX resync when seq mismatch?
-        self._seq = None
-        self._direction = None
-        self._next_seq = 0
+        self._queue.reject(seq)
         self._mobile.position = Position(x, y, z, direction)
 
     def walk_ack(self, seq, notoriety):
-        if self._mobile.position is None: return
-
-        if self._seq != seq:
+        if not self._queue.ack(seq):
             # XXX resync when seq mismatch?
-            pass
+            print "WalkAck out of sync"
 
-        self.move_player(self._direction)
-
-    def move_player(self, direction):
+    def _move_player(self, direction):
         oldpos = self._mobile.position
         if oldpos.direction == direction:
             x, y = oldpos.x, oldpos.y
@@ -100,5 +124,6 @@ class Walk:
             self._mobile.position = Position(oldpos.x, oldpos.y, oldpos.z,
                                              direction)
 
-        self._seq = None
-        self._direction = None
+    def move_player(self, direction):
+        self._queue.clear()
+        self._move_player(direction)

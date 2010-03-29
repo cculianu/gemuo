@@ -73,13 +73,18 @@ class DirectWalk(Engine):
 
         direction = self._direction_from(position)
         if direction is None:
-            self._success()
+            if self.walk.finished():
+                self._success()
             return
 
         if should_run(player):
             direction |= RUNNING
 
-        self._client.send(self.walk.walk(direction))
+        packet = self.walk.walk(direction)
+        if packet is None:
+            return
+        self._client.send(packet)
+        self._next_walk()
 
     def on_walk_reject(self):
         self._failure()
@@ -158,7 +163,6 @@ class PathFindWalk(Engine):
         self.walk = client.world.walk
         self.map = MapWrapper(map)
         self.destination = destination
-        self.to = None
 
         self._path_find()
 
@@ -218,12 +222,13 @@ class PathFindWalk(Engine):
             return
 
         self._client.send(w)
-        self.to = next
+        self._sent.append(next)
 
     def _path_find(self):
         if self.player.position.x == self.destination.x and \
            self.player.position.y == self.destination.y:
-            self._success()
+            if self.walk.finished():
+                self._success()
             return
 
         from gemuo.path import path_find
@@ -233,18 +238,28 @@ class PathFindWalk(Engine):
             return
 
         self._path = list(path)
+        self._sent = [self.player.position]
         self._next_walk()
 
-    def on_walk_reject(self):
-        if self.to is None: return
+    def _cleanup(self):
+        position = self.player.position
+        while len(self._sent) > 0:
+            i = self._sent[0]
+            if i.x == position.x and i.y == position.y:
+                return True
+            self._sent = self._sent[1:]
+        return False
 
-        print "walk reject", self.to
-        self.map.add_bad(self.to.x, self.to.y)
-        self.to = None
+    def on_walk_reject(self):
+        if self._cleanup() and len(self._sent) >= 2:
+            to = self._sent[1]
+            self.map.add_bad(to.x, to.y)
+        else:
+            to = None
+        print "walk reject", to
+
         self._path_find()
 
     def on_walk_ack(self):
-        if self.to is None: return
-
-        self.to = None
+        self._cleanup()
         self._next_walk()
