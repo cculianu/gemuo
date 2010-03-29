@@ -62,6 +62,10 @@ class Lumber(Engine):
         d.addCallbacks(self._chopped, self._target_failure)
 
     def _target_failure(self, fail):
+        if self.exhausted:
+            self._success()
+            return
+
         self.tries -= 1
         if self.tries > 0:
             self._begin_chop()
