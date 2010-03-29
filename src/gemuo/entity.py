@@ -115,3 +115,11 @@ class Mobile(Entity):
 
     def is_animal(self):
         return self.body in ANIMALS
+
+    def mass_remaining(self):
+        """Returns the mass this mobile can pick up (in stones).
+        Returns None if unknown."""
+        if self.mass is None or self.stats is None: return None
+        strength = self.stats[0]
+        max_mass = (strength * 7) / 2 + 40
+        return max_mass - self.mass
