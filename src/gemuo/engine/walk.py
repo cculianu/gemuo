@@ -41,12 +41,6 @@ class DirectWalk(Engine):
 
         self._next_walk()
 
-    def _distance2(self, position):
-        player = self.player.position
-        dx = player.x - position.x
-        dy = player.y - position.y
-        return dx*dx + dy*dy
-
     def _direction_from(self, position):
         destination = self.destination
         if destination.x < position.x:
