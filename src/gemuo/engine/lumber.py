@@ -80,6 +80,8 @@ class Lumber(Engine):
                'Target cannot be seen' in text:
             self.exhausted = True
             self.exhaust_db.set_exhausted(self.tree.x / 8, self.tree.y / 8)
+        elif 'You broke your axe' in text:
+            self.exhausted = True
 
     def on_packet(self, packet):
         if isinstance(packet, p.AsciiMessage):

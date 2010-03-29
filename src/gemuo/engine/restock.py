@@ -86,8 +86,11 @@ class Restock(Engine):
     def _source_opened2(self):
         client = self._client
 
-        FinishCallback(client, OpenContainer(client, self._destination),
-                       self._destination_opened)
+        if self._destination.is_bank(client.world.player):
+            self._destination_opened(True)
+        else:
+            FinishCallback(client, OpenContainer(client, self._destination),
+                           self._destination_opened)
 
     def _destination_opened(self, success):
         if not success:
