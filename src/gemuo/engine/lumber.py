@@ -78,6 +78,8 @@ class Lumber(Engine):
     def on_packet(self, packet):
         if isinstance(packet, p.AsciiMessage):
             if packet.type == 0 and packet.serial == 0xffffffff and \
-               packet.name == 'System' and 'not enough wood here' in packet.text:
+               packet.name == 'System' and \
+               ('not enough wood here' in packet.text or
+                'Target cannot be seen' in packet.text):
                 self.exhausted = True
                 self.exhaust_db.set_exhausted(self.tree.x / 8, self.tree.y / 8)
