@@ -55,3 +55,7 @@ class DetectGameMaster(Engine):
 
     def on_equip_item(self, item):
         self._check_item(item)
+
+    def on_mobile_incoming(self, mobile):
+        if mobile.body == 0x3db:
+            self._panic(mobile)
