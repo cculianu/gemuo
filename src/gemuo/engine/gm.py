@@ -18,6 +18,16 @@ from uo.entity import ITEM_GM_ROBE
 from gemuo.entity import Item
 from gemuo.engine import Engine
 
+# uosecondage.com
+GM_SERIALS = (
+    0x92f, # Derrick
+    0x434d, # Braden
+    0x4ace, # Maahes
+    0xf321, # Protostar
+    0x15487, # Phoenix
+    0x209ff, # Nevermore
+)
+
 class DetectGameMaster(Engine):
     """Detect the presence of a GameMaster, and stop the macro
     immediately."""
@@ -57,5 +67,5 @@ class DetectGameMaster(Engine):
         self._check_item(item)
 
     def on_mobile_incoming(self, mobile):
-        if mobile.body == 0x3db:
+        if mobile.body == 0x3db or mobile.serial in GM_SERIALS:
             self._panic(mobile)
