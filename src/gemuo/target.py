@@ -70,6 +70,15 @@ class Target:
         self.z = z
         self.graphic = graphic
 
+    def __str__(self):
+        l = []
+        if self.serial != 0: l.append('serial=0x%x' % self.serial)
+        if self.x != 0xffff: l.append('x=%d' % self.x)
+        if self.y != 0xffff: l.append('y=%d' % self.y)
+        if self.z != 0xffff: l.append('z=%d' % self.z)
+        if self.graphic != 0: l.append('graphic=0x%x' % self.graphic)
+        return '[Target %s]' % ' '.join(l)
+
     def response(self, target_id, flags):
         return p.TargetResponse(0, target_id, flags, self.serial,
                                 self.x, self.y, self.z, self.graphic)
