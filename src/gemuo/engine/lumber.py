@@ -38,6 +38,7 @@ class Lumber(Engine):
 
         self.exhaust_db = exhaust_db
         self.exhausted = False
+        self.tries = 5
 
         self.axe = find_axe(client.world)
         if self.axe is None:
@@ -58,9 +59,17 @@ class Lumber(Engine):
             return
 
         d = UseAndTarget(self._client, self.axe, self.tree).deferred
-        d.addCallbacks(self._chopped, self._failure)
+        d.addCallbacks(self._chopped, self._target_failure)
+
+    def _target_failure(self, fail):
+        self.tries -= 1
+        if self.tries > 0:
+            self._begin_chop()
+        else:
+            self._failure(fail)
 
     def _chopped(self, result):
+        self.tries = 5
         if self.exhausted:
             self._success()
         else:
