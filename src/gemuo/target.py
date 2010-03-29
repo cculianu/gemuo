@@ -80,7 +80,12 @@ class Target:
         return '[Target %s]' % ' '.join(l)
 
     def response(self, target_id, flags):
-        return p.TargetResponse(0, target_id, flags, self.serial,
+        if self.serial != 0:
+            type = 0
+        else:
+            type = 1
+
+        return p.TargetResponse(type, target_id, flags, self.serial,
                                 self.x, self.y, self.z, self.graphic)
 
 class SendTarget(Engine):
