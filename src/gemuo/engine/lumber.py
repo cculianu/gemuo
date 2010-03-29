@@ -53,7 +53,7 @@ class Lumber(Engine):
 
     def _begin_chop(self):
         player = self._client.world.player
-        if player.mass is not None and player.mass > 350:
+        if player.mass_remaining() < 40:
             self._success()
             return
 
