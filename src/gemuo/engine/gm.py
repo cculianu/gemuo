@@ -23,8 +23,12 @@ GM_SERIALS = (
     0x92f, # Derrick
     0x434d, # Braden
     0x4ace, # Maahes
+    0x4d4c, # Ezp
+    0x683c, # Kaivan
+    0x9a90, # Yoda
     0xf321, # Protostar
     0x15487, # Phoenix
+    0x1a510, # Yoda
     0x209ff, # Nevermore
 )
 
