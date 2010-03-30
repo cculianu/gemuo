@@ -24,13 +24,20 @@ class OpenBank(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
         self._client.send(p.TalkUnicode(text='Bank!', keyword=0x02))
+        self.call_id = reactor.callLater(2, self._timeout)
 
     def abort(self):
-        self._failure()
+        Engine.abort(self)
+        self.call_id.cancel()
 
     def on_open_container(self, container):
         if container.is_bank(self._client.world.player):
+            self.call_id.cancel()
             self._success()
+
+    def _timeout(self):
+        print "OpenBank timeout"
+        self._failure()
 
 class OpenContainer(Engine):
     """Double-click a container, and return successfully when the gump
