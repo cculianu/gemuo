@@ -37,8 +37,8 @@ class Guards(Engine):
 
     def call_guards_twice(self):
         self.call_guards()
-        if self.call_guards is not None:
-            self.call_guards.cancel()
+        if self.call_id is not None:
+            self.call_id.cancel()
         self.call_id = reactor.callLater(2, self.call_guards_again)
 
     def on_message(self, serial, name, text):
