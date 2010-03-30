@@ -40,6 +40,7 @@ class OpenContainer(Engine):
         Engine.__init__(self, client)
 
         self._serial = container.serial
+        self._open = False
 
         if container.is_bank(client.world.player):
             self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x02))
@@ -58,9 +59,12 @@ class OpenContainer(Engine):
         self.call_id.cancel()
 
     def on_open_container(self, container):
-        if container.serial == self._serial and not self._client.world.is_empty(container):
-            self.call_id.cancel()
-            self._success()
+        if container.serial == self._serial:
+            if self._client.world.is_empty(container):
+                self._open = True
+            else:
+                self.call_id.cancel()
+                self._success()
 
     def on_container_content(self, container):
         if container.serial == self._serial:
@@ -68,8 +72,11 @@ class OpenContainer(Engine):
             self._success()
 
     def _timeout(self):
-        print "OpenContainer timeout"
-        self._failure()
+        if self._open:
+            self._success()
+        else:
+            print "OpenContainer timeout"
+            self._failure()
 
 class UseAndTarget(Engine):
     def __init__(self, client, item, target):
