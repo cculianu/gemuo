@@ -58,6 +58,13 @@ def deferred_nearest_reachable_item(client, func):
 
     return deferred_find_item_in_backpack(client, func)
 
+def deferred_find_player_item(client, func):
+    i = client.world.find_player_item(func)
+    if i is not None:
+        return defer.succeed(i)
+
+    return deferred_find_item_in_backpack(client, func)
+
 def deferred_skills(client):
     skills = client.world.player.skills
     if skills is not None:
