@@ -47,7 +47,7 @@ class WalkQueue:
         return seq
 
     def request(self):
-        if len(self._queue) >= 2:
+        if len(self._queue) >= 3:
             return None
 
         seq = self._next_seq()
