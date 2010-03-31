@@ -13,7 +13,7 @@
 #   GNU General Public License for more details.
 #
 
-import sys
+from twisted.internet import reactor
 from uo.entity import ITEM_GM_ROBE
 from gemuo.entity import Item
 from gemuo.engine import Engine
@@ -55,7 +55,7 @@ class DetectGameMaster(Engine):
                 break
             entity = all_entities[parent]
 
-        sys.exit(2)
+        reactor.crash()
 
     def _check_item(self, item):
         if item.item_id == ITEM_GM_ROBE:
