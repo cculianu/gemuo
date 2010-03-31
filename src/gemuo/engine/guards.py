@@ -28,7 +28,7 @@ class Guards(Engine):
 
     def call_guards(self):
         print "Calling guards"
-        self._client.send(p.TalkUnicode(type=0xc0, hue=0, font=1, text='.', keyword=0x07))
+        self._client.send(p.TalkUnicode(text='.', keyword=0x07))
 
     def call_guards_again(self):
         self.call_id = None

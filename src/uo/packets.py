@@ -414,7 +414,7 @@ def WalkRequest(direction, seq):
     p.uint(0)
     return p.finish()
 
-def TalkAscii(type, hue, font, text):
+def TalkAscii(text, type=0, hue=0x34, font=1):
     p = PacketWriter(0x03)
     p.byte(type)
     p.ushort(hue)
@@ -568,7 +568,7 @@ def PlayServer(index):
     p.ushort(index)
     return p.finish()
 
-def TalkUnicode(type, hue, font, text, keyword):
+def TalkUnicode(text, keyword, type=0xc0, hue=0x34, font=1):
     p = PacketWriter(0xad)
     p.byte(type)
     p.ushort(hue)

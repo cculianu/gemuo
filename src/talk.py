@@ -26,7 +26,7 @@ class Talk(Engine, basic.LineOnlyReceiver):
             self._success()
             return
 
-        self._client.send(TalkAscii(type=0, hue=0, font=1, text=line))
+        self._client.send(TalkAscii(text=line))
         self.prompt()
 
     def connectionLost(self, reason):
