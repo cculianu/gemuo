@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from twisted.internet import defer
 from uo.entity import *
 import uo.packets as p
 from gemuo.entity import Item
