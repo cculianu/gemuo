@@ -13,15 +13,14 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
 from uo.entity import ITEM_BANDAGE
+from gemuo.defer import deferred_find_item_in_backpack
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback, DelayedCallback
-from gemuo.engine.items import OpenContainer, UseAndTarget
+from gemuo.engine.items import UseAndTarget
 from gemuo.engine.bandage import CutCloth
-
-def find_bandage(world):
-    return world.nearest_reachable_item(lambda x: x.item_id == ITEM_BANDAGE)
 
 class UseBandageOn(Engine):
     def __init__(self, client, target):
@@ -29,36 +28,10 @@ class UseBandageOn(Engine):
 
         self.target = target
 
-        world = client.world
-        bandage = find_bandage(world)
+        d = deferred_find_item_in_backpack(client, lambda x: x.item_id == ITEM_BANDAGE)
+        d.addCallbacks(self._found_bandage, self._failure)
 
-        if bandage is not None:
-            self._bandage(bandage)
-        else:
-            self.backpack = world.backpack()
-            if self.backpack is None:
-                print "No backpack"
-                self._failure()
-                return
-
-            FinishCallback(client, OpenContainer(client, self.backpack), self._backpack)
-
-    def _backpack(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-
-        bandage = find_bandage(client.world)
-        if bandage is None:
-            print "No bandage"
-            DelayedCallback(client, 1, self._failure)
-            return
-
-        self._bandage(bandage)
-
-    def _bandage(self, bandage):
+    def _found_bandage(self, bandage):
         client = self._client
         FinishCallback(client, UseAndTarget(client, bandage, self.target), self._healed)
 

@@ -13,10 +13,10 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 import uo.packets as p
+from gemuo.defer import deferred_find_item_in_backpack
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, DelayedCallback
-from gemuo.engine.items import OpenContainer
 
 class Equip(Engine):
     def __init__(self, client, func):
@@ -31,36 +31,14 @@ class Equip(Engine):
             self._success()
             return
 
-        self.backpack = world.backpack()
-        if self.backpack is None:
-            print "no backpack"
-            self._failure()
-            return
+        d = deferred_find_item_in_backpack(client, func)
+        d.addCallbacks(self._found, self._failure)
 
-        if self._find_and_equip():
-            DelayedCallback(self._client, 1, self._success)
-            return
-
-        FinishCallback(client, OpenContainer(client, self.backpack),
-                       self._backpack_opened)
-
-    def _find_and_equip(self):
+    def _found(self, item):
         client = self._client
         world = client.world
 
-        item = world.find_item_in(self.backpack, self.func)
-        if item is None: return False
-
         client.send(p.LiftRequest(item.serial))
         client.send(p.EquipRequest(item.serial, 0x2, world.player.serial))
-        return True
 
-    def _backpack_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
-        if self._find_and_equip():
-            DelayedCallback(self._client, 1, self._success)
-        else:
-            self._failure()
+        reactor.callLater(1, self._success)
