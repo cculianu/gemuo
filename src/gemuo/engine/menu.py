@@ -18,6 +18,10 @@ from twisted.python.failure import Failure
 import uo.packets as p
 from gemuo.engine import Engine
 
+class NoSuchOption(Exception):
+    def __init__(self, message='No such menu option'):
+        Exception.__init__(self, message)
+
 def select_option(menu, item):
     for i, option in enumerate(menu.options):
         if option.text[:len(item)] == item:
@@ -42,9 +46,8 @@ class MenuResponse(Engine):
             response, self.responses = self.responses[0], self.responses[1:]
             option = select_option(packet, response)
             if option is None:
-                print "Option not found"
                 self.call_id.cancel()
-                self._failure()
+                self._failure(NoSuchOption())
                 return
 
             self._client.send(p.MenuResponse(packet.dialog_serial, option))

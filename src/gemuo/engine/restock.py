@@ -16,6 +16,7 @@
 from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Item
+from gemuo.error import *
 from gemuo.engine import Engine
 from gemuo.engine.items import OpenContainer
 
@@ -60,7 +61,7 @@ class Restock(Engine):
 
         self._source = client.world.backpack()
         if self._source is None:
-            self._failure()
+            self._failure(NoSuchEntity('No backpack'))
             return
 
         self._destination = container
@@ -124,7 +125,7 @@ class Restock(Engine):
         if n > count:
             x = world.find_item_in(self._source, lambda x: x.item_id in item_ids)
             if x is None:
-                self._failure()
+                self._failure(NoSuchEntity())
                 return
 
             client.send(p.LiftRequest(x.serial, n - count))
@@ -134,8 +135,7 @@ class Restock(Engine):
         elif n < count:
             x = world.find_item_in(self._destination, lambda x: x.item_id in item_ids)
             if x is None:
-                print "Not found:", item_ids
-                self._failure()
+                self._failure(NoSuchEntity("Not found: " + repr(item_ids)))
                 return
 
             client.send(p.LiftRequest(x.serial, count - n))
@@ -154,7 +154,7 @@ class Trash(Engine):
 
         self._source = client.world.backpack()
         if self._source is None:
-            self._failure()
+            self._failure(NoSuchEntity('No backpack'))
             return
 
         self.ids = ids
@@ -177,8 +177,7 @@ class Trash(Engine):
 
         destination = self._find_trash_can()
         if destination is None:
-            print "No trash can"
-            self._failure()
+            self._failure(NoSuchEntity('No trash can'))
             return
 
         d = MoveItems(self._client, items, destination).deferred

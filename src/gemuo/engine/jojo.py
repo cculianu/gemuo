@@ -24,6 +24,10 @@ from gemuo.engine.player import QueryStats
 from gemuo.engine.stats import StatLock
 from gemuo.engine.training import UseSkill
 
+class NotAtSkillCap(Exception):
+    def __init__(self, message='Not at skill cap'):
+        Exception.__init__(self, message)
+
 STAT_SKILLS = (
     (SKILL_ARMS_LORE, SKILL_HERDING),
     (SKILL_MUSICIANSHIP,),
@@ -50,8 +54,7 @@ class StatJojo(Engine):
 
         total = sum(map(lambda x: x.base, skills.itervalues()))
         if total != 7000:
-            print "Skill sum is not 700"
-            self._failure()
+            self._failure(NotAtSkillCap())
             return
 
         d = QueryStats(client).deferred

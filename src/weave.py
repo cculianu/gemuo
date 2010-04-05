@@ -4,6 +4,7 @@ from twisted.internet import reactor
 from uo.entity import *
 from gemuo.simple import simple_run
 from gemuo.defer import deferred_find_item_in_backpack
+from gemuo.error import *
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.items import UseAndTarget
@@ -19,9 +20,9 @@ class WeaveYarn(Engine):
         self.target_mutex = client.target_mutex
         self.loom = find_reachable_loom(client.world)
         if self.loom is None:
-            print "No loom"
-            self._failure()
+            self._failure(NoSuchEntity('No loom'))
             return
+
         self._next()
 
     def _next(self):

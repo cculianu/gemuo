@@ -17,6 +17,10 @@ from twisted.internet import reactor, threads
 from uo.entity import *
 from gemuo.engine import Engine
 
+class WalkReject(Exception):
+    def __init__(self, message='Walk reject'):
+        Exception.__init__(self, message)
+
 def should_run(mobile):
     return mobile.stamina is not None and \
            (mobile.stamina.value >= 20 or \
@@ -69,6 +73,7 @@ class DirectWalk(Engine):
         position = player.position
         if position is None:
             self._failure()
+            return
 
         direction = self._direction_from(position)
         if direction is None:
@@ -86,7 +91,7 @@ class DirectWalk(Engine):
         self._next_walk()
 
     def on_walk_reject(self):
-        self._failure()
+        self._failure(WalkReject())
 
     def on_walk_ack(self):
         self._next_walk()

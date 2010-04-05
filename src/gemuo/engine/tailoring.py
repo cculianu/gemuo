@@ -21,6 +21,10 @@ from gemuo.engine import Engine
 from gemuo.engine.menu import MenuResponse
 from gemuo.defer import deferred_find_item_in_backpack, deferred_skill
 
+class NoTailoringTarget(Exception):
+    def __init__(self, message='No tailoring target'):
+        Exception.__init__(self, message)
+
 def tailoring_target(skill):
     if skill < 475:
         return ('Shirts', 'fancy dress')
@@ -52,8 +56,7 @@ class Tailoring(Engine):
     def _got_skill(self, result):
         target = tailoring_target(result.value)
         if target is None:
-            print "No tailoring target"
-            self._failure()
+            self._failure(NoTailoringTarget())
             return
 
         client = self._client

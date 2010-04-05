@@ -18,6 +18,7 @@ import uo.packets as p
 from uo.entity import TREES
 from gemuo.engine import Engine
 from gemuo.target import Target
+from gemuo.error import *
 from gemuo.engine.items import UseAndTarget
 
 def find_axe(world):
@@ -42,12 +43,12 @@ class Lumber(Engine):
 
         self.axe = find_axe(client.world)
         if self.axe is None:
-            self._failure('No axe')
+            self._failure(NoSuchEntity('No axe'))
             return
 
         self.tree = find_tree(map, tree)
         if self.tree is None:
-            self._failure('No tree at %s' % tree)
+            self._failure(NoSuchEntity('No tree at %s' % tree))
             return
 
         self._begin_chop()

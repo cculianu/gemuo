@@ -17,6 +17,10 @@ from gemuo.engine.watch import Watch
 from gemuo.engine.stats import StatLock
 from gemuo.engine.player import QuerySkills
 
+class NotEnoughIntelligence(Exception):
+    def __init__(self, message='Not enough intelligence'):
+        Exception.__init__(self, message)
+
 class CastSpell(Engine):
     def __init__(self, client, spell):
         Engine.__init__(self, client)
@@ -93,8 +97,7 @@ class NeedMana(Engine):
         elif self.player.mana.value >= self.mana:
             self._success()
         elif self.player.stats is None or self.player.stats[2] < self.mana:
-            print "Not enough INT"
-            self._failure()
+            self._failure(NotEnoughIntelligence())
         else:
             self._client.send(p.UseSkill(SKILL_MEDITATION))
             delay = uo.rules.skill_delay(SKILL_MEDITATION)

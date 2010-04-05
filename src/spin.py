@@ -3,6 +3,7 @@
 from twisted.internet import reactor
 from uo.entity import *
 from gemuo.simple import simple_run
+from gemuo.error import *
 from gemuo.defer import deferred_find_item_in_backpack
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
@@ -18,9 +19,9 @@ class SpinWool(Engine):
 
         self.spinningwheel = find_reachable_spinning_wheel(client.world)
         if self.spinningwheel is None:
-            print "No spinningwheel"
-            self._failure()
+            self._failure(NoSuchEntity('No spinning wheel'))
             return
+
         self._next()
 
     def _next(self):

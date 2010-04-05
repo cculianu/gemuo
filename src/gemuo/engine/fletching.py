@@ -16,6 +16,7 @@
 from twisted.internet import reactor
 from uo.skills import SKILL_FLETCHING
 from uo.entity import *
+from gemuo.error import *
 from gemuo.engine import Engine
 from gemuo.engine.util import Fail
 from gemuo.engine.items import UseAndTarget
@@ -27,15 +28,14 @@ class Fletching(Engine):
 
         tool = client.world.find_reachable_item(lambda x: x.item_id in ITEMS_FLETCHING_TOOLS)
         if tool is None:
-            print "No tool"
-            self._failure()
+            self._failure(NoSuchEntity('No fletching tool'))
             return
 
         self.choice = choice
 
         wood = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id in (ITEMS_LOGS + ITEMS_BOARDS))
         if wood is None:
-            print "No wood"
+            self._failure(NoSuchEntity('No wood'))
             self._failure()
             return
 

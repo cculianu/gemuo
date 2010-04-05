@@ -15,6 +15,7 @@
 
 from twisted.python.failure import Failure
 from twisted.internet import reactor, defer
+from gemuo.error import *
 from gemuo.engine.items import OpenContainer
 from gemuo.engine.player import QuerySkills
 
@@ -31,7 +32,7 @@ def deferred_find_item_in(client, parent, func):
         if i is not None:
             d.callback(i)
         else:
-            d.errback('No such item')
+            d.errback(NoSuchEntity())
 
     def callback(result):
         reactor.callLater(1, second_lookup)
@@ -47,7 +48,7 @@ def deferred_find_item_in(client, parent, func):
 def deferred_find_item_in_backpack(client, func):
     backpack = client.world.backpack()
     if backpack is None:
-        return defer.fail('No backpack')
+        return defer.fail(NoSuchEntity('No backpack'))
 
     return deferred_find_item_in(client, backpack, func)
 
@@ -78,7 +79,7 @@ def deferred_skills(client):
         if skills is not None:
             d.callback(skills)
         else:
-            defer.errback('No skill info available')
+            defer.errback(NoSkills())
         return result
 
     def errback(fail):
@@ -96,7 +97,7 @@ def deferred_skill(client, skill):
         if skill in result:
             d.callback(result[skill])
         else:
-            defer.errback('Skill not found')
+            defer.errback(NoSkills())
         return result
 
     def errback(fail):

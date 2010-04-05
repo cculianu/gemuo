@@ -17,6 +17,7 @@ from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Entity
 from gemuo.engine import Engine
+from gemuo.error import *
 from gemuo.target import Target, SendTarget
 
 class OpenBank(Engine):
@@ -35,8 +36,7 @@ class OpenBank(Engine):
             self._success(container)
 
     def _timeout(self):
-        print "OpenBank timeout"
-        self._failure()
+        self._failure(Timeout('Bank timeout'))
 
 class OpenContainer(Engine):
     """Double-click a container, and return successfully when the gump
@@ -108,7 +108,7 @@ class UseAndTarget(Engine):
 
     def target_abort(self):
         self.engine.abort()
-        self._failure()
+        self._failure(Timeout('Target timeout'))
 
     def _target_sent(self, result):
         self.target_mutex.put_target()

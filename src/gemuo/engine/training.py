@@ -18,6 +18,7 @@ from uo.skills import *
 import uo.packets as p
 import uo.rules
 from uo.entity import *
+from gemuo.error import *
 from gemuo.defer import deferred_skills
 from gemuo.engine import Engine
 from gemuo.engine.player import QuerySkills
@@ -32,8 +33,7 @@ class UseSkill(Engine):
         self._targets = self._find_skill_targets(skill)
 
         if self._targets is None:
-            print "Error: no target found for", SKILL_NAMES[skill]
-            self._failure()
+            self._failure(NoSuchEntity('No target found for %s' % SKILL_NAMES[skill]))
             return
 
         if len(self._targets) == 0:
@@ -158,9 +158,8 @@ class UseSkill(Engine):
                 self._client.send(p.Use(instrument.serial))
                 self._success()
             else:
-                print "No instrument!"
                 self._client.send(p.Use(SERIAL_PLAYER | self._world.player.serial))
-                self._failure()
+                self._failure(NoSuchEntity('No instrument'))
                 return
 
         elif skill == SKILL_HERDING:
@@ -168,10 +167,9 @@ class UseSkill(Engine):
             if crook is not None:
                 self._client.send(p.Use(crook.serial))
             else:
-                print "No crook!"
                 self._client.send(p.Use(SERIAL_PLAYER | self._world.player.serial))
                 self._target_mutex.put_target()
-                self._failure()
+                self._failure(NoSuchEntity('No crook'))
                 return
 
         else:
@@ -312,8 +310,7 @@ class SkillTraining(Engine):
             name = SKILL_NAMES[skill_id]
 
             if skill_id not in skills:
-                print "No value for skill", skill_id
-                self._failure()
+                self._failure(NoSkills("No value for skill %s" % name))
                 return False
 
             skill = skills[skill_id]
@@ -322,8 +319,7 @@ class SkillTraining(Engine):
                 print "Done with skill", name
                 self._skills.remove(skill_id)
             elif skill.lock != SKILL_LOCK_UP:
-                print "Skill is locked:", name
-                self._failure()
+                self._failure(SkillLocked("Skill is locked: %s" % name))
                 return False
 
         if len(self._skills) == 0:
@@ -335,12 +331,11 @@ class SkillTraining(Engine):
             return False
 
         if total >= 7000 and down == 0:
-            print "No skills down"
             if self._use is not None:
                 self._use.abort()
             if self.call_id is not None:
                 self.call_id.cancel()
-            self._failure()
+            self._failure(SkillLocked("No skills down"))
             return False
 
         return True
