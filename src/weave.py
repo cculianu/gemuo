@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
+from twisted.internet import reactor
 from uo.entity import *
 from gemuo.simple import simple_run
 from gemuo.defer import deferred_find_item_in_backpack
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.items import UseAndTarget
-from gemuo.engine.util import DelayedCallback
 from gemuo.engine.hide import AutoHide
 
 def find_reachable_loom(world):
@@ -33,7 +33,7 @@ class WeaveYarn(Engine):
         d.addCallbacks(self._done, self._failure)
 
     def _done(self, result):
-        DelayedCallback(self._client, 3.5, self._next)
+        reactor.callLater(3.5, self._next)
 
 def run(client):
     PrintMessages(client)

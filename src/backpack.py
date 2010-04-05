@@ -3,7 +3,6 @@
 from twisted.internet import defer
 from gemuo.simple import simple_run
 from gemuo.engine.items import OpenContainer
-from gemuo.engine.defer import defer_engine
 
 def print_contents(result, world, container):
     for x in world.items_in(container):
@@ -14,7 +13,7 @@ def run(client):
     if backpack is None:
         return defer.fail('No backpack')
 
-    d = defer_engine(client, OpenContainer(client, backpack))
+    d = OpenContainer(client, backpack).deferred
     d.addCallback(print_contents, client.world, backpack)
     return d
 

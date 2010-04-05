@@ -14,10 +14,10 @@
 #
 
 import random
+from twisted.internet import reactor
 from gemuo.path import Position
 from gemuo.engine import Engine
 from gemuo.engine.walk import PathFindWalk
-from gemuo.engine.util import FinishCallback, DelayedCallback
 
 class StrollWestBritain(Engine):
     def __init__(self, client, map):
@@ -33,7 +33,8 @@ class StrollWestBritain(Engine):
         client = self._client
         to = Position(self.random.randint(self.min_x, self.max_x),
                       self.random.randint(self.min_y, self.max_y))
-        FinishCallback(client, PathFindWalk(client, self.map, to), self._walked)
+        d = PathFindWalk(client, self.map, to).deferred
+        d.addCallbacks(self._walked, self._walked)
 
-    def _walked(self, success):
-        DelayedCallback(self._client, 2, self._next_walk)
+    def _walked(self, result):
+        reactor.callLater(2, self._next_walk)

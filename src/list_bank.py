@@ -26,7 +26,7 @@ def print_bank(result, world):
         print x
 
 def run(client):
-    d = defer_engine(client, OpenBank(client))
+    d = OpenBank(client).deferred
     d.addCallback(print_contents, client.world)
     return d
 

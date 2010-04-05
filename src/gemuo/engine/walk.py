@@ -13,10 +13,8 @@
 #   GNU General Public License for more details.
 #
 
-from twisted.internet import threads
+from twisted.internet import reactor, threads
 from uo.entity import *
-import uo.packets as p
-from uo.entity import SERIAL_PLAYER
 from gemuo.engine import Engine
 
 def should_run(mobile):
@@ -132,16 +130,16 @@ class PathWalk(Engine):
             return
 
         print "Walk to", nearest, nearest_distance2
-        client = self._client
-        FinishCallback(client, DirectWalk(client, nearest), self._walked)
+        d = DirectWalk(self._client, nearest).deferred
+        d.addCallbacks(self._walked, self._walk_failed)
 
-    def _walked(self, success):
-        if success:
-            self.path = self.path[1:]
-            self._next_walk()
-        else:
-            print "Walk failed"
-            DelayedCallback(self._client, 2, self._next_walk)
+    def _walked(self, result):
+        self.path = self.path[1:]
+        self._next_walk()
+
+    def _walk_failed(self, fail):
+        print "Walk failed", fail
+        reactor.callLater(2, self._next_walk)
 
 class MapWrapper:
     def __init__(self, map):

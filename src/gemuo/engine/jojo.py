@@ -13,13 +13,14 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from uo.skills import *
 import uo.packets as p
 import uo.rules
 from uo.entity import *
+from gemuo.defer import deferred_skills
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, DelayedCallback
-from gemuo.engine.player import QuerySkills, QueryStats
+from gemuo.engine.player import QueryStats
 from gemuo.engine.stats import StatLock
 from gemuo.engine.training import UseSkill
 
@@ -41,15 +42,11 @@ class StatJojo(Engine):
 
         self.goal = goal
 
-        FinishCallback(client, QuerySkills(client), self._got_skills)
+        d = deferred_skills(client)
+        d.addCallbacks(self._got_skills, self._failure)
 
-    def _got_skills(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _got_skills(self, skills):
         client = self._client
-        skills = client.world.player.skills
 
         total = sum(map(lambda x: x.base, skills.itervalues()))
         if total != 7000:
@@ -57,13 +54,14 @@ class StatJojo(Engine):
             self._failure()
             return
 
-        FinishCallback(client, QueryStats(client), self._got_stats)
+        d = QueryStats(client).deferred
+        d.addCallbacks(self._got_stats, self._failure)
 
-    def _got_stats(self, success):
+    def _got_stats(self, result):
         client = self._client
         player = client.world.player
 
-        if not success or player.stats is None:
+        if player.stats is None:
             self._failure()
             return
 
@@ -93,19 +91,17 @@ class StatJojo(Engine):
                 if len(selected) >= 2:
                     break
 
-        FinishCallback(client, StatLock(client, goal), self._stat_lock_finished)
+        d = StatLock(client, goal).deferred
+        d.addCallbacks(self._stat_lock_finished, self._failure)
 
         self.skills = selected
         self._next_skill()
 
-    def _stat_lock_finished(self, success):
-        if success:
-            for x in self.skills:
-                self._client.send(p.SkillLock(x, SKILL_LOCK_DOWN))
+    def _stat_lock_finished(self, result):
+        for x in self.skills:
+            self._client.send(p.SkillLock(x, SKILL_LOCK_DOWN))
 
-            self._success()
-        else:
-            self._failure()
+        self._success()
 
     def _do_skill(self, skill):
         client = self._client
@@ -116,7 +112,8 @@ class StatJojo(Engine):
             self._client.send(p.SkillLock(x, SKILL_LOCK_DOWN))
         self._client.send(p.SkillLock(skill, SKILL_LOCK_UP))
 
-        FinishCallback(client, UseSkill(client, skill), self._skill_finished)
+        d = UseSkill(client, skill).deferred
+        d.addCallbacks(self._skill_finished, self._failure)
 
     def _next_skill(self):
         client = self._client
@@ -139,9 +136,5 @@ class StatJojo(Engine):
         else:
             self._do_skill(self.skill)
 
-    def _skill_finished(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, self.delay, self._check_skill)
+    def _skill_finished(self, result):
+        reactor.callLater(self.delay, self._check_skill)

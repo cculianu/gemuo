@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from twisted.internet import defer
+from twisted.internet import reactor, defer
 import uo.packets as p
 from uo.skills import *
 from uo.entity import *
@@ -11,10 +11,8 @@ from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.watch import Watch
 from gemuo.engine.items import OpenContainer, UseAndTarget
-from gemuo.engine.util import FinishCallback, Delayed, DelayedCallback
 from gemuo.engine.hide import AutoHide
 from gemuo.engine.restock import Restock
-from gemuo.engine.defer import defer_engine
 
 def find_crook(world):
     return world.find_player_item(lambda x: x.item_id == ITEM_CROOK)
@@ -63,29 +61,26 @@ class HerdSheep(Engine):
         client.send(p.Use(self.crook.serial))
 
         self.engine = SendTarget(client, Target(serial=self.target.serial))
-        FinishCallback(client, self.engine, self._target_sent)
+        d = self.engine.deferred
+        d.addCallbacks(self._target_sent, self._target_failed)
 
     def target_abort(self):
         self.engine.abort()
         self._failure()
 
-    def _target_sent(self, success):
-        if not success:
-            self.target_mutex.put_target()
-            self._failure()
-            return
-
+    def _target_sent(self, result):
         client = self._client
-        self.engine = SendTarget(client, Target(serial=client.world.player.serial))
-        FinishCallback(client, self.engine, self._player_sent)
+        self.engine = SendTarget(self._client, Target(serial=client.world.player.serial))
+        d = self.engine.deferred
+        d.addCallbacks(self._player_sent, self._target_failed)
 
-    def _player_sent(self, success):
+    def _player_sent(self, result):
         self.target_mutex.put_target()
+        reactor.callLater(1, self._next)
 
-        if success:
-            DelayedCallback(self._client, 1, self._next)
-        else:
-            self._failure()
+    def _target_failed(self, fail):
+        self.target_mutex.put_target()
+        self._failure(fail)
 
 class HarvestWool(Engine):
     def __init__(self, client):
@@ -103,7 +98,8 @@ class HarvestWool(Engine):
 
         sheep = find_reachable_sheep(client.world)
         if sheep is None:
-            FinishCallback(client, HerdSheep(client), self._herded)
+            d = HerdSheep(client).deferred
+            d.addCallbacks(self._herded, self._failure)
             return
 
         dagger = find_dagger(client.world)
@@ -112,21 +108,14 @@ class HarvestWool(Engine):
             self._failure()
             return
 
-        FinishCallback(client, UseAndTarget(client, dagger, sheep), self._harvested)
+        d = UseAndTarget(client, dagger, sheep).deferred
+        d.addCallbacks(self._harvested, self._failure)
 
-    def _herded(self, success):
-        if not success:
-            self._failure()
-            return
+    def _herded(self, result):
+        reactor.callLater(4, self._next)
 
-        DelayedCallback(self._client, 4, self._next)
-
-    def _harvested(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, 1, self._next)
+    def _harvested(self, result):
+        reactor.callLater(1, self._next)
 
 def chest_opened(client, chest):
     return Restock(client, chest, func=lambda x: x.item_id == ITEM_WOOL)
@@ -140,12 +129,12 @@ def harvested(result, client):
     if chest is None:
         return defer.fail('No chest')
 
-    d = defer_engine(client, OpenContainer(client, chest))
+    d = OpenContainer(client, chest).deferred
     d.addCallback(chest_opened0, client, chest)
     return d
 
 def backpack_opened(client):
-    d = defer_engine(client, HarvestWool(client))
+    d = HarvestWool(client).deferred
     d.addCallback(harvested, client)
     return d
 
@@ -160,7 +149,7 @@ def run(client):
     if backpack is None:
         return defer.fail('No backpack')
 
-    d = defer_engine(client, OpenContainer(client, backpack))
+    d = OpenContainer(client, backpack).deferred
     d.addCallback(backpack_opened0, client)
     return d
 

@@ -13,13 +13,12 @@
 #   GNU General Public License for more details.
 #
 
-import uo.packets as p
+from twisted.internet import reactor
 from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.target import Target, SendTarget
 from gemuo.defer import deferred_nearest_reachable_item, deferred_find_item_in_backpack
 from gemuo.engine.items import UseAndTarget
-from gemuo.engine.util import FinishCallback, DelayedCallback
 
 class CutCloth(Engine):
     def __init__(self, client):
@@ -38,15 +37,11 @@ class CutCloth(Engine):
         d.addCallbacks(self._found_scissors, self._failure)
 
     def _found_scissors(self, result):
-        client = self._client
-        FinishCallback(client, UseAndTarget(client, result, self.cloth),
-                       self._cutted)
+        d = UseAndTarget(self._client, result, self.cloth).deferred
+        d.addCallbacks(self._cutted, self._failure)
 
     def _cutted(self, success):
-        if success:
-            DelayedCallback(self._client, 1, self._success)
-        else:
-            self._failure()
+        reactor.callLater(1, self._success)
 
 class CutAllCloth(Engine):
     def __init__(self, client):
@@ -61,11 +56,8 @@ class CutAllCloth(Engine):
         d.addCallbacks(self._found_cloth, self._success)
 
     def _found_cloth(self, result):
-        client = self._client
-        FinishCallback(client, CutCloth(client), self._cutted)
+        d = CutCloth(self._client).deferred
+        d.addCallbacks(self._cutted, self._failure)
 
-    def _cutted(self, success):
-        if success:
-            self._next()
-        else:
-            self._failure()
+    def _cutted(self, result):
+        self._next()

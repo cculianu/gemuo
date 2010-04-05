@@ -1,17 +1,16 @@
 #!/usr/bin/python
 
-from twisted.internet import defer
+from twisted.internet import reactor, defer
 from uo.entity import *
 import uo.packets as p
 from gemuo.entity import Item
 from gemuo.simple import simple_run, simple_later
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
-from gemuo.engine.util import FinishCallback, Delayed, DelayedCallback, Fail
+from gemuo.engine.util import Delayed, Fail
 from gemuo.engine.restock import drop_into
 from gemuo.engine.menu import MenuResponse
 from gemuo.engine.items import OpenContainer
-from gemuo.engine.defer import defer_engine
 
 def find_box_at(world, x, y):
     for e in world.iter_entities_at(x, y):
@@ -58,48 +57,29 @@ class MakeBoards(Engine):
 
         client.send(p.Use(tool.serial))
 
-        FinishCallback(client, MenuResponse(client, ('Other',
-                                                     'board: 1 Logs')),
-                       self._responded)
+        d = MenuResponse(client, ('Other', 'board: 1 Logs')).deferred
+        d.addCallbacks(self._responded, self._failure)
 
-    def _responded(self, success):
-        if success:
-            DelayedCallback(self._client, 10, self._delay)
-        else:
-            self._failure()
-
-    def _delay(self):
-        self._success()
+    def _responded(self, result):
+        reactor.callLater(10, self._success)
 
 class AutoBoards(Engine):
     def __init__(self, client, restock_box):
         Engine.__init__(self, client)
         self.restock_box = restock_box
-        self._take_logs(True)
+        self._take_logs(None)
 
-    def _take_logs(self, success):
-        if not success:
-            self._failure()
-            return
+    def _take_logs(self, result):
+        d = TakeLogs(self._client, self.restock_box).deferred
+        d.addCallbacks(self._make_boards, self._failure)
 
-        client = self._client
-        FinishCallback(client, TakeLogs(client, self.restock_box), self._make_boards)
+    def _make_boards(self, result):
+        d = MakeBoards(self._client).deferred
+        d.addCallbacks(self._put_boards, self._failure)
 
-    def _make_boards(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        FinishCallback(client, MakeBoards(client), self._put_boards)
-
-    def _put_boards(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        FinishCallback(client, PutBoards(client, self.restock_box), self._take_logs)
+    def _put_boards(self, result):
+        d = PutBoards(self._client, self.restock_box).deferred
+        d.addCallbacks(self._take_logs, self._failure)
 
 def backpack_opened(client, restock_box):
     return AutoBoards(client, restock_box)
@@ -112,7 +92,7 @@ def restock_box_opened(client, restock_box):
     if backpack is None:
         return defer.fail('No backpack')
 
-    d = defer_engine(client, OpenContainer(client, backpack))
+    d = OpenContainer(client, backpack).deferred
     d.addCallback(backpack_opened0, client, restock_box)
     return d
 
@@ -126,7 +106,7 @@ def run(client):
     if restock_box is None:
         return defer.fail('No box')
 
-    d = defer_engine(client, OpenContainer(client, restock_box))
+    d = OpenContainer(client, restock_box).deferred
     d.addCallback(restock_box_opened0, client, restock_box)
     return d
 

@@ -14,17 +14,15 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from uo.entity import *
-import uo.packets as p
 from gemuo.simple import simple_run
-from gemuo.data import TileCache
 from gemuo.entity import Item
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
 from gemuo.engine.walk import PathFindWalk
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.restock import Restock, Trash
 from gemuo.engine.carpentry import Carpentry
 
@@ -51,31 +49,17 @@ class HouseRestock(Engine):
             self._failure()
             return
 
-        #FinishCallback(client, OpenContainer(client, box), self._box_opened)
-        #return
+        d = OpenContainer(client, box).deferred
+        d.addCallbacks(self._box_opened, self._failure)
 
-        self._box_opened(True)
-
-    def _box_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _box_opened(self, result):
         counts = (
             (ITEMS_CARPENTRY_TOOLS, 2),
             (ITEMS_LOGS + ITEMS_BOARDS, 50),
         )
 
-        client = self._client
-        FinishCallback(client, Restock(client, self._box, counts=counts),
-                       self._restocked)
-
-    def _restocked(self, success):
-        if not success:
-            self._failure()
-            return
-
-        self._success()
+        d = Restock(self._client, self._box, counts=counts).deferred
+        d.addCallbacks(self._success, self._failure)
 
 class AutoCarpentry(Engine):
     def __init__(self, client):
@@ -83,34 +67,22 @@ class AutoCarpentry(Engine):
         self._trash()
 
     def _trash(self):
-        client = self._client
+        d = Trash(self._client, ITEMS_CARPENTRY_PRODUCTS).deferred
+        d.addCallbacks(self._trashed, self._failure)
 
-        FinishCallback(client, Trash(client, ITEMS_CARPENTRY_PRODUCTS), self._trashed)
+    def _trashed(self, result):
+        d = HouseRestock(self._client).deferred
+        d.addCallbacks(self._restocked, self._failure)
 
-    def _trashed(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        FinishCallback(client, HouseRestock(client), self._restocked)
-
-    def _restocked(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, 1, self._restocked2)
+    def _restocked(self, result):
+        reactor.callLater(1, self._restocked2)
 
     def _restocked2(self):
-        FinishCallback(client, Carpentry(self._client), self._crafted)
+        d = Carpentry(self._client).deferred
+        d.addCallbacks(self._crafted, self._failure)
 
-    def _crafted(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, 9, self._trash)
+    def _crafted(self, result):
+        reactor.callLater(9, self._trash)
 
 def run(client):
     PrintMessages(client)

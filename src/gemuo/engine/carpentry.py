@@ -18,7 +18,6 @@ from uo.entity import *
 import uo.packets as p
 from gemuo.defer import deferred_skill, deferred_find_item_in_backpack
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback
 from gemuo.engine.menu import MenuResponse
 
 def carpentry_target(skill):
@@ -56,12 +55,5 @@ class Carpentry(Engine):
     def _found_tool(self, tool):
         client.send(p.Use(tool.serial))
 
-        FinishCallback(client, MenuResponse(client, self.target),
-                       self._responded)
-
-    def _responded(self, success):
-        if success:
-            self._success()
-        else:
-            #self._failure()
-            self._success()
+        d = MenuResponse(client, target).deferred
+        d.addCallbacks(self._success, self._success)

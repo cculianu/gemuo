@@ -18,7 +18,6 @@ from uo.skills import SKILL_TAILORING
 import uo.packets as p
 from uo.entity import *
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback
 from gemuo.engine.menu import MenuResponse
 from gemuo.defer import deferred_find_item_in_backpack, deferred_skill
 
@@ -60,15 +59,8 @@ class Tailoring(Engine):
         client = self._client
         client.send(p.Use(self.tool.serial))
 
-        FinishCallback(client, MenuResponse(client, target),
-                       self._responded)
-
-    def _responded(self, success):
-        if success:
-            self._success()
-        else:
-            #self._failure()
-            self._success()
+        d = MenuResponse(client, target).deferred
+        d.addCallbacks(self._success, self._success)
 
     def _on_target_request(self, allow_ground, target_id, flags):
         self._client.send(p.TargetResponse(0, target_id, flags, self.cloth.serial,

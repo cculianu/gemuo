@@ -14,6 +14,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from uo.entity import *
 import uo.packets as p
 from uo.entity import TREES, ITEMS_AXE
@@ -29,7 +30,6 @@ from gemuo.engine.equip import Equip
 from gemuo.engine.watch import Watch
 from gemuo.engine.lumber import Lumber
 from gemuo.engine.walk import PathFindWalk
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import OpenBank
 from gemuo.engine.restock import Restock, Trash
 from gemuo.engine.fletching import TrainFletching
@@ -51,13 +51,10 @@ class FletchingRestock(Engine):
             self._success()
             return
 
-        FinishCallback(client, OpenBank(client), self._box_opened)
+        d = OpenBank(client).deferred
+        d.addCallbacks(self._box_opened, self._failure)
 
-    def _box_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _box_opened(self, result):
         bank = self._client.world.bank()
         if bank is None:
             print "No bank"
@@ -68,15 +65,10 @@ class FletchingRestock(Engine):
             (ITEMS_LOGS + ITEMS_BOARDS, 150),
         )
 
-        client = self._client
-        FinishCallback(client, Restock(client, bank, counts=counts),
-                       self._restocked)
+        d = Restock(self._client, bank, counts=counts).deferred
+        d.addCallbacks(self._restocked, self._failure)
 
-    def _restocked(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _restocked(self, result):
         self._success()
 
 class AutoFletching(Engine):
@@ -85,33 +77,21 @@ class AutoFletching(Engine):
         self._trash()
 
     def _trash(self):
-        client = self._client
+        d = Trash(self._client, ITEMS_FLETCHING_PRODUCTS).deferred
+        d.addCallbacks(self._trashed, self._failure)
 
-        FinishCallback(client, Trash(client, ITEMS_FLETCHING_PRODUCTS), self._trashed)
+    def _trashed(self, result):
+        d = FletchingRestock(self._client).deferred
+        d.addCallbacks(self._restocked, self._failure)
 
-    def _trashed(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        FinishCallback(client, FletchingRestock(client), self._restocked)
-
-    def _restocked(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, 1, self._restocked2)
+    def _restocked(self, result):
+        reactor.callLater(1, self._restocked2)
 
     def _restocked2(self):
-        FinishCallback(client, TrainFletching(self._client), self._crafted)
+        d = TrainFletching(self._client).deferred
+        d.addCallbacks(self._crafted, self._failure)
 
-    def _crafted(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _crafted(self, result):
         self._trash()
 
 def run(client):

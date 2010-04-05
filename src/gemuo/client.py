@@ -19,7 +19,6 @@ from twisted.internet.protocol import ClientCreator
 from uo.client import UOProtocol
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.engine.defer import defer_engine
 
 class Client:
     def __init__(self, client):
@@ -120,8 +119,8 @@ class AccountLogin(Engine):
         client.send(p.AccountLogin(username, password))
 
     def _on_connect(self, client, auth_id):
-        d = defer_engine(client, GameLogin(client, self.username, self.password,
-                                           auth_id, self.character))
+        d = GameLogin(client, self.username, self.password,
+                      auth_id, self.character).deferred
         d.addCallback(lambda client: self._success(client))
         d.addErrback(lambda f: self._failure(f))
 
@@ -149,7 +148,7 @@ def login(host, port, username, password, character, connect=connect):
     d = defer.Deferred()
 
     def on_connect(client):
-        e = defer_engine(client, AccountLogin(client, username, password, character, connect))
+        e = AccountLogin(client, username, password, character, connect).deferred
         e.addCallback(lambda client: d.callback(client))
         e.addErrback(lambda f: d.errback(f))
 

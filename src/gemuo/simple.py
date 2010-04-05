@@ -21,7 +21,6 @@ from gemuo.engine.login import Login
 from gemuo.world import World
 from gemuo.target import TargetMutex
 from gemuo.engine import Engine
-from gemuo.engine.defer import defer_engine
 
 class SimpleClientWrapper:
     def __init__(self, client):
@@ -59,7 +58,7 @@ def simple_callback(result):
     elif IDelayedCall.implementedBy(result.__class__):
         pass
     elif isinstance(result, Engine):
-        d = defer_engine(result._client, result)
+        d = result.deferred
         d.addCallback(simple_callback)
         d.addErrback(simple_err)
     else:

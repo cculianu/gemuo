@@ -13,10 +13,11 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import reactor
 from uo.skills import SKILL_FLETCHING
 from uo.entity import *
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, DelayedCallback, Fail
+from gemuo.engine.util import Fail
 from gemuo.engine.items import UseAndTarget
 from gemuo.engine.menu import MenuResponse
 
@@ -42,15 +43,11 @@ class Fletching(Engine):
         d.addCallbacks(self._target_sent, self._failure)
 
     def _target_sent(self, result):
-        client = self._client
-        FinishCallback(client, MenuResponse(client, self.choice),
-                       self._responded)
+        d = MenuResponse(self._client, self.choice).deferred
+        d.addCallbacks(self._responded, self._failure)
 
-    def _responded(self, success):
-        if success:
-            DelayedCallback(self._client, 9, self._success)
-        else:
-            self._success()
+    def _responded(self, result):
+        reactor.callLater(9, self._success)
 
 def fletching_choice(skill):
     if skill < 300:

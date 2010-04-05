@@ -17,7 +17,6 @@ from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Item
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import OpenContainer
 
 def drop_into(client, item, container, amount=0xffff):
@@ -72,41 +71,30 @@ class Restock(Engine):
             self._counts.extend(counts)
         self._func = func
 
-        FinishCallback(client, OpenContainer(client, self._source),
-                       self._source_opened)
+        d = OpenContainer(client, self._source).deferred
+        d.addCallbacks(self._source_opened, self._failure)
 
-    def _source_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        DelayedCallback(client, 1, self._source_opened2)
+    def _source_opened(self, result):
+        reactor.callLater(1, self._source_opened2)
 
     def _source_opened2(self):
         client = self._client
 
         if self._destination.is_bank(client.world.player):
-            self._destination_opened(True)
+            self._destination_opened(None)
         else:
-            FinishCallback(client, OpenContainer(client, self._destination),
-                           self._destination_opened)
+            d = OpenContainer(client, self._destination).deferred
+            d.addCallbacks(self._destination_opened, self._failure)
 
-    def _destination_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-
+    def _destination_opened(self, result):
         if self._func is None:
             self._moved(True)
             return
 
-        FinishCallback(client, move_items(client, self._source, self._destination,
-                                          self._func), self._moved)
+        d = move_items(self._client, self._source, self._destination, self._func).deferred
+        d.addCallbacks(self._moved, self._failure)
 
-    def _moved(self, success):
+    def _moved(self, result):
         self._do_counts()
 
     def _do_counts(self):
@@ -171,17 +159,13 @@ class Trash(Engine):
 
         self.ids = ids
 
-        FinishCallback(client, OpenContainer(client, self._source),
-                       self._source_opened)
+        d = OpenContainer(client, self._source).deferred
+        d.addCallbacks(self._source_opened, self._failure)
 
     def _find_trash_can(self):
         return self._client.world.nearest_reachable_item(lambda x: x.parent_serial is None and x.item_id == 0xe77)
 
-    def _source_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _source_opened(self, result):
         items = []
         for x in self._client.world.items_in(self._source):
             if x.item_id in self.ids:
@@ -197,11 +181,5 @@ class Trash(Engine):
             self._failure()
             return
 
-        FinishCallback(self._client, MoveItems(self._client, items, destination),
-                       self._moved)
-
-    def _moved(self, success):
-        if success:
-            self._success()
-        else:
-            self._failure()
+        d = MoveItems(self._client, items, destination).deferred
+        d.addCallbacks(self._success, self._failure)

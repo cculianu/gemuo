@@ -16,24 +16,6 @@
 from twisted.internet import reactor
 from gemuo.engine import Engine
 
-class FinishCallback(Engine):
-    def __init__(self, client, engine, func):
-        Engine.__init__(self, client)
-
-        self._func = func
-
-        engine.deferred.addCallbacks(self._callback, self._errback)
-
-    def _callback(self, result):
-        self._func(True)
-        self._success()
-        return result
-
-    def _errback(self, fail):
-        self._func(False)
-        self._success()
-        return fail
-
 class Delayed(Engine):
     def __init__(self, client, delay):
         Engine.__init__(self, client)
@@ -43,14 +25,6 @@ class Delayed(Engine):
     def abort(self):
         Engine.abort(self)
         self._call_id.cancel()
-
-def DelayedCallback(client, delay, func):
-    reactor.callLater(delay, func)
-
-class Success(Engine):
-    def __init__(self, client):
-        Engine.__init__(self, client)
-        self._success()
 
 class Fail(Engine):
     def __init__(self, client):
@@ -66,15 +40,11 @@ class Repeat(Engine):
         self.args = args
         self.keywords = keywords
 
-        DelayedCallback(self._client, self.delay, self._next)
+        reactor.callLater(self.delay, self._next)
 
     def _next(self):
-        FinishCallback(self._client, self.func(self._client, *self.args,
-                                               **self.keywords),
-                       self._finished)
+        d = self.func(self._client, *self.args, **self.keywords).deferred
+        d.addCallbacks(self._finished, self._failure)
 
-    def _finished(self, success):
-        if success:
-            DelayedCallback(self._client, self.delay, self._next)
-        else:
-            self._failure()
+    def _finished(self, result):
+        reactor.callLater(self.delay, self._next)

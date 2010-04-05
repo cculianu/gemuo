@@ -20,7 +20,6 @@ import uo.rules
 from uo.entity import *
 from gemuo.defer import deferred_skills
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback
 from gemuo.engine.player import QuerySkills
 
 class UseSkill(Engine):
@@ -369,7 +368,8 @@ class SkillTraining(Engine):
         else:
             self._use = UseSkill(client, skill)
 
-        FinishCallback(client, self._use, self._used)
+        d = self._use.deferred
+        d.addCallbacks(self._used, self._use_failed)
 
     def _got_skills(self, skills):
         if self._check_skills(skills):
@@ -378,11 +378,16 @@ class SkillTraining(Engine):
     def on_skill_update(self, skills):
         self._check_skills(skills)
 
-    def _used(self, success):
+    def _used(self, result):
         assert self._use is not None
         self._use = None
-        if success:
-            self.call_id = reactor.callLater(uo.rules.skill_delay(self._current),
-                                             self._do_next)
-        else:
-            self.call_id = reactor.callLater(1, self._do_next)
+
+        self.call_id = reactor.callLater(uo.rules.skill_delay(self._current),
+                                         self._do_next)
+
+    def _use_failed(self, fail):
+        assert self._use is not None
+        self._use = None
+
+        print "use failed", fail
+        self.call_id = reactor.callLater(1, self._do_next)

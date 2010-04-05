@@ -14,9 +14,9 @@
 #
 
 from uo.entity import ITEM_GOLD
+from gemuo.defer import deferred_find_player_item
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, Repeat
-from gemuo.engine.items import OpenContainer
+from gemuo.engine.util import Repeat
 from gemuo.engine.restock import drop_into
 
 class DonateOnce(Engine):
@@ -24,30 +24,14 @@ class DonateOnce(Engine):
         Engine.__init__(self, client)
 
         self._to = to
-        self._source = client.world.backpack()
-        if self._source is None:
-            print "No backpack"
-            self._failure()
-            return
 
-        FinishCallback(client, OpenContainer(client, self._source),
-                       self._source_opened)
+        d = deferred_find_player_item(client, lambda x: x.item_id == ITEM_GOLD)
+        # No gold is success, because this engine is meant for use
+        # cases where you donate all your money to raise Karma
+        d.addCallbacks(self._donate, self._success)
 
-    def _source_opened(self, success):
-        if not success:
-            self._failure()
-            return
-
-        client = self._client
-        world = client.world
-        gold = world.find_item_in(self._source, lambda x: x.item_id == ITEM_GOLD)
-        if gold is None:
-            # No gold is success, because this engine is meant for use
-            # cases where you donate all your money to raise Karma
-            self._success()
-            return
-
-        drop_into(client, gold, self._to, 1)
+    def _donate(self, gold):
+        drop_into(self._client, gold, self._to, 1)
         self._success()
 
 def DonateLoop(client, to):

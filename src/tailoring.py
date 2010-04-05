@@ -14,7 +14,7 @@
 #   GNU General Public License for more details.
 #
 
-import uo.packets as p
+from twisted.internet import reactor
 from uo.entity import *
 from gemuo.simple import simple_run
 from gemuo.defer import deferred_nearest_reachable_item, deferred_skills
@@ -22,7 +22,6 @@ from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import UseAndTarget
 from gemuo.engine.tailoring import Tailoring
 
@@ -50,30 +49,26 @@ class Cut(Engine):
         d.addCallbacks(self._cutted, self._failure)
 
     def _cutted(self, result):
-        DelayedCallback(self._client, 1, self._next)
+        reactor.callLater(1, self._next)
 
 class AutoTailoring(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        DelayedCallback(client, 1, self._cut)
+        reactor.callLater(1, self._cut)
 
     def _cut(self):
-        client = self._client
-        FinishCallback(client, Cut(self._client), self._cutted)
+        d = Cut(self._client).deferred
+        d.addCallbacks(self._cutted, self._failure)
 
-    def _cutted(self, success):
+    def _cutted(self, result):
         self._craft()
 
     def _craft(self):
-        client = self._client
-        FinishCallback(client, Tailoring(self._client), self._crafted)
+        d = Tailoring(self._client).deferred
+        d.addCallbacks(self._crafted, self._failure)
 
-    def _crafted(self, success):
-        if not success:
-            self._failure()
-            return
-
-        DelayedCallback(self._client, 9, self._cut)
+    def _crafted(self, result):
+        reactor.callLater(9, self._cut)
 
 def got_skills(skills, client):
     return AutoTailoring(client)

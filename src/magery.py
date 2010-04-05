@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from twisted.internet import reactor
 from uo.skills import *
 from uo.spells import *
 from uo.entity import *
@@ -9,10 +10,10 @@ from gemuo.simple import simple_run
 from gemuo.entity import Item
 from gemuo.engine import Engine
 from gemuo.defer import deferred_skill
+from gemuo.target import Target, SendTarget
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.stats import StatLock
 from gemuo.engine.player import QuerySkills
 
@@ -21,10 +22,7 @@ class CastSpell(Engine):
         Engine.__init__(self, client)
 
         client.send(p.Cast(spell))
-        DelayedCallback(client, 2, self._casted)
-
-    def _casted(self):
-        self._success()
+        reactor.callLater(2, self._success)
 
 class CastTargetSpell(Engine):
     def __init__(self, client, spell, target):
@@ -33,31 +31,26 @@ class CastTargetSpell(Engine):
         self.spell = spell
         self.target = target
 
-        self.target_locked = False
         self.target_mutex = client.target_mutex
         self.target_mutex.get_target(self._target_ok, self._target_abort)
 
     def _target_ok(self):
-        self.target_locked = True
         self._client.send(p.Cast(self.spell))
 
+        self.engine = SendTarget(self._client, Target(serial=self.target.serial))
+        self.engine.deferred.addCallbacks(self._target_sent, self._target_failed)
+
     def _target_abort(self):
+        self.engine.abort()
         self._failure()
 
-    def _on_target_request(self, allow_ground, target_id, flags):
-        if not self.target_locked: return
-
-        client = self._client
-        client.send(p.TargetResponse(0, target_id, flags, self.target.serial,
-                                     0xffff, 0xffff, 0xffff, 0))
+    def _target_sent(self, result):
         self.target_mutex.put_target()
+        reactor.callLater(2, self._success)
 
-        DelayedCallback(client, 2, self._success)
-
-    def on_packet(self, packet):
-        if isinstance(packet, p.TargetRequest):
-            self._on_target_request(packet.allow_ground, packet.target_id,
-                                    packet.flags)
+    def _target_failed(self, fail):
+        self.target_mutex.put_target()
+        self._failure(fail)
 
 class NeedMana(Engine):
     def __init__(self, client, mana):
@@ -105,7 +98,7 @@ class NeedMana(Engine):
         else:
             self._client.send(p.UseSkill(SKILL_MEDITATION))
             delay = uo.rules.skill_delay(SKILL_MEDITATION)
-            DelayedCallback(self._client, 10, self._check)
+            reactor.callLater(10, self._check)
 
 def select_circle(skill):
     if skill < 300:
@@ -155,7 +148,6 @@ class AutoMagery(Engine):
         d.addCallbacks(self._got_magery_skill, self._failure)
 
     def _got_magery_skill(self, magery):
-        client = self._client
         skill = magery.value
         spell = select_spell(skill)
         if spell is None:
@@ -164,13 +156,10 @@ class AutoMagery(Engine):
             return
 
         mana, self.spell, self.target = spell
-        FinishCallback(client, NeedMana(client, mana), self._meditated)
+        d = NeedMana(self._client, mana).deferred
+        d.addCallbacks(self._meditated, self._failure)
 
-    def _meditated(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _meditated(self, result):
         client = self._client
 
         if self.target:
@@ -180,15 +169,12 @@ class AutoMagery(Engine):
                 self._failure()
                 return
 
-            FinishCallback(client, CastTargetSpell(client, self.spell, target), self._casted)
+            d = CastTargetSpell(client, self.spell, target).deferred
         else:
-            FinishCallback(client, CastSpell(client, self.spell), self._casted)
+            d = CastSpell(client, self.spell).deferred
+        d.addCallbacks(self._casted, self._failure)
 
-    def _casted(self, success):
-        if not success:
-            self._failure()
-            return
-
+    def _casted(self, result):
         self._next()
 
 def run(client):

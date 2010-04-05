@@ -6,7 +6,6 @@ from gemuo.simple import simple_run, simple_later
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.bandage import CutAllCloth
 from gemuo.engine.items import OpenContainer
-from gemuo.engine.defer import defer_engine
 
 def cut(client):
     return CutAllCloth(client)
@@ -21,7 +20,7 @@ def run(client):
     if backpack is None:
         return defer.fail('No backpack')
 
-    d = defer_engine(client, OpenContainer(client, backpack))
+    d = OpenContainer(client, backpack).deferred
     d.addCallback(backpack_opened, client)
     return d
 

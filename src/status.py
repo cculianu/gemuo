@@ -5,7 +5,6 @@ from uo.skills import *
 from uo.stats import *
 from gemuo.simple import simple_run
 from gemuo.engine.player import QuerySkills, QueryStats
-from gemuo.engine.defer import defer_engine
 
 def status(result, client):
     player = client.world.player
@@ -35,8 +34,8 @@ def status(result, client):
         pass
 
 def run(client):
-    d = defer.DeferredList((defer_engine(client, QuerySkills(client)),
-                            defer_engine(client, QueryStats(client))))
+    d = defer.DeferredList((QuerySkills(client).deferred,
+                            QueryStats(client).deferred))
     d.addCallback(status, client)
     return d
 

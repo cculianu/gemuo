@@ -18,7 +18,6 @@ import uo.packets as p
 from gemuo.entity import Entity
 from gemuo.engine import Engine
 from gemuo.target import Target, SendTarget
-from gemuo.engine.util import FinishCallback
 
 class OpenBank(Engine):
     def __init__(self, client):
@@ -105,16 +104,16 @@ class UseAndTarget(Engine):
         client = self._client
         client.send(p.Use(self.item))
         self.engine = SendTarget(client, self.target)
-        FinishCallback(client, self.engine, self._target_sent)
+        self.engine.deferred.addCallbacks(self._target_sent, self._target_failed)
 
     def target_abort(self):
         self.engine.abort()
         self._failure()
 
-    def _target_sent(self, success):
+    def _target_sent(self, result):
         self.target_mutex.put_target()
+        self._success(result)
 
-        if success:
-            self._success()
-        else:
-            self._failure()
+    def _target_failed(self, fail):
+        self.target_mutex.put_target()
+        self._failure(fail)

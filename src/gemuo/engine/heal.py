@@ -18,7 +18,6 @@ import uo.packets as p
 from uo.entity import ITEM_BANDAGE
 from gemuo.defer import deferred_find_item_in_backpack
 from gemuo.engine import Engine
-from gemuo.engine.util import FinishCallback, DelayedCallback
 from gemuo.engine.items import UseAndTarget
 from gemuo.engine.bandage import CutCloth
 
@@ -32,14 +31,11 @@ class UseBandageOn(Engine):
         d.addCallbacks(self._found_bandage, self._failure)
 
     def _found_bandage(self, bandage):
-        client = self._client
-        FinishCallback(client, UseAndTarget(client, bandage, self.target), self._healed)
+        d = UseAndTarget(self._client, bandage, self.target).deferred
+        d.addCallbacks(self._healed, self._failure)
 
-    def _healed(self, success):
-        if success:
-            DelayedCallback(self._client, 6, self._success)
-        else:
-            self._failure()
+    def _healed(self, result):
+        reactor.callLater(6, self._success)
 
 class AutoHeal(Engine):
     def __init__(self, client):
@@ -65,19 +61,16 @@ class AutoHeal(Engine):
             reactor.callLater(1, self._next)
             return
 
-        FinishCallback(client, UseBandageOn(client, m), self._healed)
+        d = UseBandageOn(client, m).deferred
+        d.addCallbacks(self._healed, self._heal_failed)
 
-    def _healed(self, success):
-        if success:
-            self._next()
-        else:
-            # maybe out of bandages?
-            client = self._client
-            FinishCallback(client, CutCloth(client), self._cutted)
+    def _healed(self, result):
+        self._next()
 
-    def _cutted(self, success):
-        if not success:
-            self._failure()
-            return
+    def _heal_failed(self, fail):
+        # maybe out of bandages?
+        d = CutCloth(self._client).deferred
+        d.addCallbacks(self._cutted, self._failure)
 
+    def _cutted(self, result):
         self._next()
