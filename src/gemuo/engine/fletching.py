@@ -15,55 +15,36 @@
 
 from uo.skills import SKILL_FLETCHING
 from uo.entity import *
-import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback, DelayedCallback, Fail
+from gemuo.engine.items import UseAndTarget
 from gemuo.engine.menu import MenuResponse
 
 class Fletching(Engine):
     def __init__(self, client, choice):
         Engine.__init__(self, client)
 
-        self.tool = client.world.find_reachable_item(lambda x: x.item_id in ITEMS_FLETCHING_TOOLS)
-        if self.tool is None:
+        tool = client.world.find_reachable_item(lambda x: x.item_id in ITEMS_FLETCHING_TOOLS)
+        if tool is None:
             print "No tool"
             self._failure()
             return
 
         self.choice = choice
 
-        self.wood = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id in (ITEMS_LOGS + ITEMS_BOARDS))
-        if self.wood is None:
+        wood = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id in (ITEMS_LOGS + ITEMS_BOARDS))
+        if wood is None:
             print "No wood"
             self._failure()
             return
 
-        self.target_mutex = client.target_mutex
-        self.target_locked = False
+        d = UseAndTarget(client, tool, wood)
+        d.addCallbacks(self._target_sent, self._failure)
 
-        self.target_mutex.get_target(self._target_ok, self._target_abort)
-
-    def _target_ok(self):
-        self.target_locked = True
-        self._client.send(p.Use(self.tool.serial))
-
-    def _target_abort(self):
-        self._failure()
-
-    def _on_target_request(self, allow_ground, target_id, flags):
-        if not self.target_locked: return
-
+    def _target_sent(self, result):
         client = self._client
-        client.send(p.TargetResponse(0, target_id, flags, self.wood.serial,
-                                     0xffff, 0xffff, 0xffff, 0))
-        self.target_mutex.put_target()
         FinishCallback(client, MenuResponse(client, self.choice),
                        self._responded)
-
-    def on_packet(self, packet):
-        if isinstance(packet, p.TargetRequest):
-            self._on_target_request(packet.allow_ground, packet.target_id,
-                                    packet.flags)
 
     def _responded(self, success):
         if success:
