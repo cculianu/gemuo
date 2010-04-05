@@ -16,6 +16,7 @@
 from uo.skills import SKILL_CARPENTRY
 from uo.entity import *
 import uo.packets as p
+from gemuo.defer import deferred_skill, deferred_find_item_in_backpack
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
 from gemuo.engine.menu import MenuResponse
@@ -39,27 +40,23 @@ class Carpentry(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        tool = client.world.find_item_in(client.world.backpack(), lambda x: x.item_id in ITEMS_CARPENTRY_TOOLS)
-        if tool is None:
-            print "No tool"
-            self._failure()
-            return
+        d = deferred_skill(client, SKILL_CARPENTRY)
+        d.addCallbacks(self._got_skill, self._failure)
 
-        skills = client.world.player.skills
-        if skills is None or SKILL_CARPENTRY not in skills:
-            print "No carpentry skill"
-            self._failure()
-            return
-
-        target = carpentry_target(skills[SKILL_CARPENTRY].value)
-        if target is None:
+    def _got_skill(self, carpentry):
+        self.target = carpentry_target(carpentry.value)
+        if self.target is None:
             print "No carpentry target"
             self._failure()
             return
 
+        d = deferred_find_item_in_backpack(self._client, lambda x: x.item_id in ITEMS_CARPENTRY_TOOLS)
+        d.addCallbacks(self._found_tool, self._failure)
+
+    def _found_tool(self, tool):
         client.send(p.Use(tool.serial))
 
-        FinishCallback(client, MenuResponse(client, target),
+        FinishCallback(client, MenuResponse(client, self.target),
                        self._responded)
 
     def _responded(self, success):
