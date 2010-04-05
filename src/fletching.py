@@ -54,13 +54,7 @@ class FletchingRestock(Engine):
         d = OpenBank(client).deferred
         d.addCallbacks(self._box_opened, self._failure)
 
-    def _box_opened(self, result):
-        bank = self._client.world.bank()
-        if bank is None:
-            print "No bank"
-            self._failure()
-            return
-
+    def _box_opened(self, bank):
         counts = (
             (ITEMS_LOGS + ITEMS_BOARDS, 150),
         )

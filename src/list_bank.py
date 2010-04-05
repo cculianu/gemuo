@@ -17,11 +17,7 @@
 from gemuo.simple import simple_run
 from gemuo.engine.items import OpenBank
 
-def print_bank(result, world):
-    container = world.bank()
-    if container is None:
-        raise 'No bank'
-
+def print_contents(container, world):
     for x in world.items_in(container):
         print x
 

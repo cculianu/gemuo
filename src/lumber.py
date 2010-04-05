@@ -162,15 +162,8 @@ class Bank(Engine):
     def _out_filter(self, x):
         return x.item_id not in ITEMS_AXE
 
-    def _opened(self, result):
-        client = self._client
-
-        bank = client.world.bank()
-        if bank is None:
-            self._failure('No bank')
-            return
-
-        d = Restock(client, client.world.bank(), func=self._out_filter,
+    def _opened(self, bank):
+        d = Restock(self._client, bank, func=self._out_filter,
                     counts=((ITEMS_AXE, 1),)).deferred
         d.addCallbacks(self._restocked, self._failure)
 

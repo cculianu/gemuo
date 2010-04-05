@@ -32,7 +32,7 @@ class OpenBank(Engine):
     def on_open_container(self, container):
         if container.is_bank(self._client.world.player):
             self.call_id.cancel()
-            self._success()
+            self._success(container)
 
     def _timeout(self):
         print "OpenBank timeout"
