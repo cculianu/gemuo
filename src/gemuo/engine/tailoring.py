@@ -16,6 +16,7 @@
 from twisted.internet import defer
 from uo.skills import SKILL_TAILORING
 import uo.packets as p
+from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.engine.util import FinishCallback
 from gemuo.engine.menu import MenuResponse
@@ -35,13 +36,13 @@ class Tailoring(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        d = deferred_find_item_in_backpack(client, lambda x: x.item_id == 0xf9d)
+        d = deferred_find_item_in_backpack(client, lambda x: x.item_id in ITEMS_TAILORING_TOOLS)
         d.addCallbacks(self._found_tool, self._failure)
 
     def _found_tool(self, result):
         self.tool = result
         d = deferred_find_item_in_backpack(self._client,
-                                           lambda x: x.item_id == 0x1766)
+                                           lambda x: x.item_id in ITEMS_CLOTH)
         d.addCallbacks(self._found_cloth, self._failure)
 
     def _found_cloth(self, result):

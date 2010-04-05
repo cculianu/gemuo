@@ -14,6 +14,7 @@
 #
 
 import uo.packets as p
+from uo.entity import *
 from gemuo.engine import Engine
 from gemuo.target import Target, SendTarget
 from gemuo.defer import deferred_nearest_reachable_item, deferred_find_item_in_backpack
@@ -25,7 +26,7 @@ class CutCloth(Engine):
         Engine.__init__(self, client)
 
         d = deferred_find_item_in_backpack(client,
-                                           lambda x: x.item_id in (0xf9b, 0x1766))
+                                           lambda x: x.item_id in (ITEMS_CLOTH + ITEMS_BOLT))
         d.addCallbacks(self._found_cloth, self._success)
 
     def _found_cloth(self, result):
@@ -33,7 +34,7 @@ class CutCloth(Engine):
 
         client = self._client
         d = deferred_nearest_reachable_item(client,
-                                            lambda x: x.item_id in (0xf9e, 0xf9f))
+                                            lambda x: x.item_id in ITEMS_SCISSORS)
         d.addCallbacks(self._found_scissors, self._failure)
 
     def _found_scissors(self, result):
@@ -56,7 +57,7 @@ class CutAllCloth(Engine):
     def _next(self):
         client = self._client
         d = deferred_find_item_in_backpack(client,
-                                           lambda x: x.item_id in (0xf9b, 0x1766))
+                                           lambda x: x.item_id in (ITEMS_CLOTH + ITEMS_BOLT))
         d.addCallbacks(self._found_cloth, self._success)
 
     def _found_cloth(self, result):

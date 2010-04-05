@@ -15,6 +15,7 @@
 #
 
 import uo.packets as p
+from uo.entity import *
 from gemuo.simple import simple_run
 from gemuo.defer import deferred_nearest_reachable_item, deferred_skills
 from gemuo.engine import Engine
@@ -30,7 +31,7 @@ class Cut(Engine):
         Engine.__init__(self, client)
 
         d = deferred_nearest_reachable_item(client,
-                                            lambda x: x.item_id in (0xf9e, 0xf9f))
+                                            lambda x: x.item_id in ITEMS_SCISSORS)
         d.addCallbacks(self._found_scissors, self._failure)
 
     def _found_scissors(self, result):
@@ -40,7 +41,7 @@ class Cut(Engine):
     def _next(self):
         client = self._client
         world = client.world
-        target = world.find_player_item(lambda x: x.item_id in (0x1F00, 0x1EFF, 0x1515, 0x1F03, 0x1F04))
+        target = world.find_player_item(lambda x: x.item_id in ITEMS_TAILORING_PRODUCTS)
         if target is None:
             self._success()
             return
