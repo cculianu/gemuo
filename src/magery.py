@@ -8,6 +8,7 @@ import uo.rules
 from gemuo.simple import simple_run
 from gemuo.entity import Item
 from gemuo.engine import Engine
+from gemuo.defer import deferred_skill
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
 from gemuo.engine.watch import Watch
@@ -63,11 +64,13 @@ class NeedMana(Engine):
         Engine.__init__(self, client)
 
         self.player = client.world.player
+        self.mana = mana
 
-        if self.player.skills is not None and SKILL_MEDITATION in self.player.skills:
-            skill = self.player.skills[SKILL_MEDITATION].base
-        else:
-            skill = 0
+        d = deferred_skill(client, SKILL_MEDITATION)
+        d.addCallbacks(self._got_meditation_skill, self._failure)
+
+    def _got_meditation_skill(self, meditation):
+        skill = meditation.value
 
         # calculate the optimal skill gain percentage
         min_percent, max_percent = 900 - skill, 1200 - skill
@@ -86,9 +89,8 @@ class NeedMana(Engine):
         min_mana = (min_percent * intelligence) / 1000
         max_mana = (max_percent * intelligence) / 1000
 
-        if mana < max_mana:
-            mana = max_mana
-        self.mana = mana
+        if self.mana < max_mana:
+            self.mana = max_mana
 
         self._check()
 
@@ -103,7 +105,7 @@ class NeedMana(Engine):
         else:
             self._client.send(p.UseSkill(SKILL_MEDITATION))
             delay = uo.rules.skill_delay(SKILL_MEDITATION)
-            DelayedCallback(client, 10, self._check)
+            DelayedCallback(self._client, 10, self._check)
 
 def select_circle(skill):
     if skill < 300:
@@ -146,27 +148,15 @@ class AutoMagery(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
 
-        if client.world.player.skills is None:
-            FinishCallback(client, QuerySkills(client), self._got_skills)
-        else:
-            self._next()
-
-    def _got_skills(self, success):
-        if not success:
-            self._failure()
-            return
-
         self._next()
 
     def _next(self):
-        client = self._client
-        player = client.world.player
-        if player.skills is None or SKILL_MAGERY not in player.skills:
-            print "No magery skill"
-            self._failure()
-            return
+        d = deferred_skill(self._client, SKILL_MAGERY)
+        d.addCallbacks(self._got_magery_skill, self._failure)
 
-        skill = player.skills[SKILL_MAGERY].value
+    def _got_magery_skill(self, magery):
+        client = self._client
+        skill = magery.value
         spell = select_spell(skill)
         if spell is None:
             print "No spell"
