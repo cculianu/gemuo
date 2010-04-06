@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.internet import threads
 from uo.entity import *
 import uo.packets as p
 from uo.entity import SERIAL_PLAYER
@@ -232,7 +233,10 @@ class PathFindWalk(Engine):
             return
 
         from gemuo.path import path_find
-        path = path_find(self.map, self.player.position, self.destination)
+        d = threads.deferToThread(path_find, self.map, self.player.position, self.destination)
+        d.addCallbacks(self._path_found, self._failure)
+
+    def _path_found(self, path):
         if path is None:
             self._failure()
             return
