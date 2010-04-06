@@ -157,6 +157,11 @@ class World(Engine):
             if isinstance(e, Item):
                 yield e
 
+    def iter_multis(self):
+        for i in self.iter_items():
+            if (i.item_id & 0x4000) != 0:
+                yield i
+
     def iter_mobiles(self):
         for e in self.entities.itervalues():
             if isinstance(e, Mobile):
