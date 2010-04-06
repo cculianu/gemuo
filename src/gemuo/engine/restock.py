@@ -21,7 +21,7 @@ from gemuo.engine import Engine
 from gemuo.engine.items import OpenContainer
 
 def drop_into(client, item, container, amount=0xffff):
-    dest = client.world.find_item_in(container, lambda x: x.item_id == item.item_id and x.amount < 60000)
+    dest = client.world.find_item_in(container, lambda x: x.item_id == item.item_id and x.hue == item.hue and x.amount < 60000)
     if dest is None or dest.amount == 1:
         dest = container
     client.send(p.LiftRequest(item.serial, amount))
