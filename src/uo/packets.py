@@ -466,6 +466,12 @@ def EquipRequest(item_serial, layer, target_serial):
     p.uint(target_serial)
     return p.finish()
 
+def Resync():
+    p = PacketWriter(0x22)
+    p.byte(0)
+    p.byte(0)
+    return p.finish()
+
 def MobileQuery(type, serial):
     p = PacketWriter(0x34)
     p.uint(0xedededed)
