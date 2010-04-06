@@ -16,6 +16,7 @@
 from twisted.internet import reactor
 from twisted.python.failure import Failure
 import uo.packets as p
+from gemuo.error import *
 from gemuo.engine import Engine
 
 class NoSuchOption(Exception):
@@ -58,4 +59,4 @@ class MenuResponse(Engine):
 
     def _timeout(self):
         # waiting for the menu to appear has taken too long; give up
-        self._failure(Failure('Menu timeout'))
+        self._failure(Timeout('Menu timeout'))

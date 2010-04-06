@@ -81,8 +81,7 @@ class OpenContainer(Engine):
         if self._open:
             self._success()
         else:
-            print "OpenContainer timeout"
-            self._failure()
+            self._failure(Timeout("OpenContainer timeout"))
 
 class UseAndTarget(Engine):
     def __init__(self, client, item, target):
