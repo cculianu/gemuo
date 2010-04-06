@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 from uo.skills import *
 from uo.stats import *
 import uo.packets as p
@@ -41,11 +42,11 @@ class Watch(Engine):
             self.stats = None
         elif self.stats is None:
             for i, name in enumerate(STAT_NAMES):
-                print "Stat '%s' = %d" % (name, stats[i])
+                log.msg("Stat '%s' = %d" % (name, stats[i]))
         else:
             for i, name in enumerate(STAT_NAMES):
                 if stats[i] != self.stats[i]:
-                    print "Stat '%s': %d -> %d" % (name, self.stats[i], stats[i])
+                    log.msg("Stat '%s': %d -> %d" % (name, self.stats[i], stats[i]))
 
         self.stats = stats
 
@@ -64,15 +65,15 @@ class Watch(Engine):
                     down += x.base
 
                 if self.skills is None or x.id not in self.skills:
-                    print "Skill '%s': %d" % (SKILL_NAMES[x.id], x.base)
+                    log.msg("Skill '%s': %d" % (SKILL_NAMES[x.id], x.base))
                     change = True
                 elif x.base != self.skills[x.id].base:
-                    print "Skill '%s': %d -> %d" % (SKILL_NAMES[x.id], self.skills[x.id].base, x.base)
+                    log.msg("Skill '%s': %d -> %d" % (SKILL_NAMES[x.id], self.skills[x.id].base, x.base))
                     change = True
 
                 total += x.base
             if change:
-                print "Skills total=", total, "down=", down
+                log.msg("Skills total=%u down=%u" % (total, down))
 
         if skills is not None:
             self.skills = skills.copy()

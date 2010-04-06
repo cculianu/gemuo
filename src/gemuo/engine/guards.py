@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 from twisted.internet import reactor
 import uo.packets as p
 from gemuo.engine import Engine
@@ -27,7 +28,7 @@ class Guards(Engine):
         self.call_id = None
 
     def call_guards(self):
-        print "Calling guards"
+        log.msg("Calling guards")
         self._client.send(p.TalkUnicode(text='.', keyword=0x07))
 
     def call_guards_again(self):

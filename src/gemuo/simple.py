@@ -14,6 +14,8 @@
 #
 
 from sys import argv, stderr, exit
+import logging
+from twisted.python import log
 from twisted.internet import reactor, defer
 from twisted.internet.interfaces import IDelayedCall
 from gemuo.client import login, connect
@@ -21,6 +23,17 @@ from gemuo.engine.login import Login
 from gemuo.world import World
 from gemuo.target import TargetMutex
 from gemuo.engine import Engine
+
+observer = log.PythonLoggingObserver()
+observer.start()
+
+logger = logging.getLogger(None)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler(stderr)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class SimpleClientWrapper:
     def __init__(self, client):

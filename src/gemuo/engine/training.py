@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 from twisted.internet import reactor
 from uo.skills import *
 import uo.packets as p
@@ -150,7 +151,7 @@ class UseSkill(Engine):
     def _use_skill(self, skill):
         assert self._target_locked == bool(self._targets)
 
-        print "train skill", SKILL_NAMES[skill]
+        log.msg("train skill", SKILL_NAMES[skill])
 
         if skill == SKILL_MUSICIANSHIP:
             instrument = self._find_instrument()
@@ -316,7 +317,7 @@ class SkillTraining(Engine):
             skill = skills[skill_id]
 
             if skill.base >= skill.cap:
-                print "Done with skill", name
+                log.msg("Done with skill %s" % name)
                 self._skills.remove(skill_id)
             elif skill.lock != SKILL_LOCK_UP:
                 self._failure(SkillLocked("Skill is locked: %s" % name))
@@ -384,5 +385,5 @@ class SkillTraining(Engine):
         assert self._use is not None
         self._use = None
 
-        print "use failed", fail
+        log.err(fail)
         self.call_id = reactor.callLater(1, self._do_next)

@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 from twisted.internet import reactor
 import uo.packets as p
 from gemuo.engine import Engine
@@ -57,7 +58,7 @@ class TargetMutex:
     def _timeout(self):
         assert self._locked
 
-        print "Target timeout"
+        log.msg("Target timeout")
 
         self._abort_func()
         self._next()

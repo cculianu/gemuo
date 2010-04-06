@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 import uo.packets as p
 from gemuo.engine import Engine
 
@@ -24,7 +25,7 @@ class PrintMessages(Engine):
         if isinstance(packet, p.AsciiMessage) and packet.type != 0x06 and \
            len(packet.text) > 0 and \
            (packet.text[0] != '[' or packet.text[-1] != ']'):
-            print "<%s> %s" % (packet.name, packet.text)
+            log.msg("<%s> %s" % (packet.name, packet.text))
 
 class Parrot(Engine):
     def __init__(self, client):

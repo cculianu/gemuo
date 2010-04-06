@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+from twisted.python import log
 from uo.skills import SKILL_NAMES
 from uo.entity import *
 import uo.packets as p
@@ -92,7 +93,7 @@ class Walk:
     def walk_ack(self, seq, notoriety):
         if not self._queue.ack(seq):
             # XXX resync when seq mismatch?
-            print "WalkAck out of sync"
+            log.msg("WalkAck out of sync")
 
     def _move_player(self, direction):
         oldpos = self._mobile.position
