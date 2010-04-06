@@ -52,6 +52,35 @@ def deferred_find_item_in_backpack(client, func):
 
     return deferred_find_item_in(client, backpack, func)
 
+def deferred_amount_in(client, parent, func):
+    d = defer.Deferred()
+    e = OpenContainer(client, parent).deferred
+
+    def count():
+        total = 0
+        for i in client.world.items_in(parent):
+            if func(i):
+                total += i.amount
+        d.callback(total)
+
+    def callback(result):
+        reactor.callLater(1, count)
+        return result
+
+    def errback(fail):
+        d.errback(fail)
+        return fail
+
+    e.addCallbacks(callback, errback)
+    return d
+
+def deferred_amount_in_backpack(client, func):
+    backpack = client.world.backpack()
+    if backpack is None:
+        return defer.fail(NoSuchEntity('No backpack'))
+
+    return deferred_amount_in(client, backpack, func)
+
 def deferred_nearest_reachable_item(client, func):
     i = client.world.nearest_reachable_item(func)
     if i is not None:
