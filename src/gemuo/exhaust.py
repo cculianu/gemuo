@@ -19,8 +19,9 @@ import anydbm
 class ExhaustDatabase:
     """A file-based database of blocks whose resources are exhausted."""
 
-    def __init__(self, path):
+    def __init__(self, path, duration=30):
         self._db = anydbm.open(path, 'c')
+        self.duration = duration
 
     def _key(self, x, y):
         return '%d,%d' % (x, y)
@@ -43,5 +44,5 @@ class ExhaustDatabase:
         key = self._key(x, y)
         now = os.times()[4]
         # this block is exhausted for 30 minutes
-        self._db[key] = str(now + 30 * 60)
+        self._db[key] = str(now + self.duration * 60)
         self._db.sync()
