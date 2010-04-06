@@ -49,3 +49,18 @@ def find_resource(map, position, ids, exhaust_db=None, func=None):
                            (func is None or func(item_id, spiral.x * 8 + x, spiral.y * 8 + y, z)):
                         return item_id, spiral.x * 8 + x, spiral.y * 8 + y, z
         spiral.step()
+
+def find_land_resource(map, position, ids, exhaust_db=None, func=None):
+    spiral = Spiral(position.x / 8, position.y / 8)
+    while True:
+        if exhaust_db is None or not exhaust_db.is_exhausted(spiral.x, spiral.y):
+            block = map.land.load_block(spiral.x, spiral.y)
+            if block is None: continue
+            for x in range(8):
+                for y in range(8):
+                    item_id = block.get_id(x, y)
+                    if item_id not in ids: continue
+                    z = block.get_height(x, y)
+                    if func is None or func(item_id, spiral.x * 8 + x, spiral.y * 8 + y, z):
+                        return item_id, spiral.x * 8 + x, spiral.y * 8 + y, z
+        spiral.step()
