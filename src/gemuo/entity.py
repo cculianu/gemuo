@@ -59,7 +59,7 @@ class Item(Entity):
         s = '[Item serial=0x%x id=0x%x' % ( self.serial, self.item_id or 0 )
         if self.name is not None: s += " name='%s'" % self.name
         if self.hue is not None and self.hue != 0: s += " hue=0x%x" % self.hue
-        s += " flags=0x%x" % self.flags
+        if self.flags is not None and self.flags != 0: s += " flags=0x%x" % self.flags
         if self.parent_serial is not None: s += " parent=0x%x" % self.parent_serial
         if self.layer is not None: s += " layer=0x%x" % self.layer
         if self.amount is not None: s += " amount=%d" % self.amount
@@ -101,7 +101,7 @@ class Mobile(Entity):
         s = '[Mobile serial=0x%x body=0x%x' % ( self.serial, self.body or 0 )
         if self.name is not None: s += " name='%s'" % self.name
         if self.hue is not None and self.hue != 0: s += " hue=0x%x" % self.hue
-        s += " flags=0x%x" % self.flags
+        if self.flags is not None and self.flags != 0: s += " flags=0x%x" % self.flags
         if self.position is not None: s += " position='%s'" % self.position
         if self.notoriety is not None: s += " notoriety=%d" % self.notoriety
         s += ']'
