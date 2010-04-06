@@ -27,7 +27,7 @@ ITEMS_UNLOAD = ITEMS_TAILORING_TOOLS + ITEMS_CARPENTRY_TOOLS
 
 def find_box_at(world, x, y):
     for e in world.iter_entities_at(x, y):
-        if isinstance(e, Item) and e.item_id in ITEMS_LARGE_CRATE:
+        if isinstance(e, Item) and e.item_id in ITEMS_CONTAINER:
             return e
     return None
 
