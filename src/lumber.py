@@ -15,6 +15,7 @@
 #
 
 from random import Random
+from twisted.internet import reactor
 from uo.entity import *
 from gemuo.entity import Item
 from gemuo.simple import simple_run, simple_later
@@ -92,7 +93,7 @@ class AutoLumber(Engine):
             self._success()
             return
 
-        self._walk()
+        reactor.callLater(0.5, self._walk)
 
     def _equipped(self, result):
         d = Lumber(self._client, self.map, self.tree, self.exhaust_db).deferred
