@@ -105,10 +105,20 @@ class PacketWriter:
         self.data(struct.pack('>I', x))
 
     def ushort(self, x):
+        assert x >= 0 and x < 65536
         self.data(struct.pack('>H', x))
 
+    def sshort(self, x):
+        assert x >= -32768 and x < 32768
+        self.data(struct.pack('>h', x))
+
     def byte(self, x):
+        assert x >= 0 and x < 256
         self.data(struct.pack('>B', x))
+
+    def sbyte(self, x):
+        assert x >= -128 and x < 128
+        self.data(struct.pack('>b', x))
 
     def boolean(self, x):
         if x:

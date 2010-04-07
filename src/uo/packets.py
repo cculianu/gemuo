@@ -438,7 +438,7 @@ def Drop(serial, x, y, z, dest_serial):
     p.uint(serial)
     p.ushort(x)
     p.ushort(y)
-    p.byte(z)
+    p.sbyte(z)
     p.uint(dest_serial)
     return p.finish()
 
@@ -513,7 +513,7 @@ def TargetResponse(type, target_id, flags, serial, x, y, z, graphic):
     p.uint(serial)
     p.ushort(x)
     p.ushort(y)
-    p.ushort(z)
+    p.sshort(z)
     p.ushort(graphic)
     return p.finish()
 

@@ -64,7 +64,7 @@ class TargetMutex:
         self._next()
 
 class Target:
-    def __init__(self, serial=0, x=0xffff, y=0xffff, z=0xffff, graphic=0):
+    def __init__(self, serial=0, x=0xffff, y=0xffff, z=-1, graphic=0):
         self.serial = serial
         self.x = x
         self.y = y
