@@ -15,6 +15,7 @@
 
 from twisted.internet import reactor, threads
 from uo.entity import *
+from gemuo.error import *
 from gemuo.engine import Engine
 
 class WalkReject(Exception):
@@ -72,7 +73,7 @@ class DirectWalk(Engine):
         player = self.player
         position = player.position
         if position is None:
-            self._failure()
+            self._failure(MissingData('Player position is missing'))
             return
 
         direction = self._direction_from(position)
@@ -203,12 +204,12 @@ class PathFindWalk(Engine):
         player = self.player
         position = player.position
 
-        if not self.map.is_passable(next.x, next.y, position.z):
-            self._path_find()
+        if position is None:
+            self._failure(MissingData('Player position is missing'))
             return
 
-        if position is None:
-            self._failure()
+        if not self.map.is_passable(next.x, next.y, position.z):
+            self._path_find()
             return
 
         direction = self._direction(position, next)
@@ -240,9 +241,7 @@ class PathFindWalk(Engine):
         d.addCallbacks(self._path_found, self._failure)
 
     def _path_found(self, path):
-        if path is None:
-            self._failure()
-            return
+        assert path is not None
 
         self._path = list(path)
         self._sent = [self.player.position]

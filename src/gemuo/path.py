@@ -17,6 +17,10 @@
 
 from uo.entity import *
 
+class Unreachable(Exception):
+    """The position is not reachable."""
+    pass
+
 class Position:
     def __init__(self, x, y):
         self.x = x
@@ -95,11 +99,13 @@ def walk_back(l, dest):
 def path_find(map, src, dest):
     if not map.is_passable(dest.x, dest.y, 0):
         # the destination cannot possibly be reached
-        return None
+        raise Unreachable()
 
     src = Position(src.x, src.y)
     dest = Position(dest.x, dest.y)
-    if src == dest: return None
+    if src == dest:
+        # no-op
+        return ()
 
     open_list = { src: (0, 0, None) }
     closed_list = dict()
@@ -109,7 +115,8 @@ def path_find(map, src, dest):
         # find the nearest position on the "open" list, and move it to
         # the "closed" list
         p = nearest(open_list)
-        if p is None: return None
+        if p is None:
+            raise Unreachable()
         cost, total, direction = open_list[p]
         del open_list[p]
         closed_list[p] = (cost, total, direction)
@@ -130,3 +137,6 @@ def path_find(map, src, dest):
                 # destination has been reached - terminate
                 closed_list[n] = open_list[n]
                 return walk_back(closed_list, dest)
+
+    # give up
+    raise Unreachable()

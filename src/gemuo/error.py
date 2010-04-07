@@ -30,3 +30,6 @@ class NoSkills(Exception):
 class SkillLocked(Exception):
     def __init__(self, message='Skill is locked'):
         Exception.__init__(self, message)
+
+class MissingData(Exception):
+    pass
