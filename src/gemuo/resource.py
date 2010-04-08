@@ -38,6 +38,29 @@ class Spiral:
         self.y += self.vector[1]
         self.remaining -= 1
 
+class Resource:
+    def __init__(self, x, y, z, item_id, hue):
+        self.x, self.y, self.z = x, y, z
+        self.item_id, self.hue = item_id, hue
+
+def iter_statics_in_block(map, block_x, block_y, ids):
+    block = map.statics.load_block(block_x, block_y)
+    if block is None:
+        return
+
+    for item_id, x, y, z, hue in block:
+        if ((item_id & 0x3fff) | 0x4000) in ids:
+            yield Resource(block_x * 8 + x, block_y * 8 + y, z, item_id, hue)
+
+def find_statics_resource_block(map, position, ids, exhaust_db=None):
+    spiral = Spiral(position.x / 8, position.y / 8)
+    while True:
+        if exhaust_db is None or not exhaust_db.is_exhausted(spiral.x, spiral.y):
+            resources = tuple(iter_statics_in_block(map, spiral.x, spiral.y, ids))
+            if len(resources) > 0:
+                return resources
+        spiral.step()
+
 def find_resource(map, position, ids, exhaust_db=None, func=None):
     spiral = Spiral(position.x / 8, position.y / 8)
     while True:
