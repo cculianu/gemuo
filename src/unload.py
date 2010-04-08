@@ -23,7 +23,7 @@ from gemuo.defer import deferred_find_item_in, deferred_find_item_in_backpack
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.restock import drop_into
 
-ITEMS_UNLOAD = ITEMS_TAILORING_TOOLS + ITEMS_CARPENTRY_TOOLS
+ITEMS_UNLOAD = ITEMS_TAILORING_TOOLS + ITEMS_CARPENTRY_TOOLS + ITEMS_TINKERING_TOOLS
 
 def find_box_at(world, x, y):
     for e in world.iter_entities_at(x, y):
