@@ -22,8 +22,9 @@ from gemuo.simple import simple_run, simple_later
 from gemuo.data import TileCache
 from gemuo.entity import Position
 from gemuo.exhaust import ExhaustDatabase
-from gemuo.resource import find_resource
+from gemuo.resource import find_statics_resource_block
 from gemuo.defer import deferred_find_player_item
+from gemuo.target import Target
 from gemuo.engine import Engine
 from gemuo.engine.messages import PrintMessages
 from gemuo.engine.guards import Guards
@@ -70,9 +71,40 @@ def PathFindWalkRectangle(client, map, rectangle):
 def find_tree(map, exhaust_db, position):
     center = Position((position.x * 7 + BANK[4]) / 8,
                       (position.y * 7 + BANK[5]) / 8)
-    item_id, x, y, z = find_resource(map, center, TREES, exhaust_db)
-    print "tree:", x, y, z
-    return Position(x, y)
+    return find_statics_resource_block(map, center, TREES, exhaust_db)
+
+def passable_positions_around(map, x, y, z, distance):
+    positions = []
+    for ix in range(x - distance, x + distance + 1):
+        for iy in range(y - distance, y + distance + 1):
+            if map.is_passable(ix, iy, z):
+                positions.append((ix, iy))
+    return positions
+
+def distance2(a, b):
+    dx = a[0] - b[0]
+    dy = a[1] - b[1]
+    return dx*dx + dy*dy
+
+def nearest_position(player, positions):
+    nearest_position = None
+    nearest_distance2 = 999999
+    for p in positions:
+        d = distance2(player, p)
+        if d < nearest_distance2:
+            nearest_position = p
+            nearest_distance2 = d
+    return nearest_position
+
+def is_reachable(a, b, distance):
+    return a.x >= b.x - distance and a.x <= b.x + distance and \
+           a.y >= b.y - distance and a.y <= b.y + distance
+
+def reachable_resource(player, resources, distance):
+    for r in resources:
+        if is_reachable(player, r, distance):
+            return r
+    return None
 
 class AutoLumber(Engine):
     def __init__(self, client, map, exhaust_db):
@@ -96,7 +128,14 @@ class AutoLumber(Engine):
         reactor.callLater(0.5, self._walk)
 
     def _equipped(self, result):
-        d = Lumber(self._client, self.map, self.tree, self.exhaust_db).deferred
+        tree = reachable_resource(self.player.position, self.trees, 2)
+        if tree is None:
+            print "No tree??"
+            reactor.callLater(0.5, self._walk)
+            return
+
+        tree = Target(x=tree.x, y=tree.y, z=tree.z, graphic=tree.item_id)
+        d = Lumber(self._client, self.map, tree, self.exhaust_db).deferred
         d.addCallbacks(self._lumbered, self._success)
 
     def _walked(self, result):
@@ -107,7 +146,8 @@ class AutoLumber(Engine):
     def _walk_failed(self, fail):
         # walking to this tree failed for some reason; mark this 8x8
         # as "exhausted", so we won't try it again for a while
-        self.exhaust_db.set_exhausted(self.tree.x/8, self.tree.y/8)
+        tree = self.trees[0]
+        self.exhaust_db.set_exhausted(tree.x/8, tree.y/8)
         self._walk()
 
     def _walk(self):
@@ -116,22 +156,26 @@ class AutoLumber(Engine):
             self._failure()
             return
 
-        self.tree = find_tree(self.map, self.exhaust_db, position)
-        if self.tree is None:
+        self.trees = find_tree(self.map, self.exhaust_db, position)
+        if self.trees is None:
             self._failure()
             return
 
-        x, y = self.tree.x, self.tree.y
-        if position.x < self.tree.x:
-            x -= 1
-        elif position.x > self.tree.x:
-            x += 1
-        if position.y < self.tree.y:
-            y -= 1
-        elif position.y > self.tree.y:
-            y += 1
+        positions = set()
+        for resource in self.trees:
+            for p in passable_positions_around(self.map, resource.x, resource.y, resource.z, 2):
+                positions.add(p)
 
-        position = Position(x, y)
+        if len(positions) == 0:
+            # no reachable position; try again
+            resource = self.trees[0]
+            self.exhaust_db.set_exhausted(resource.x/8, resource.y/8)
+            reactor.callLater(0.1, self._walk)
+            return
+
+        nearest = nearest_position((self.player.position.x, self.player.position.y),
+                                   positions)
+        position = Position(nearest[0], nearest[1])
         client = self._client
         d = PathFindWalk(self._client, self.map, position).deferred
         d.addCallbacks(self._walked, self._walk_failed)

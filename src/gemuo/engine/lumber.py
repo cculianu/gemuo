@@ -15,7 +15,6 @@
 
 from twisted.internet import reactor
 import uo.packets as p
-from uo.entity import TREES
 from gemuo.engine import Engine
 from gemuo.target import Target
 from gemuo.error import *
@@ -23,15 +22,6 @@ from gemuo.engine.items import UseAndTarget
 
 def find_axe(world):
     return world.equipped_item(world.player, 0x2) or world.equipped_item(world.player, 0x1)
-
-def is_tree(item_id):
-    return ((item_id & 0x3fff) | 0x4000) in TREES
-
-def find_tree(map, position):
-    for id, z, hue in map.statics_at(position.x, position.y):
-        if is_tree(id):
-            return Target(x=position.x, y=position.y, z=z, graphic=id)
-    return None
 
 class Lumber(Engine):
     def __init__(self, client, map, tree, exhaust_db):
@@ -41,14 +31,11 @@ class Lumber(Engine):
         self.exhausted = False
         self.tries = 5
 
+        self.tree = tree
+
         self.axe = find_axe(client.world)
         if self.axe is None:
             self._failure(NoSuchEntity('No axe'))
-            return
-
-        self.tree = find_tree(map, tree)
-        if self.tree is None:
-            self._failure(NoSuchEntity('No tree at %s' % tree))
             return
 
         self._begin_chop()
