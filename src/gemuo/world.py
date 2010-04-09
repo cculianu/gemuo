@@ -13,6 +13,7 @@
 #   GNU General Public License for more details.
 #
 
+import thread
 import uo.packets as p
 from gemuo.engine import Engine
 from gemuo.player import Walk
@@ -21,12 +22,18 @@ from gemuo.entity import Position, BoundedValue, Entity, Item, Mobile
 class World(Engine):
     def __init__(self, client):
         Engine.__init__(self, client)
-        #self.active = False
+        self.mutex = thread.allocate_lock()
         self.entities = dict()
         self.player = None
         self.walk = None
         self.map_width = None
         self.map_height = None
+
+    def lock(self):
+        self.mutex.acquire()
+
+    def unlock(self):
+        self.mutex.release()
 
     def _reachable(self, position):
         assert self.player is not None
@@ -184,12 +191,16 @@ class World(Engine):
         if serial in self.entities:
             return self.entities[serial]
         m = Mobile(serial)
+        self.lock()
         self.entities[serial] = m
+        self.unlock()
         return m
 
     def _new_item(self, serial):
         i = Item(serial)
+        self.lock()
         self.entities[serial] = i
+        self.unlock()
         return i
 
     def _delete_items_in(self, serial):
@@ -199,8 +210,12 @@ class World(Engine):
 
     def _delete_entity(self, serial):
         if serial not in self.entities: return
-        del self.entities[serial]
-        self._delete_items_in(serial)
+        try:
+            self.lock()
+            del self.entities[serial]
+            self._delete_items_in(serial)
+        finally:
+            self.unlock()
 
     def on_packet(self, packet):
         if isinstance(packet, p.MobileStatus):
