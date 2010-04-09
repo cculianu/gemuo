@@ -76,7 +76,7 @@ class Target:
         if self.serial != 0: l.append('serial=0x%x' % self.serial)
         if self.x != 0xffff: l.append('x=%d' % self.x)
         if self.y != 0xffff: l.append('y=%d' % self.y)
-        if self.z != 0xffff: l.append('z=%d' % self.z)
+        if self.z != -1: l.append('z=%d' % self.z)
         if self.graphic != 0: l.append('graphic=0x%x' % self.graphic)
         return '[Target %s]' % ' '.join(l)
 
