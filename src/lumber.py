@@ -279,6 +279,17 @@ class BridgeMap:
                     if e.serial != world.player.serial:
                         # never step over other mobiles
                         return False
+
+            for i in world.iter_multis():
+                if i.position is not None:
+                    if z is not None:
+                        dz = z - i.position.z
+                    else:
+                        dz = 0
+
+                    if not multi_passable_at(i.item_id, x - i.position.x,
+                                             y - i.position.y, dz):
+                        return False
         finally:
             world.unlock()
 
