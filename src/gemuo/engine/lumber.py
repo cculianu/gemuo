@@ -69,6 +69,7 @@ class Lumber(Engine):
 
     def _on_system_message(self, text):
         if 'not enough wood here' in text or \
+               'That is too far away' in text or \
                'Target cannot be seen' in text:
             self.exhausted = True
             self.exhaust_db.set_exhausted(self.tree.x / 8, self.tree.y / 8)
