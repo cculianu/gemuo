@@ -17,6 +17,8 @@
 import uo.packets as p
 import re
 from gemuo.engine import Engine
+from twisted.internet import reactor
+from gemuo.error import Timeout
 
 class Buy(Engine):
 
@@ -26,7 +28,7 @@ class Buy(Engine):
         self.vendor = None
         self.itemid = itemid
         self.amount = amount
-        self.price = None
+        self.call_id = reactor.callLater(2, self._timeout)
         self.get_offer()
 
     def on_packet(self, packet):
@@ -84,8 +86,12 @@ class Buy(Engine):
         if self.vendor is not None:
             if self.vendor == ascii_message.serial:
                 if re.match("The total of thy purchase is", ascii_message.text):
+                    self.call_id.cancel()
                     self._success()
-
+    
+    def _timeout(self):
+        self._failure(Timeout("Buy timeout"))
+    
 class Buy_at_price(Buy):
 
     def __init__(self, client, itemid, amount, price):
@@ -95,6 +101,7 @@ class Buy_at_price(Buy):
        self.vendor = None
        self.itemid = itemid
        self.amount = amount
+       self.call_id = reactor.callLater(2, self._timeout)
        self.get_offer()
 
     def get_item_price(self):
