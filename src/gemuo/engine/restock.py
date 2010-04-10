@@ -17,6 +17,7 @@ from twisted.internet import reactor
 import uo.packets as p
 from gemuo.entity import Item
 from gemuo.error import *
+from gemuo.defer import deferred_find_item_in_recursive
 from gemuo.engine import Engine
 from gemuo.engine.items import OpenContainer
 
@@ -98,6 +99,13 @@ class Restock(Engine):
     def _moved(self, result):
         self._do_counts()
 
+    def _found(self, item, n):
+        drop_into(self._client, item, self._source, n)
+        reactor.callLater(1, self._do_counts)
+
+    def _not_found(self, fail, item_ids):
+        self._failure(NoSuchEntity("Not found: " + repr(item_ids)))
+
     def _do_counts(self):
         if len(self._counts) == 0:
             self._success()
@@ -133,14 +141,10 @@ class Restock(Engine):
 
             reactor.callLater(1, self._do_counts)
         elif n < count:
-            x = world.find_item_in(self._destination, lambda x: x.item_id in item_ids)
-            if x is None:
-                self._failure(NoSuchEntity("Not found: " + repr(item_ids)))
-                return
-
-            drop_into(client, x, self._source, count - n)
-
-            reactor.callLater(1, self._do_counts)
+            d = deferred_find_item_in_recursive(self._client, self._destination,
+                                                lambda x: x.item_id in item_ids)
+            d.addCallback(self._found, count - n)
+            d.addErrback(self._not_found, item_ids)
         else:
             self._counts = self._counts[1:]
             reactor.callLater(0, self._do_counts)

@@ -45,6 +45,31 @@ def deferred_find_item_in(client, parent, func):
     e.addCallbacks(callback, errback)
     return d
 
+def deferred_find_item_in_recursive(client, parent, func):
+    containers = []
+    d = defer.Deferred()
+
+    def callback(result):
+        d.callback(result)
+
+    def errback(fail):
+        for i in client.world.items_in(parent):
+            if i.item_id in ITEMS_CONTAINER:
+                containers.append(i)
+
+        if len(containers) == 0:
+            d.errback(fail)
+            return
+
+        parent, containers = containers[0], containers[1:]
+
+        e = deferred_find_item_in(client, parent, func)
+        e.addCallbacks(callback, errback)
+
+    e = deferred_find_item_in(client, parent, func)
+    e.addCallbacks(callback, errback)
+    return d
+
 def deferred_find_item_in_backpack(client, func):
     backpack = client.world.backpack()
     if backpack is None:
