@@ -15,7 +15,6 @@
 #
 
 import uo.packets as p
-import re
 from gemuo.engine import Engine
 from twisted.internet import reactor
 from gemuo.error import Timeout
@@ -85,7 +84,7 @@ class Buy(Engine):
     def check_success(self, ascii_message):
         if self.vendor is not None:
             if self.vendor == ascii_message.serial:
-                if re.match("The total of thy purchase is", ascii_message.text):
+                if "The total of thy purchase is" in ascii_message.text:
                     self.call_id.cancel()
                     self._success()
     
