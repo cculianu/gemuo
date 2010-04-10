@@ -138,8 +138,7 @@ class Restock(Engine):
                 self._failure(NoSuchEntity("Not found: " + repr(item_ids)))
                 return
 
-            client.send(p.LiftRequest(x.serial, count - n))
-            client.send(p.Drop(x.serial, 0, 0, 0, self._source.serial))
+            drop_into(client, x, self._source, count - n)
 
             reactor.callLater(1, self._do_counts)
         else:
