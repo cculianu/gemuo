@@ -54,7 +54,6 @@ class Buy(Engine):
             for i in buy_list.items:
                 if  bi.item_id + 1020000  == int(i.description):
                     bi.price = i.price
-                    bi.code = i.description
                     break
         #self.print_offer()
         self._buy(self.get_item_serial())
@@ -126,4 +125,4 @@ class BuyItem():
         self.item_id = item_id
         self.amount = amount
         self.price = None
-        self.description = None
+
