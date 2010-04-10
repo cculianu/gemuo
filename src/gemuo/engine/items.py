@@ -83,6 +83,42 @@ class OpenContainer(Engine):
         else:
             self._failure(Timeout("OpenContainer timeout"))
 
+class MergeStacks(Engine):
+    def __init__(self, client, container, ids):
+        Engine.__init__(self, client)
+        self.container = container
+        self.ids = ids
+
+        d = OpenContainer(client, container).deferred
+        d.addCallbacks(self._opened, self._failure)
+
+    def _opened(self, result):
+        reactor.callLater(1, self._next)
+
+    def _next(self):
+        client = self._client
+        world = client.world
+
+        exclude = set()
+
+        while True:
+            a = world.find_item_in(self.container, lambda i: i.serial not in exclude and i.item_id in self.ids)
+            if a is None:
+                self._success()
+                return
+
+            exclude.add(a.serial)
+
+            b = world.find_item_in(self.container, lambda i: i.serial != a.serial and i.item_id == a.item_id and i.hue == a.hue)
+            if b is not None:
+                break
+
+        print "merge", a, b
+
+        client.send(p.LiftRequest(a.serial))
+        client.send(p.Drop(a.serial, 0, 0, 0, b.serial))
+        reactor.callLater(1, self._next)
+
 class UseAndTarget(Engine):
     def __init__(self, client, item, target):
         Engine.__init__(self, client)
