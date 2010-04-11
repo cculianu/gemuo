@@ -42,9 +42,9 @@ def multi_passable_at(item_id, x, y, z):
         # large brick
         return standard_multi_passable_at(-7, -7, 14, 14, -1, 6, 2, x, y, z)
 
-    #if item_id in (0x76, 0x78):
+    if item_id in (0x76, 0x78):
         # two story house
-        #return standard_multi_passable_at(-7, 0, 14, 7, x, y, z)
+        return standard_multi_passable_at(-7, -7, 14, 14, -3, 6, 2, x, y, z)
 
     if item_id == 0x7a:
         # tower
@@ -57,5 +57,9 @@ def multi_passable_at(item_id, x, y, z):
     if item_id == 0x7e:
         # castle
         return standard_multi_passable_at(-15, -15, 31, 31, 0, 0, 0, x, y, z)
+
+    if item_id == 0x8c:
+        # large patio
+        return standard_multi_passable_at(-7, -7, 15, 14, -4, 6, 2, x, y, z)
 
     print "Unknown multi: 0x%x\n" % item_id
