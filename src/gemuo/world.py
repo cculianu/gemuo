@@ -26,6 +26,7 @@ class World(Engine):
         self.entities = dict()
         self.player = None
         self.walk = None
+        self.combatant = None
         self.map_width = None
         self.map_height = None
 
@@ -369,3 +370,8 @@ class World(Engine):
                 if packet.type == 0x06 or len(packet.name) > 0:
                     entity = self.entities[packet.serial]
                     entity.name = packet.text
+        elif isinstance(packet, p.ChangeCombatant):
+            if packet.serial != 0:
+                self.combatant = self._make_mobile(packet.serial)
+            else:
+                self.combatant = None
