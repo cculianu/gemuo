@@ -15,6 +15,7 @@
 #
 
 from random import Random
+from twisted.python import log
 from twisted.internet import reactor
 from uo.entity import *
 from uo.multis import multi_passable_at
@@ -110,6 +111,7 @@ def reachable_resource(player, resources, distance):
 class AutoLumber(Engine):
     def __init__(self, client, map, exhaust_db):
         Engine.__init__(self, client)
+        self.world = client.world
         self.player = client.world.player
         self.map = map
         self.exhaust_db = exhaust_db
@@ -121,7 +123,7 @@ class AutoLumber(Engine):
         self._walk()
 
     def _lumbered(self, result):
-        if self.player.mass_remaining() < 50:
+        if self.player.mass_remaining() < 50 or self.world.combatant is not None:
             # too heavy, finish this engine
             self._success()
             return
@@ -219,6 +221,7 @@ class Bank(Engine):
 class AutoHarvest(Engine):
     def __init__(self, client, map, exhaust_db):
         Engine.__init__(self, client)
+        self.world = client.world
         self.player = client.world.player
         self.map = map
         self.exhaust_db = exhaust_db
@@ -226,6 +229,11 @@ class AutoHarvest(Engine):
         self._check()
 
     def _restocked(self, result):
+        if self.world.combatant is not None:
+            log.msg("Waiting until combat is over")
+            reactor.callLater(5, self._restocked, result)
+            return
+
         self._begin_lumber()
 
     def _restock(self):
@@ -239,7 +247,7 @@ class AutoHarvest(Engine):
         self._restock()
 
     def _check(self):
-        if self.player.mass_remaining() < 50:
+        if self.player.mass_remaining() < 50 or self.world.combatant is not None:
             self._restock()
         else:
             d = deferred_find_player_item(self._client, lambda x: x.item_id in ITEMS_AXE)
