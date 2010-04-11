@@ -15,6 +15,7 @@
 
 from twisted.python.failure import Failure
 from twisted.internet import reactor, defer
+from gemuo.entity import *
 from gemuo.error import *
 from gemuo.engine.items import OpenContainer
 from gemuo.engine.player import QuerySkills
@@ -52,7 +53,7 @@ def deferred_find_item_in_recursive(client, parent, func):
     def callback(result):
         d.callback(result)
 
-    def errback(fail):
+    def errback(fail, parent, containers):
         for i in client.world.items_in(parent):
             if i.item_id in ITEMS_CONTAINER:
                 containers.append(i)
@@ -64,10 +65,12 @@ def deferred_find_item_in_recursive(client, parent, func):
         parent, containers = containers[0], containers[1:]
 
         e = deferred_find_item_in(client, parent, func)
-        e.addCallbacks(callback, errback)
+        e.addCallback(callback)
+        e.addErrback(errback, parent, containers)
 
     e = deferred_find_item_in(client, parent, func)
-    e.addCallbacks(callback, errback)
+    e.addCallback(callback)
+    e.addErrback(errback, parent, containers)
     return d
 
 def deferred_find_item_in_backpack(client, func):
