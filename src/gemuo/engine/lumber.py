@@ -67,7 +67,7 @@ class Lumber(Engine):
         else:
             reactor.callLater(1, self._begin_chop)
 
-    def _on_system_message(self, text):
+    def on_system_message(self, text):
         if 'not enough wood here' in text or \
                'That is too far away' in text or \
                'Target cannot be seen' in text:
@@ -75,9 +75,3 @@ class Lumber(Engine):
             self.exhaust_db.set_exhausted(self.tree.x / 8, self.tree.y / 8)
         elif 'You broke your axe' in text:
             self.exhausted = True
-
-    def on_packet(self, packet):
-        if isinstance(packet, p.AsciiMessage):
-            if packet.type == 0 and packet.serial == 0xffffffff and \
-               packet.name == 'System':
-                self._on_system_message(packet.text)

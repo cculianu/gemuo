@@ -220,9 +220,8 @@ class UseSkill(Engine):
                 self._target_mutex.put_target()
                 self._success()
 
-    def _on_ascii_message(self, type, serial, name, text):
-        if type == 0 and serial == 0xffffffff and name == 'System' and \
-           text == 'What instrument shall you play?':
+    def on_system_message(self, text):
+        if text == 'What instrument shall you play?':
             instrument = self._find_instrument()
             if instrument is None:
                 self._failure('No instrument')
@@ -234,8 +233,6 @@ class UseSkill(Engine):
         if isinstance(packet, p.TargetRequest):
             self._on_target_request(packet.allow_ground, packet.target_id,
                                     packet.flags)
-        elif isinstance(packet, p.AsciiMessage):
-            self._on_ascii_message(packet.type, packet.serial, packet.name, packet.text)
 
 class UseStealth(Engine):
     """Stealth is a special case: it can only be used if the player is

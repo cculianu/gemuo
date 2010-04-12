@@ -21,6 +21,7 @@ from twisted.internet.interfaces import IDelayedCall
 from gemuo.client import login, connect
 from gemuo.engine.login import Login
 from gemuo.world import World
+from gemuo.translate import Translate
 from gemuo.target import TargetMutex
 from gemuo.engine import Engine
 
@@ -39,6 +40,7 @@ class SimpleClientWrapper:
     def __init__(self, client):
         self.client = client
         self.world = World(client)
+        self.translate = Translate(client)
         self.target_mutex = TargetMutex()
 
     def __getattr__(self, name):
