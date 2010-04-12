@@ -131,19 +131,24 @@ class UseAndTarget(Engine):
 
         self.item = item
         self.target = target
+        self.tries = 2
+        self.engine = None
 
         self.target_mutex = client.target_mutex
         self.target_mutex.get_target(self.target_ok, self.target_abort)
 
     def target_ok(self):
-        client = self._client
-        client.send(p.Use(self.item))
-        self.engine = SendTarget(client, self.target)
-        self.engine.deferred.addCallbacks(self._target_sent, self._target_failed)
+        self._do()
 
     def target_abort(self):
         self.engine.abort()
         self._failure(Timeout('Target timeout'))
+
+    def _do(self):
+        client = self._client
+        client.send(p.Use(self.item))
+        self.engine = SendTarget(client, self.target)
+        self.engine.deferred.addCallbacks(self._target_sent, self._target_failed)
 
     def _target_sent(self, result):
         self.target_mutex.put_target()
@@ -152,3 +157,10 @@ class UseAndTarget(Engine):
     def _target_failed(self, fail):
         self.target_mutex.put_target()
         self._failure(fail)
+
+    def on_system_message(self, text):
+        if 'must wait to perform another action' in text and \
+           self.engine is not None and self.tries > 0:
+            self.tries -= 1
+            self.engine.abort()
+            reactor.callLater(0.5, self._do)
