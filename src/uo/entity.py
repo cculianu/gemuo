@@ -134,6 +134,12 @@ ITEMS_LOOM = (
     0x1062,
     )
 
+ITEMS_OVEN = (
+    0x92b, 0x92c, # stone oven east
+    0x930, 0x931, # stone oven south
+)
+
+ITEM_RAW_FISH_STEAK = 0x097a
 
 ITEM_GM_ROBE = 0x204f
 
