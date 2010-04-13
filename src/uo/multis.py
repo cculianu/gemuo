@@ -34,6 +34,10 @@ def standard_multi_passable_at(west, north, width, height, door_x, door_y, num_d
 def multi_passable_at(item_id, x, y, z):
     item_id = item_id & 0x3fff
 
+    if item_id in range(0x00, 0x18):
+        # XXX boats are not supported here
+        return True
+
     if item_id in (0x64, 0x66, 0x68, 0x6a, 0x6c, 0x6e):
         # small house
         return standard_multi_passable_at(-3, -3, 7, 7, 0, 3, 1, x, y, z)
