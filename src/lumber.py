@@ -17,6 +17,7 @@
 from random import Random
 from twisted.internet import reactor
 from uo.entity import *
+from uo.multis import multi_passable_at
 from gemuo.entity import Item
 from gemuo.simple import simple_run, simple_later
 from gemuo.data import TileCache
