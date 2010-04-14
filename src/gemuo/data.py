@@ -100,6 +100,7 @@ class IndexLoader:
 class StaticsList:
     def __init__(self, data):
         self.data = data
+        self.passable = None # bit field, see _build_passable()
 
     def __iter__(self):
         i = 0
@@ -113,11 +114,20 @@ class StaticsList:
             if ix == x and iy == y:
                 yield id, z, hue
 
+    def _build_passable(self, tile_data):
+        # each of the 64 bits tells whether the position is passable
+        passable = 0xffffffffffffffffL
+        for id, x, y, z, hue in self:
+            if not tile_data.item_passable(id):
+                bit = x * 8 + y
+                passable &= ~(1 << bit)
+        self.passable = passable
+
     def is_passable(self, tile_data, x, y, z):
-        for current_id, current_z, current_hue in self.iter_at(x, y):
-            if not tile_data.item_passable(current_id):
-                return False
-        return True
+        if self.passable is None:
+            self._build_passable(tile_data)
+        bit = x * 8 + y
+        return (self.passable & (1 << bit)) != 0
 
 class StaticsLoader:
     def __init__(self, path):
