@@ -191,11 +191,12 @@ class BlockCache:
 
     def load_block(self, x, y):
         i = x * 65536 + y
-        if i in self._cache:
+        try:
             return self._cache[i]
-        b = self._loader.load_block(x, y)
-        self._cache[i] = b
-        return b
+        except KeyError:
+            b = self._loader.load_block(x, y)
+            self._cache[i] = b
+            return b
 
 class CachedMapGlue(MapGlue):
     def __init__(self, *args, **keywords):
