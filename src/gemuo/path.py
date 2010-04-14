@@ -29,6 +29,9 @@ class Position:
     def __str__(self):
         return '(%d,%d)' % (self.x, self.y)
 
+    def __repr__(self):
+        return self.__str__()
+
     def __hash__(self):
         return hash(self.x) ^ hash(self.y)
 
