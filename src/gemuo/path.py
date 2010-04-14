@@ -135,8 +135,9 @@ def path_find(map, src, dest):
                 # direction change is one more walk packet
                 n_cost += 1
 
-            open_list[n] = (n_cost, n_cost + dest.manhattan_distance(n), d)
-            if n == dest:
+            distance = dest.manhattan_distance(n)
+            open_list[n] = (n_cost, n_cost + distance, d)
+            if distance == 0:
                 # destination has been reached - terminate
                 closed_list[n] = open_list[n]
                 return walk_back(closed_list, dest)
