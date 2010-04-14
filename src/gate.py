@@ -19,9 +19,10 @@
 from twisted.internet import defer
 import uo.packets as p
 from gemuo.simple import simple_run
+from uo.entity import ITEM_GATE
 
 def run(client):
-    gate = client.world.find_reachable_item(lambda x: x.item_id == 0xf6c)
+    gate = client.world.find_reachable_item(lambda x: x.item_id == ITEM_GATE)
     if gate is None:
         return defer.fail('No nearby gate found')
 

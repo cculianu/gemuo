@@ -18,6 +18,7 @@ import uo.packets as p
 from uo.spells import SPELL_DISPEL_FIELD
 from gemuo.engine import Engine
 from gemuo.target import Target
+from uo.entity import ITEM_GATE
 
 class DispelGate(Engine):
     """For death gates into houses. The Engines precasts Dispel Field on Vas Rel Por and targets the gate that appears."""
@@ -47,7 +48,7 @@ class WaitAndSendTarget(Engine):
             self.target_request = packet
         elif isinstance(packet, p.WorldItem):
             if self.target_request is not None:
-                if packet.item_id == 0xf6c:
+                if packet.item_id == ITEM_GATE:
                     self.target = Target(packet.serial, packet.x, packet.y, packet.z, packet.item_id)
                     self._client.send(self.target.response(self.target_request.target_id, self.target_request.flags))
                     self._success()
