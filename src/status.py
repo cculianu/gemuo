@@ -11,6 +11,8 @@ def status(result, client):
     print "Name:", "\t", player.name
     if player.position is not None:
         print "Pos:", "\t", player.position
+    print "Serial: ", player.serial
+    print "Body:", "\t", player.body
     print "Stats:", "\t", zip(("Str", "Dex", "Int"), player.stats)
     if player.hits is not None:
         print "Hits:", "\t", player.hits.value, "/", player.hits.limit
