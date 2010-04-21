@@ -16,11 +16,13 @@
 
 import uo.packets as p
 from gemuo.engine import Engine
-from gemuo.entity import Position
 from gemuo.target import Target
 from twisted.python import log
 
 class OpenDoor(Engine):
+    """Opens the door for serials in the friend_list that step on a trigger position
+    trigger_list is of Format [Position(pos1.x, pos1.y), Position(pos2.y, pos2.y)]
+    friend_list is of Format [Serial1, Serial2, ]"""
 
     def __init__(self, client, door_serial, trigger_list, friend_list):
         Engine.__init__(self, client)
