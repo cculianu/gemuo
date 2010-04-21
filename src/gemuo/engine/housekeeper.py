@@ -21,8 +21,8 @@ from twisted.python import log
 
 class OpenDoor(Engine):
     """Opens the door for serials in the friend_list that step on a trigger position
-    trigger_list is of Format [Position(pos1.x, pos1.y), Position(pos2.y, pos2.y)]
-    friend_list is of Format [Serial1, Serial2, ]"""
+    trigger_list is of format [Position(pos1.x, pos1.y), Position(pos2.y, pos2.y)]
+    friend_list is of format [Serial1, Serial2, ]"""
 
     def __init__(self, client, door_serial, trigger_list, friend_list):
         Engine.__init__(self, client)
@@ -53,9 +53,10 @@ class OpenDoor(Engine):
 class AutoEject(Engine):
     """Auto ejects not friended mobiles out of the house.
     house_rectangle is of format [pos1.x, pos1.y, pos2.x, pos2.y] where
-    pos1 is the northwest and pos2 the southeast corner"""
+    pos1 is the northwest and pos2 the southeast corner
+    red_friends is of format [Serial1, Serial2, ]"""
 
-    def __init__(self, client, red_friends=[], house_rectangle=[]):
+    def __init__(self, client, red_friends, house_rectangle):
         Engine.__init__(self, client)
         self.target = None
         self.red_friends = red_friends
