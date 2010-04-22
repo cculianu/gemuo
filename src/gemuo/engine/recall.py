@@ -19,6 +19,7 @@ from gemuo.engine import Engine
 from gemuo.engine.items import OpenContainer
 from gemuo.target import Target, SendTarget
 from uo.spells import SPELL_RECALL
+from uo.entity import ITEM_RECALL_RUNE
 from twisted.python import log
 from gemuo.error import Timeout
 from twisted.internet import reactor
@@ -30,12 +31,12 @@ class Recall(Engine):
         Engine.__init__(self, client)
         self.dest = destination
         self.runes = list()
-        self.call_id = reactor.callLater(5, self._timeout)
+        self.call_id = reactor.callLater(4, self._timeout)
         self.open_backpack()
 
     def get_runes(self, result, world, container):
         for x in world.items_in(container):
-            if x.item_id ==  0x1f14:
+            if x.item_id ==  ITEM_RECALL_RUNE:
                 self.runes.append(Rune(x.serial))
                 self.request_rune_data(x)
 
