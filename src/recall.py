@@ -21,7 +21,11 @@ from gemuo.engine.messages import PrintMessages
 
 def run(client):
     PrintMessages(client)
-    #return Buy(client, ITEM_BANDAGE, 1)
+
+    #recall to a Rune called "Britain"
+    #return Recall(clien, "Britain")
+
+    #recall to a random rune in the backpack
     return Recall(client)
 
 simple_run(run)
