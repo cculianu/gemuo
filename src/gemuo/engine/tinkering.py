@@ -25,12 +25,15 @@ class NoTinkeringTarget(Exception):
         Exception.__init__(self, message)
 
 def tinkering_target(skill):
-    if skill < 450:
-        # XXX implement
+    if skill < 300:
         return None
+    if skill < 450:
+        return ('Parts', 'clock parts')
     if skill < 900:
         return ('Tools', 'lockpick')
-    # XXX implement more
+    if skill < 1000:
+        return ('Miscellaneous', 'heating stand')
+
     return None
 
 class Tinkering(Engine):
