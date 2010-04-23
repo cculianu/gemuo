@@ -23,7 +23,7 @@ def run(client):
     PrintMessages(client)
 
     #recall to a Rune called "Britain"
-    #return Recall(clien, "Britain")
+    #return Recall(client, "Britain")
 
     #recall to a random rune in the backpack
     return Recall(client)
