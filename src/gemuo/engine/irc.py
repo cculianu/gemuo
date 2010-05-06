@@ -20,6 +20,9 @@ import uo.packets as p
 from gemuo.engine import Engine
 
 class IRCClient(irc.IRCClient):
+    username = 'gemuo'
+    realname = 'GemUO'
+
     def signedOn(self):
         self.factory.irc = self
         self.join(self.factory.channel)
@@ -34,6 +37,11 @@ class IRCBot(Engine, ClientFactory):
         self.irc = None
 
         d = reactor.connectTCP(server, port, self)
+
+    def buildProtocol(self, addr):
+        protocol = ClientFactory.buildProtocol(self, addr)
+        protocol.nickname = self._client.world.player.name
+        return protocol
 
     def on_packet(self, packet):
         if self.irc is None: return
