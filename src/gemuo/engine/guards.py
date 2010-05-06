@@ -45,6 +45,8 @@ class Guards(Engine):
     def on_message(self, serial, name, text):
         if name == '' and text in ('1', '2', '3'):
             self.call_guards_twice()
+        elif 'You notice' in text and 'trying to steal' in text:
+            self.call_guards()
 
     def on_combatant(self, serial):
         if serial != 0:
